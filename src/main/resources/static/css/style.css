@@ -1,0 +1,62 @@
+/* ===============================
+   ГОЛОВНИЙ БЛОК (HERO SECTION)
+   =============================== */
+
+/* Розставляємо текст і торт по горизонталі */
+.hero {
+    display: flex;
+    justify-content: space-between; /* Розсуває елементи по краях */
+    align-items: center;            /* Вирівнює по центру по вертикалі */
+    max-width: 1200px;              /* Обмежуємо ширину, як у шапки */
+    margin: 0 auto;                 /* Центруємо блок на екрані */
+    padding: 50px 20px;
+    position: relative;             /* Важливо для позиціонування бризок */
+}
+
+/* Налаштування шоколадних бризок */
+.splash-left {
+    position: absolute;
+    left: -100px;       /* Зсуваємо вліво за край екрана */
+    bottom: -50px;      /* Зсуваємо вниз */
+    width: 350px;       /* Розмір бризок (можеш змінити) */
+    z-index: -1;        /* Ховаємо їх ПІД текст */
+}
+
+/* Ліва колонка з текстом */
+.hero-text {
+    flex: 1; /* Кажемо зайняти половину вільного місця */
+    padding-left: 40px;
+}
+
+/* Напис "КОНДИТЕРСЬКА" */
+.hero-text .subtitle {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    color: #E2A8A8; /* Ніжно-рожевий колір */
+    letter-spacing: 2px; /* Відстань між літерами */
+    font-weight: 400;
+    margin-bottom: -15px; /* Підтягуємо текст ближче до HOME BAKERY */
+}
+
+/* Напис "HOME BAKERY" */
+.hero-text .title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 90px; /* Величезний шрифт */
+    line-height: 0.9; /* Відстань між рядками HOME та BAKERY */
+    color: #E2A8A8; /* Рожевий колір тексту */
+    /* МАГІЯ: Робимо сіру 3D-тінь, як на твоєму макеті! */
+    text-shadow: 3px 3px 5px rgba(100, 100, 100, 0.4);
+    margin: 0;
+    font-weight: 400;
+}
+
+/* Права колонка з тортом */
+.hero-image {
+    flex: 1;
+    text-align: right; /* Притискаємо торт до правого краю */
+}
+
+.hero-image img {
+    max-width: 100%; /* Щоб торт не вилазив за межі екрана */
+    height: auto;
+}

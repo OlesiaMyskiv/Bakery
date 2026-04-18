@@ -22,13 +22,13 @@
     margin: 0;
 }
 
-/* Налаштування звичайного тексту в меню */
+/* Налаштування звичайного тексту в меню (Асортимент, Конструктор тощо) */
 .nav-list li a {
     text-decoration: none;
-    color: #4A3B32; /* Темно-коричневий колір */
-    font-family: 'Cormorant Garamond', serif; /* Той самий шрифт! */
+    color: #4A3B32;
+    font-family: 'Cormorant Garamond', serif;
     font-size: 22px;
-    font-weight: 500;
+    font-weight: 400; /* Змінили з 500 на 400 (це і є Regular) */
     transition: color 0.3s ease;
 }
 
@@ -37,11 +37,11 @@
     color: #DCAE96;
 }
 
-/* Налаштування ЛОГОТИПУ */
+/* Налаштування ЛОГОТИПУ (Cake House) */
 .nav-list .logo a {
-    font-family: 'Love Light', cursive; /* Рукописний шрифт для лого */
-    font-size: 56px;                    /* Логотип має бути великим */
-    font-weight: 400;
+    font-family: 'Love Light', cursive;
+    font-size: 56px;
+    font-weight: 400; /* 400 - це Regular */
     color: #33261D;
 }
 
