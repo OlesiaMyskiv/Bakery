@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Cake House - Головна</title>
+    <link rel="stylesheet" th:href="@{/css/globals.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<header th:replace="~{header :: header}"></header>
+
+<main>
+    <section class="hero">
+        <div class="hero-text">
+            <h2>КОНДИТЕРСЬКА</h2>
+            <h1>BAKERY</h1>
+            <div class="hero-subtitle">HOME</div>
+        </div>
+        <div class="hero-image">
+            <img th:src="@{/img/1.png}" alt="Головний торт" />
+        </div>
+    </section>
+
+</main>
+
+<footer class="footer">
+    <p>&copy; 2026 Cake House. Всі права захищені.</p>
+</footer>
+
+</body>
+</html>

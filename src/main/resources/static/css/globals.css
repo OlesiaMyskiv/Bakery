@@ -1,0 +1,66 @@
+/* ===============================
+   СТИЛІ ДЛЯ ШАПКИ (HEADER)
+   =============================== */
+
+.header {
+    background-color: #FAF6F3; /* Ніжний фон (можеш змінити на свій) */
+    padding: 20px 50px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); /* Легка тінь знизу */
+}
+
+.navigation-menu {
+    max-width: 1200px; /* Обмежуємо ширину, щоб на великих екранах не розповзалося */
+    margin: 0 auto;    /* Центруємо меню */
+}
+
+.nav-list {
+    display: flex;
+    justify-content: space-between; /* Розставляє елементи рівномірно */
+    align-items: center;            /* Вирівнює все по центру по вертикалі */
+    list-style: none;               /* Прибираємо крапки від списку */
+    padding: 0;
+    margin: 0;
+}
+
+/* Налаштування звичайного тексту в меню */
+.nav-list li a {
+    text-decoration: none;
+    color: #4A3B32; /* Темно-коричневий колір */
+    font-family: 'Cormorant Garamond', serif; /* Той самий шрифт! */
+    font-size: 22px;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+/* Колір при наведенні мишкою */
+.nav-list li a:hover {
+    color: #DCAE96;
+}
+
+/* Налаштування ЛОГОТИПУ */
+.nav-list .logo a {
+    font-family: 'Love Light', cursive; /* Рукописний шрифт для лого */
+    font-size: 56px;                    /* Логотип має бути великим */
+    font-weight: 400;
+    color: #33261D;
+}
+
+.nav-list .logo a:hover {
+    color: #33261D; /* Логотип при наведенні колір не змінює */
+}
+
+/* Налаштування іконок (Кошик, Профіль) */
+.nav-list .icons a {
+    display: flex;
+    align-items: center;
+}
+
+.nav-list .icons img {
+    width: 28px;
+    height: 28px;
+    transition: transform 0.3s ease;
+}
+
+.nav-list .icons img:hover {
+    transform: scale(1.1); /* Іконка трохи збільшується при наведенні */
+}
