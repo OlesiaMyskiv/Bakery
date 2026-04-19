@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Cake House - Вхід</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Love+Light&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/globals.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="login-body">
+
+<header th:replace="~{header :: header}"></header>
+
+<main class="login-main">
+    <div class="login-card">
+        <h2 class="login-title">Вхід</h2>
+
+        <form th:action="@{/login}" method="post">
+            <div class="input-group">
+                <label>Електронна пошта</label>
+                <input type="email" name="username" required>
+            </div>
+
+            <div class="input-group">
+                <label>Пароль:</label>
+                <input type="password" name="password" required>
+                <a th:href="@{/forgot-password}" class="forgot-password">Забули пароль?</a>
+            </div>
+
+            <button type="submit" class="login-btn">Увійти</button>
+        </form>
+
+        <div class="register-link">
+            Немає облікового запису? <a th:href="@{/register}">Реєстрація</a>
+        </div>
+    </div>
+</main>
+
+</body>
+</html>

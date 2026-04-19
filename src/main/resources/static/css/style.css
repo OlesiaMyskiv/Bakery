@@ -1,62 +1,471 @@
 /* ===============================
    ГОЛОВНИЙ БЛОК (HERO SECTION)
    =============================== */
+body {
+    overflow-x: hidden; /* Забороняє сайту хитатися вправо-вліво */
+}
 
-/* Розставляємо текст і торт по горизонталі */
 .hero {
     display: flex;
-    justify-content: space-between; /* Розсуває елементи по краях */
-    align-items: center;            /* Вирівнює по центру по вертикалі */
-    max-width: 1200px;              /* Обмежуємо ширину, як у шапки */
-    margin: 0 auto;                 /* Центруємо блок на екрані */
-    padding: 50px 20px;
-    position: relative;             /* Важливо для позиціонування бризок */
+    justify-content: space-between;
+    align-items: center;
+    max-width: 100%;
+    margin: 0;
+    padding: 150px 0px 100px 10%;
+    position: relative;
+    /* ВАЖЛИВО: Ми ВИДАЛИЛИ звідси overflow: hidden; ! Тепер бризки вільні */
 }
 
-/* Налаштування шоколадних бризок */
+/* Шоколадні бризки */
 .splash-left {
     position: absolute;
-    left: -100px;       /* Зсуваємо вліво за край екрана */
-    bottom: -50px;      /* Зсуваємо вниз */
-    width: 350px;       /* Розмір бризок (можеш змінити) */
-    z-index: -1;        /* Ховаємо їх ПІД текст */
+    /* Трохи посунемо вліво, щоб вона не залазила далеко на екран */
+    left: -40px;
+    /* Піднімемо трохи вище, бо вона стала меншою */
+    bottom: -100px;
+    /* МАГІЯ ТУТ: Зменшили розмір картинки (було 400px) */
+    width: 240px;
+    z-index: 1;
+    pointer-events: none;
 }
 
-/* Ліва колонка з текстом */
+/* Контейнер для тексту */
 .hero-text {
-    flex: 1; /* Кажемо зайняти половину вільного місця */
-    padding-left: 40px;
+    flex: 1;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Напис "КОНДИТЕРСЬКА" */
 .hero-text .subtitle {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 26px;
-    color: #E2A8A8; /* Ніжно-рожевий колір */
-    letter-spacing: 2px; /* Відстань між літерами */
+    font-size: 34px;
+    color: #E2A8A8;
     font-weight: 400;
-    margin-bottom: -15px; /* Підтягуємо текст ближче до HOME BAKERY */
+    margin-bottom: -15px; /* Притягуємо ближче до HOME */
+    letter-spacing: 2px;
 }
 
-/* Напис "HOME BAKERY" */
-.hero-text .title {
+/* Спільні стилі для HOME та BAKERY */
+.hero-text .title-home,
+.hero-text .title-bakery {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 90px; /* Величезний шрифт */
-    line-height: 0.9; /* Відстань між рядками HOME та BAKERY */
-    color: #E2A8A8; /* Рожевий колір тексту */
-    /* МАГІЯ: Робимо сіру 3D-тінь, як на твоєму макеті! */
-    text-shadow: 3px 3px 5px rgba(100, 100, 100, 0.4);
+    font-size: 140px; /* Величезний розмір */
+    color: #F8C8D0; /* Ніжно-рожева заливка */
     margin: 0;
+    line-height: 0.85; /* Робимо їх ближчими по вертикалі */
+    font-weight: 400;
+
+    /* Магія: сіра обводка тексту (stroke) та легка тінь! */
+    -webkit-text-stroke: 1.5px #2A7562;
+    text-shadow: 4px 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+/* Зсуваємо слово BAKERY вправо! */
+.hero-text .title-bakery {
+    margin-left: 90px;
+}
+
+/* Контейнер для торта */
+.hero-image {
+    flex: 1.2;
+    text-align: right;
+    z-index: 2;
+    margin-right: 0; /* Прибираємо всі старі відступи */
+    display: flex;
+    justify-content: flex-end; /* Притискаємо вміст максимально вправо */
+}
+
+/* Сам торт */
+.hero-image img {
+    width: 100%;
+    max-width: 850px; /* Збільшили торт, щоб він виглядав ефектніше з краю */
+    height: auto;
+    display: block;
+}
+
+/* ===============================
+   СЕКЦІЯ "ПРО НАС" (ABOUT US)
+   =============================== */
+.about-us {
+    background-color: #C1ECE4; /* М'ятний фон */
+    color: #277B8A; /* Темно-бірюзовий колір тексту */
+    font-family: 'Cormorant Garamond', serif;
+    padding: 80px 20px; /* Відступи зверху і знизу */
+}
+
+/* Обмежуємо ширину, щоб було як у шапці */
+.about-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Розставляємо фото і текст в один рядок */
+.about-content {
+    display: flex;
+    align-items: center; /* Вирівнюємо по центру по вертикалі */
+    gap: 60px; /* Відстань між фото і текстом */
+    margin-bottom: 60px; /* Відстань до нижніх переваг */
+}
+
+.about-image {
+    flex: 1; /* Фото займає майже половину */
+}
+
+.about-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+    /* На твоєму фото кути гострі, тому без заокруглень */
+}
+
+.about-text-block {
+    flex: 1.2; /* Тексту даємо трохи більше місця, щоб рядки були довгими */
+}
+
+/* Заголовок "ПРО НАС" */
+.about-title {
+    font-size: 55px;
+    font-weight: 400; /* Regular */
+    margin-top: 0;
+    margin-bottom: 30px;
+    letter-spacing: 2px;
+}
+
+/* Текст опису */
+.about-description {
+    font-size: 28px; /* Великий текст, який легко читати */
+    line-height: 1.5; /* Відстань між рядками */
+    font-weight: 400; /* Regular */
+    margin: 0;
+}
+
+/* Робимо перші слова Cake House жирними і трошки більшими */
+.about-description strong {
+    font-weight: 700; /* Bold */
+    font-size: 32px;
+}
+
+/* Три переваги внизу */
+.about-features {
+    display: flex;
+    justify-content: space-between; /* Розставляє їх рівномірно по ширині */
+    font-size: 38px; /* Великий шрифт як на фото */
+    font-weight: 400; /* Regular */
+    padding: 0 20px; /* Трохи зсуваємо від самих країв */
+}
+/* ===============================
+   СТОРІНКА ВХОДУ (LOGIN PAGE)
+   =============================== */
+
+/* Робимо фон всієї сторінки м'ятним */
+.login-body {
+    background-color: #C1ECE4;
+    height: 100vh; /* На всю висоту екрана */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Центруємо білу карточку */
+.login-main {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* Біла карточка (ЗМЕНШЕНА) */
+.login-card {
+    background-color: #FFFFFF;
+    padding: 40px 50px; /* Зменшили внутрішні відступи */
+    border-radius: 20px;
+    width: 100%;
+    max-width: 450px; /* БУЛО 600px. Робимо карточку значно вужчою */
+    font-family: 'Cormorant Garamond', serif;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); /* Додали ледь помітну тінь для об'єму */
+}
+
+.login-title {
+    color: #3AA6B9;
+    font-size: 38px; /* Трохи зменшили заголовок */
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 30px; /* Зменшили відступ до полів */
     font-weight: 400;
 }
 
-/* Права колонка з тортом */
-.hero-image {
-    flex: 1;
-    text-align: right; /* Притискаємо торт до правого краю */
+.input-group {
+    margin-bottom: 20px; /* БУЛО 30px */
 }
 
-.hero-image img {
-    max-width: 100%; /* Щоб торт не вилазив за межі екрана */
-    height: auto;
+.input-group label {
+    display: block;
+    color: #333333;
+    font-size: 20px; /* Трохи зменшили текст над полем */
+    margin-bottom: 8px;
+}
+
+/* Сірі округлі поля вводу (ЗРОБИЛИ ТОНШИМИ) */
+.input-group input {
+    width: 100%;
+    background-color: #D9D9D9;
+    border: none;
+    border-radius: 20px;
+    padding: 12px 20px; /* Поля тепер не такі "пухкі" */
+    font-size: 18px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.forgot-password {
+    display: block;
+    color: #3AA6B9;
+    font-size: 16px;
+    margin-top: 8px;
+    text-decoration: none;
+}
+
+/* Рожева кнопка (ЗРОБИЛИ ТОНШОЮ) */
+/* Рожева кнопка */
+.login-btn {
+    background-color: #FF9EAA;
+    border: none;
+    border-radius: 20px;
+    width: 100%;
+    height: 48px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 15px;
+
+    /* Змушуємо браузер використовувати саме цей шрифт */
+    font-family: 'Cormorant Garamond', serif !important;
+    font-size: 26px; /* Трошки збільшили для солідності */
+    color: #333333;
+    font-weight: 400;
+}
+
+.login-btn:hover {
+    background-color: #E2A8A8;
+}
+
+.register-link {
+    text-align: center;
+    margin-top: 30px; /* Зменшили відступ */
+    font-size: 20px;
+    color: #333333;
+}
+
+.register-link a {
+    color: #3AA6B9;
+    text-decoration: none;
+}
+
+/* ===============================
+   СТОРІНКА РЕЄСТРАЦІЇ (СПЕЦІАЛЬНІ ПОЛЯ)
+   =============================== */
+
+/* Трохи розширимо карточку для реєстрації */
+.register-card {
+    max-width: 500px;
+    margin-top: 50px;
+    margin-bottom: 50px;
+}
+
+/* Налаштування радіокнопок статусу */
+.status-group {
+    margin-bottom: 25px;
+}
+
+.status-label-main {
+    display: block;
+    color: #333333;
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* Основні стилі для кастомних радіокнопок */
+.custom-radio {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin-bottom: 10px;
+    font-family: 'Cormorant Garamond', serif; /* Або ваш основний шрифт */
+    font-size: 18px;
+}
+
+/* Ховаємо стандартну радіокнопку */
+.custom-radio input[type="radio"] {
+    display: none;
+}
+
+/* Стилі для нашого кастомного кружечка */
+.radio-mark {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid #ccc; /* Колір рамки в неактивному стані */
+    margin-right: 10px;
+    display: inline-block;
+    position: relative;
+    transition: border-color 0.3s ease;
+}
+
+/* Ефект омбре (градієнт) для заповнення при виборі */
+.radio-mark::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0); /* Початково прихований */
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    /* Ваш градієнт (омбре) */
+    background: linear-gradient(135deg, #ff9eaa 0%, #e2a8a8 100%);
+    transition: transform 0.3s ease;
+}
+
+/* Стилі при виборі радіокнопки */
+.custom-radio input[type="radio"]:checked + .radio-mark {
+    border-color: #ff9eaa; /* Колір рамки при виборі */
+}
+
+.custom-radio input[type="radio"]:checked + .radio-mark::after {
+    transform: translate(-50%, -50%) scale(1); /* Показуємо заповнення */
+}
+
+/* Блок завантаження фото */
+.file-upload-box {
+    width: 140px;
+    height: 140px;
+    background-color: #D9D9D9;
+    border-radius: 20px;
+    margin: 15px auto 25px auto;
+    position: relative;
+    overflow: hidden;
+}
+
+.file-upload-box input {
+    display: none;
+}
+
+.file-upload-box label {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    font-size: 40px;
+    color: #FFFFFF;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.file-upload-box label:hover {
+    background-color: #cccccc;
+}
+
+/* Кастомна галочка (чекбокс) */
+.custom-checkbox {
+    display: flex;
+    align-items: flex-start;
+    cursor: pointer;
+    margin-bottom: 25px;
+}
+
+.custom-checkbox input {
+    display: none;
+}
+
+.checkmark {
+    width: 18px;
+    height: 18px;
+    background-color: #FF9EAA; /* Рожевий квадратик */
+    margin-right: 12px;
+    flex-shrink: 0;
+    margin-top: 3px;
+    position: relative;
+}
+
+/* Текст згоди (дрібніший) */
+.consent-text {
+    font-size: 14px;
+    color: #333333;
+    line-height: 1.3;
+}
+/* ===============================
+   КАСТОМНИЙ ЧЕКБОКС (ГАЛОЧКА)
+   =============================== */
+.custom-checkbox {
+    display: flex;
+    align-items: flex-start;
+    cursor: pointer;
+    margin-bottom: 25px;
+    position: relative;
+    user-select: none; /* Забороняємо виділення тексту при кліку */
+}
+
+/* Ховаємо стандартний чекбокс браузера */
+.custom-checkbox input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+/* Малюємо наш квадрат */
+.checkmark {
+    width: 22px; /* Розмір квадрата */
+    height: 22px;
+    background-color: #D9D9D9; /* Світло-сірий у неактивному стані */
+    margin-right: 15px; /* Відступ до тексту */
+    border-radius: 4px; /* Легке заокруглення кутів */
+    flex-shrink: 0;
+    margin-top: 2px;
+    position: relative;
+    transition: background-color 0.3s ease; /* Плавна зміна кольору */
+}
+
+/* Колір квадрата, коли користувач натиснув на нього (кораловий) */
+.custom-checkbox input:checked ~ .checkmark {
+    background-color: #FF9EAA;
+}
+
+/* Створюємо саму галочку (поки що приховану) */
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none; /* Ховаємо галочку */
+}
+
+/* Показуємо галочку, коли чекбокс вибрано */
+.custom-checkbox input:checked ~ .checkmark:after {
+    display: block;
+}
+
+/* Малюємо форму галочки за допомогою рамок (білий колір) */
+.custom-checkbox .checkmark:after {
+    left: 7px;
+    top: 3px;
+    width: 6px;
+    height: 12px;
+    border: solid white;
+    border-width: 0 3px 3px 0;
+    /* Повертаємо рамки так, щоб вийшла "пташка" */
+    transform: rotate(45deg);
+}
+
+/* Текст згоди */
+.consent-text {
+    font-size: 16px; /* Розмір як на макеті */
+    color: #333333;
+    line-height: 1.4;
+    font-family: 'Cormorant Garamond', serif;
 }

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Cake House - Реєстрація</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Love+Light&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/globals.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="login-body">
+
+<header th:replace="~{header :: header}"></header>
+
+<main class="login-main">
+    <div class="login-card register-card">
+        <h2 class="login-title">Реєстрація</h2>
+
+        <form th:action="@{/register}" method="post">
+            <div class="input-group">
+                <label>Ім'я користувача:</label>
+                <input type="text" name="username" required>
+            </div>
+
+            <div class="input-group">
+                <label>Телефон:</label>
+                <input type="tel" name="phone" placeholder="+380" required>
+            </div>
+
+            <div class="input-group">
+                <label>Електронна пошта:</label>
+                <input type="email" name="email" required>
+            </div>
+
+            <div class="input-group">
+                <label>Пароль:</label>
+                <input type="password" name="password" required>
+            </div>
+
+            <div class="input-group">
+                <label>Підтвердження паролю:</label>
+                <input type="password" name="confirm_password" required>
+            </div>
+
+            <div class="status-group">
+                <label class="status-label-main">Вибір статусу:</label>
+
+                <label class="custom-radio">
+                    <input type="radio" name="role" value="CLIENT" checked onchange="toggleSpecialFields()">
+                    <span class="radio-mark"></span> Звичайний клієнт
+                </label>
+
+                <label class="custom-radio">
+                    <input type="radio" name="role" value="ZSU" onchange="toggleSpecialFields()">
+                    <span class="radio-mark"></span> Військовослужбовець (ЗСУ)
+                </label>
+
+                <label class="custom-radio">
+                    <input type="radio" name="role" value="DSNS" onchange="toggleSpecialFields()">
+                    <span class="radio-mark"></span> Співробітник ДСНС
+                </label>
+            </div>
+
+            <div id="special-fields" style="display: none;">
+                <label class="status-label-main text-center">Прикріпити фото посвідчення:</label>
+
+                <div class="file-upload-box">
+                    <input type="file" id="document-upload" name="document" accept="image/*">
+                    <label for="document-upload">+</label>
+                </div>
+
+                <label class="custom-checkbox">
+                    <input type="checkbox" name="consent" id="consent-check" required>
+                    <span class="checkmark"></span>
+                    <span class="consent-text">Я підтверджую справжність документа та надаю згоду на обробку персональних даних</span>
+                </label>
+            </div>
+
+            <button type="submit" class="login-btn">Створити акаунт</button>
+        </form>
+    </div>
+</main>
+
+<script>
+    function toggleSpecialFields() {
+        // Знаходимо, яка кнопка зараз вибрана
+        const selectedRole = document.querySelector('input[name="role"]:checked').value;
+        const specialFields = document.getElementById('special-fields');
+        const consentCheck = document.getElementById('consent-check');
+
+        // Якщо вибрано ЗСУ або ДСНС - показуємо блок
+        if (selectedRole === 'ZSU' || selectedRole === 'DSNS') {
+            specialFields.style.display = 'block';
+            consentCheck.required = true; // Робимо галочку обов'язковою
+        } else {
+            // Інакше ховаємо
+            specialFields.style.display = 'none';
+            consentCheck.required = false;
+        }
+    }
+</script>
+
+</body>
+</html>

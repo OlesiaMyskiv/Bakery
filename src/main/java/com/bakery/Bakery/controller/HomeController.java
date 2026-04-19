@@ -10,4 +10,19 @@ public class HomeController {
     public String home() {
         return "index";
     }
+
+    @GetMapping("/login")
+    public String loginPage() {
+        return "login";
+    }
+
+    @GetMapping("/forgot-password")
+    public String forgotPasswordPage() {
+        return "forgot-password";
+    }
+
+    @GetMapping("/register")
+    public String registerPage() {
+        return "register";
+    }
 }

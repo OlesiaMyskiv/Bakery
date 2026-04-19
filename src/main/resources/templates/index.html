@@ -3,8 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <title>Cake House - Головна</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Love+Light&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" th:href="@{/css/globals.css}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+
 </head>
 <body>
 
@@ -15,15 +21,38 @@
         <img th:src="@{/img/2.png}" alt="Шоколадні бризки" class="splash-left">
 
         <div class="hero-text">
-            <h2 class="subtitle">КОНДИТЕРСЬКА</h2>
-            <h1 class="title">
-                HOME<br>
-                BAKERY
-            </h1>
+            <div class="subtitle">КОНДИТЕРСЬКА</div>
+            <h1 class="title-home">HOME</h1>
+            <h1 class="title-bakery">BAKERY</h1>
         </div>
 
         <div class="hero-image">
             <img th:src="@{/img/1.png}" alt="Головний торт" />
+        </div>
+    </section>
+
+    <section class="about-us">
+        <div class="about-container">
+
+            <div class="about-content">
+                <div class="about-image">
+                    <img th:src="@{/img/about-image.png}" alt="Процес приготування торта" />
+                </div>
+
+                <div class="about-text-block">
+                    <h2 class="about-title">ПРО НАС</h2>
+                    <p class="about-description">
+                        <strong>Cake House</strong> — це домашня кондитерська, яка спеціалізується на виготовленні свіжих, натуральних та оригінальних десертів. У нас можна замовити торти на індивідуальні замовлення, кекси, тістечка та інші солодощі для святкових подій або повсякденного насолоди. Основний акцент робиться на якісних інгредієнтах, унікальних рецептах і ручній роботі, що гарантує домашній смак і естетичний вигляд кожного виробу.
+                    </p>
+                </div>
+            </div>
+
+            <div class="about-features">
+                <span>100% натурально</span>
+                <span>Ручна робота</span>
+                <span>Бережна доставка</span>
+            </div>
+
         </div>
     </section>
 

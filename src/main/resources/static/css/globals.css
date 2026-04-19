@@ -1,38 +1,62 @@
 /* ===============================
-   СТИЛІ ДЛЯ ШАПКИ (HEADER)
+   СТИЛІ ДЛЯ ШАПКИ (HEADER) - ГЛОБАЛЬНІ
    =============================== */
-
 .header {
-    background-color: #FAF6F3; /* Ніжний фон (можеш змінити на свій) */
-    padding: 20px 50px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); /* Легка тінь знизу */
+    /* Ми забрали звідси фон і тінь, перенесли їх у навігацію */
+}
+/* Обнуляємо стандартні відступи браузера для всього сайту */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
 }
 
+/* РОБИМО ШАПКУ ТОНШОЮ */
 .navigation-menu {
-    max-width: 1200px; /* Обмежуємо ширину, щоб на великих екранах не розповзалося */
-    margin: 0 auto;    /* Центруємо меню */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 5px 50px; /* БУЛО 20px. Тепер відступи мінімальні */
+    background-color: #FFFFFF;
+    border-bottom: 1px solid #F0F0F0;
+    position: relative;
+    z-index: 100;
+}
+
+/* Налаштування ЛОГОТИПУ */
+.nav-list .logo a {
+    font-family: 'Love Light', cursive;
+    font-size: 50px; /* Трохи збільшимо, щоб тонкий шрифт добре читався */
+    font-weight: 400;
+    color: #FF9EAA !important; /* Той самий ідеальний кораловий колір! */
+    transition: color 0.3s ease, transform 0.3s ease;
+}
+/* Ефект при наведенні мишки на логотип */
+.nav-list .logo a:hover {
+    color: #ee8080 !important; /* Ледь-ледь темніший відтінок при наведенні */
+    transform: scale(1.05); /* Логотип буде трішечки збільшуватися */
 }
 
 .nav-list {
     display: flex;
-    justify-content: space-between; /* Розставляє елементи рівномірно */
-    align-items: center;            /* Вирівнює все по центру по вертикалі */
-    list-style: none;               /* Прибираємо крапки від списку */
+    justify-content: space-between;
+    align-items: center;
+    list-style: none;
     padding: 0;
     margin: 0;
+    gap: 70px; /* Додали відступ між пунктами меню */
 }
 
-/* Налаштування звичайного тексту в меню (Асортимент, Конструктор тощо) */
+/* Налаштування звичайного тексту в меню */
 .nav-list li a {
     text-decoration: none;
     color: #4A3B32;
     font-family: 'Cormorant Garamond', serif;
     font-size: 22px;
-    font-weight: 400; /* Змінили з 500 на 400 (це і є Regular) */
+    font-weight: 400;
     transition: color 0.3s ease;
 }
 
-/* Колір при наведенні мишкою */
 .nav-list li a:hover {
     color: #DCAE96;
 }
@@ -41,12 +65,12 @@
 .nav-list .logo a {
     font-family: 'Love Light', cursive;
     font-size: 56px;
-    font-weight: 400; /* 400 - це Regular */
+    font-weight: 400;
     color: #33261D;
 }
 
 .nav-list .logo a:hover {
-    color: #33261D; /* Логотип при наведенні колір не змінює */
+    color: #33261D;
 }
 
 /* Налаштування іконок (Кошик, Профіль) */
@@ -62,5 +86,5 @@
 }
 
 .nav-list .icons img:hover {
-    transform: scale(1.1); /* Іконка трохи збільшується при наведенні */
+    transform: scale(1.1);
 }
