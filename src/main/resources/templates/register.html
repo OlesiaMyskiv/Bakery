@@ -16,10 +16,11 @@
 <main class="login-main">
     <div class="login-card register-card">
         <h2 class="login-title">Реєстрація</h2>
+        <p th:if="${error}" th:text="${error}" style="color: red; text-align: center; font-size: 18px;"></p>
 
         <form th:action="@{/register}" method="post" enctype="multipart/form-data">
             <div class="input-group">
-                <label>Ім'я користувача:</label>
+                <label>Ім'я та прізвище користувача:</label>
                 <input type="text" name="username" required>
             </div>
 
@@ -71,7 +72,6 @@
                 </div>
 
                 <label class="custom-checkbox">
-                    <input type="checkbox" name="consent" id="consent-check" required>
                     <span class="checkmark"></span>
                     <span class="consent-text">Я підтверджую справжність документа та надаю згоду на обробку персональних даних</span>
                 </label>

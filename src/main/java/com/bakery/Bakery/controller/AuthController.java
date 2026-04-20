@@ -36,57 +36,29 @@ public class AuthController {
             @RequestParam("role") Role role,
             @RequestParam(value = "consent", defaultValue = "false") boolean consent,
             @RequestParam(value = "document", required = false) MultipartFile document,
+            jakarta.servlet.http.HttpSession session, // 1. ДОДАЛИ ПАМ'ЯТЬ (СЕСІЮ) СЮДИ
             Model model) {
 
-        // 1. Перевірка паролів
+        // Перевірка паролів
         if (!password.equals(confirmPassword)) {
             model.addAttribute("error", "Паролі не співпадають!");
             return "register";
         }
 
-        // 2. Перевірка, чи існує вже такий email
+        // Перевірка, чи існує вже такий email
         if (userRepository.findByEmail(email) != null) {
             model.addAttribute("error", "Користувач з такою поштою вже існує!");
             return "register";
         }
 
-        // 3. Створюємо нового користувача
+        // Створюємо нового користувача
         User user = new User();
         user.setUsername(username);
         user.setPhone(phone);
         user.setEmail(email);
-        user.setPassword(password); // В реальному проєкті пароль треба шифрувати!
+        user.setPassword(password);
         user.setRole(role);
         user.setConsent(consent);
-
-        // 4. Логіка збереження фотографії (якщо це ЗСУ або ДСНС)
-        if ((role == Role.ZSU || role == Role.DSNS) && document != null && !document.isEmpty()) {
-            try {
-                // Створюємо папку, якщо її ще немає
-                Path uploadPath = Paths.get(UPLOAD_DIRECTORY);
-                if (!Files.exists(uploadPath)) {
-                    Files.createDirectories(uploadPath);
-                }
-
-                // Генеруємо унікальне ім'я для файлу, щоб вони не перезаписували один одного
-                String originalFileName = document.getOriginalFilename();
-                String uniqueFileName = UUID.randomUUID().toString() + "_" + originalFileName;
-
-                // Повний шлях до нового файлу
-                Path fileNameAndPath = Paths.get(UPLOAD_DIRECTORY, uniqueFileName);
-
-                // Зберігаємо файл на комп'ютер
-                Files.write(fileNameAndPath, document.getBytes());
-
-                // Зберігаємо лише шлях у базу даних
-                user.setDocumentPath("/uploads/documents/" + uniqueFileName);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-                model.addAttribute("error", "Помилка при завантаженні фото!");
-                return "register";
-            }
-        }
 
         // Встановлюємо правильний статус перевірки при реєстрації
         if (role == Role.ZSU || role == Role.DSNS) {
@@ -95,10 +67,32 @@ public class AuthController {
             user.setVerificationStatus(VerificationStatus.NONE); // Звичайний клієнт
         }
 
-        // 5. Зберігаємо користувача в базу даних
+        // Логіка збереження фотографії
+        if ((role == Role.ZSU || role == Role.DSNS) && document != null && !document.isEmpty()) {
+            try {
+                Path uploadPath = Paths.get(UPLOAD_DIRECTORY);
+                if (!Files.exists(uploadPath)) {
+                    Files.createDirectories(uploadPath);
+                }
+                String originalFileName = document.getOriginalFilename();
+                String uniqueFileName = UUID.randomUUID().toString() + "_" + originalFileName;
+                Path fileNameAndPath = Paths.get(UPLOAD_DIRECTORY, uniqueFileName);
+                Files.write(fileNameAndPath, document.getBytes());
+                user.setDocumentPath("/uploads/documents/" + uniqueFileName);
+            } catch (IOException e) {
+                e.printStackTrace();
+                model.addAttribute("error", "Помилка при завантаженні фото!");
+                return "register";
+            }
+        }
+
+        // Зберігаємо користувача в базу даних
         userRepository.save(user);
 
-        // Після успішної реєстрації відправляємо на сторінку входу
-        return "redirect:/login";
+        // 2. АВТОВХІД: Зберігаємо створеного користувача в сесію
+        session.setAttribute("loggedInUser", user);
+
+        // 3. ЗМІНИЛИ ПЕРЕХІД: Тепер після реєстрації летимо прямо в профіль!
+        return "redirect:/profile";
     }
 }
