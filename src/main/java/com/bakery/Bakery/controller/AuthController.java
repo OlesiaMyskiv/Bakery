@@ -196,4 +196,21 @@ public class AuthController {
 
         return "redirect:/profile";
     }
+
+    // ==========================================
+    // 5. МЕТОД ВИДАЛЕННЯ АВАТАРКИ
+    // ==========================================
+    @GetMapping("/delete-avatar")
+    public String deleteAvatar(jakarta.servlet.http.HttpSession session) {
+        User sessionUser = (User) session.getAttribute("loggedInUser");
+        if (sessionUser != null) {
+            User dbUser = userRepository.findById(sessionUser.getId()).orElse(null);
+            if (dbUser != null) {
+                dbUser.setProfilePicturePath(null); // Видаляємо фото
+                userRepository.save(dbUser);
+                session.setAttribute("loggedInUser", dbUser); // Оновлюємо пам'ять
+            }
+        }
+        return "redirect:/profile";
+    }
 }
