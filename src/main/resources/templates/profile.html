@@ -19,7 +19,6 @@
         <div class="profile-avatar-box">
             <div class="profile-avatar">
                 <img th:if="${session.loggedInUser.profilePicturePath != null}" th:src="${session.loggedInUser.profilePicturePath}" alt="Аватар">
-
                 <svg th:unless="${session.loggedInUser.profilePicturePath != null}" class="camera-svg" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="8" width="18" height="12" rx="2" ry="2"></rect>
                     <path d="M16 8v-2a2 2 0 0 0-2-2H10a2 2 0 0 0-2 2v2"></path>
@@ -28,37 +27,92 @@
             </div>
         </div>
 
-        <div class="profile-info-box">
+        <div id="profile-view-mode" class="profile-info-box">
             <h1 class="profile-name" th:text="${session.loggedInUser.username}">Прізвище Ім'я</h1>
 
+            <div class="profile-detail"><span>E-mail: <span th:text="${session.loggedInUser.email}"></span></span></div>
+            <div class="profile-detail"><span>Телефон: <span th:text="${session.loggedInUser.phone}"></span></span></div>
             <div class="profile-detail">
-                <span>E-mail: <span th:text="${session.loggedInUser.email}">---</span></span>
+                <span>Дата народження: <span th:text="${session.loggedInUser.birthDate != null ? session.loggedInUser.birthDate : '--.--.----'}"></span></span>
             </div>
 
-            <div class="profile-detail">
-                <span>Телефон: <span th:text="${session.loggedInUser.phone}">---</span></span>
-            </div>
-
-            <div class="profile-detail">
-                <span>Дата народження: <span th:text="${session.loggedInUser.birthDate != null ? session.loggedInUser.birthDate : '--.--.----'}">--.--.----</span></span>
-            </div>
-
-            <div class="profile-detail profile-status" th:if="${session.loggedInUser.role.name() != 'CLIENT'}">
+            <div class="profile-detail profile-status">
                 <span>Статус: </span>
 
-                <span th:if="${session.loggedInUser.verificationStatus.name() == 'PENDING'}" style="display: flex; align-items: center; gap: 8px;">
+                <span th:if="${session.loggedInUser.role.name() == 'CLIENT'}" style="display: flex; align-items: center; gap: 8px;">
+                    <span class="status-dot approved"></span> Звичайний клієнт
+                </span>
+
+                <span th:if="${session.loggedInUser.role.name() != 'CLIENT' and session.loggedInUser.verificationStatus.name() == 'PENDING'}" style="display: flex; align-items: center; gap: 8px;">
                     <span class="status-dot pending"></span> Документи обробляються...
                 </span>
 
-                <span th:if="${session.loggedInUser.verificationStatus.name() == 'APPROVED'}" style="display: flex; align-items: center; gap: 8px;">
-                    <span class="status-dot approved"></span> Підтверджено
+                <span th:if="${session.loggedInUser.role.name() != 'CLIENT' and session.loggedInUser.verificationStatus.name() == 'APPROVED'}" style="display: flex; align-items: center; gap: 8px;">
+                    <span class="status-dot approved"></span>
+                    <span th:text="'Верифіковано ' + ${session.loggedInUser.role.name()}"></span>
+                </span>
+
+                <span th:if="${session.loggedInUser.role.name() != 'CLIENT' and session.loggedInUser.verificationStatus.name() == 'REJECTED'}" style="display: flex; align-items: center; gap: 8px;">
+                    <span class="status-dot" style="background-color: #F44336;"></span> Відхилено (Оновіть документи)
                 </span>
             </div>
+
+            <a href="#" class="profile-edit-btn" onclick="toggleEditMode(event)">Редагувати</a>
         </div>
 
-        <a href="#" class="profile-edit-btn">Редагувати</a>
+        <div id="profile-edit-mode" class="profile-info-box" style="display: none;">
+            <form th:action="@{/edit-profile}" method="post" enctype="multipart/form-data" class="edit-form">
+
+                <div class="edit-input-group">
+                    <label>Ім'я та Прізвище:</label>
+                    <input type="text" name="username" th:value="${session.loggedInUser.username}" required>
+                </div>
+
+                <div class="edit-input-group">
+                    <label>Електронна пошта:</label>
+                    <input type="email" name="email" th:value="${session.loggedInUser.email}" required>
+                </div>
+
+                <div class="edit-input-group">
+                    <label>Дата народження:</label>
+                    <input type="date" name="birthDate" th:value="${session.loggedInUser.birthDate}">
+                </div>
+
+                <div class="edit-input-group">
+                    <label>Новий пароль (залиште пустим, якщо не міняєте):</label>
+                    <input type="password" name="password" placeholder="Введіть новий пароль">
+                </div>
+
+                <div class="edit-input-group">
+                    <label>Фото профілю (Аватар):</label>
+                    <input type="file" name="profilePicture" accept="image/*" style="background: none; padding: 0; color: white;">
+                </div>
+
+                <div style="display: flex; gap: 15px; margin-top: 20px;">
+                    <button type="submit" class="save-btn">Зберегти зміни</button>
+                    <button type="button" class="cancel-btn" onclick="toggleEditMode(event)">Скасувати</button>
+                </div>
+            </form>
+        </div>
+
     </div>
 </section>
+
+<script>
+    function toggleEditMode(event) {
+        event.preventDefault(); // Зупиняємо стандартний перехід по посиланню
+        const viewMode = document.getElementById('profile-view-mode');
+        const editMode = document.getElementById('profile-edit-mode');
+
+        if (viewMode.style.display === 'none') {
+            viewMode.style.display = 'flex';
+            editMode.style.display = 'none';
+        } else {
+            viewMode.style.display = 'none';
+            editMode.style.display = 'flex';
+        }
+    }
+</script>
 
 </body>
 </html>

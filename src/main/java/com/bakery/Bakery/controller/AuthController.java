@@ -7,6 +7,7 @@ import com.bakery.Bakery.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,6 +27,9 @@ public class AuthController {
     // Шлях до папки, де будуть зберігатися фото посвідчень
     public static String UPLOAD_DIRECTORY = System.getProperty("user.dir") + "/uploads/documents";
 
+    // ==========================================
+    // 1. МЕТОД РЕЄСТРАЦІЇ
+    // ==========================================
     @PostMapping("/register")
     public String registerUser(
             @RequestParam("username") String username,
@@ -36,7 +40,7 @@ public class AuthController {
             @RequestParam("role") Role role,
             @RequestParam(value = "consent", defaultValue = "false") boolean consent,
             @RequestParam(value = "document", required = false) MultipartFile document,
-            jakarta.servlet.http.HttpSession session, // 1. ДОДАЛИ ПАМ'ЯТЬ (СЕСІЮ) СЮДИ
+            jakarta.servlet.http.HttpSession session,
             Model model) {
 
         // Перевірка паролів
@@ -89,10 +93,107 @@ public class AuthController {
         // Зберігаємо користувача в базу даних
         userRepository.save(user);
 
-        // 2. АВТОВХІД: Зберігаємо створеного користувача в сесію
+        // АВТОВХІД: Зберігаємо створеного користувача в сесію
         session.setAttribute("loggedInUser", user);
 
-        // 3. ЗМІНИЛИ ПЕРЕХІД: Тепер після реєстрації летимо прямо в профіль!
+        // Перекидаємо у профіль
+        return "redirect:/profile";
+    }
+
+    // ==========================================
+    // 2. МЕТОД ВХОДУ (ЛОГІН)
+    // ==========================================
+    @PostMapping("/login")
+    public String loginUser(
+            @RequestParam("username") String email, // У твоїй формі поле email має name="username"
+            @RequestParam("password") String password,
+            jakarta.servlet.http.HttpSession session,
+            Model model) {
+
+        // Шукаємо користувача в базі за поштою
+        User user = userRepository.findByEmail(email);
+
+        // Перевірка, чи знайшовся користувач і чи збігається пароль
+        if (user != null && user.getPassword().equals(password)) {
+            // УСПІХ! Зберігаємо користувача в пам'ять
+            session.setAttribute("loggedInUser", user);
+
+            // Перекидаємо у профіль
+            return "redirect:/profile";
+        } else {
+            // ПОМИЛКА! Неправильний логін або пароль
+            model.addAttribute("error", "Неправильна електронна пошта або пароль!");
+            return "login";
+        }
+    }
+
+    // ==========================================
+    // 3. МЕТОД ВИХОДУ (ЛОГАУТ)
+    // ==========================================
+    @GetMapping("/logout")
+    public String logout(jakarta.servlet.http.HttpSession session) {
+        session.invalidate(); // Очищаємо пам'ять
+        return "redirect:/"; // Перекидаємо на головну сторінку
+    }
+    // Шлях до папки з аватарками
+    public static String PROFILE_PICS_DIRECTORY = System.getProperty("user.dir") + "/uploads/profiles";
+
+    // ==========================================
+    // 4. МЕТОД РЕДАГУВАННЯ ПРОФІЛЮ
+    // ==========================================
+    @PostMapping("/edit-profile")
+    public String editProfile(
+            @RequestParam("username") String username,
+            @RequestParam("email") String email,
+            @RequestParam(value = "password", required = false) String password,
+            @RequestParam(value = "birthDate", required = false) String birthDateStr,
+            @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture,
+            jakarta.servlet.http.HttpSession session) {
+
+        // Отримуємо поточного користувача з сесії
+        User sessionUser = (User) session.getAttribute("loggedInUser");
+        if (sessionUser == null) return "redirect:/login"; // Якщо не увійшов
+
+        // Знаходимо його в базі даних, щоб оновити
+        User dbUser = userRepository.findById(sessionUser.getId()).orElse(null);
+        if (dbUser == null) return "redirect:/login";
+
+        // Оновлюємо текст
+        dbUser.setUsername(username);
+        dbUser.setEmail(email);
+
+        // Оновлюємо пароль (тільки якщо ввели новий)
+        if (password != null && !password.isEmpty()) {
+            dbUser.setPassword(password);
+        }
+
+        // Оновлюємо дату народження
+        if (birthDateStr != null && !birthDateStr.isEmpty()) {
+            dbUser.setBirthDate(java.time.LocalDate.parse(birthDateStr));
+        }
+
+        // Зберігаємо нову аватарку (якщо завантажили)
+        if (profilePicture != null && !profilePicture.isEmpty()) {
+            try {
+                Path uploadPath = Paths.get(PROFILE_PICS_DIRECTORY);
+                if (!Files.exists(uploadPath)) {
+                    Files.createDirectories(uploadPath);
+                }
+                String uniqueFileName = UUID.randomUUID().toString() + "_" + profilePicture.getOriginalFilename();
+                Path fileNameAndPath = Paths.get(PROFILE_PICS_DIRECTORY, uniqueFileName);
+                Files.write(fileNameAndPath, profilePicture.getBytes());
+
+                // Зберігаємо шлях у базу
+                dbUser.setProfilePicturePath("/uploads/profiles/" + uniqueFileName);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // Зберігаємо оновленого користувача в базу і оновлюємо сесію
+        userRepository.save(dbUser);
+        session.setAttribute("loggedInUser", dbUser);
+
         return "redirect:/profile";
     }
 }
