@@ -25,4 +25,13 @@ public class HomeController {
     public String registerPage() {
         return "register";
     }
+
+    @GetMapping("/profile")
+    public String profilePage(jakarta.servlet.http.HttpSession session) {
+        // Якщо користувач не увійшов, відправляємо його на сторінку логіну
+        if (session.getAttribute("loggedInUser") == null) {
+            return "redirect:/login";
+        }
+        return "profile";
+    }
 }

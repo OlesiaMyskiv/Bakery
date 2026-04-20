@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Cake House - Профіль</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Love+Light&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/globals.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<header th:replace="~{header :: header}"></header>
+
+<section class="profile-header-section">
+    <div class="profile-container">
+
+        <div class="profile-avatar-box">
+            <div class="profile-avatar">
+                <img th:if="${session.loggedInUser.profilePicturePath != null}" th:src="${session.loggedInUser.profilePicturePath}" alt="Аватар">
+
+                <svg th:unless="${session.loggedInUser.profilePicturePath != null}" class="camera-svg" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="8" width="18" height="12" rx="2" ry="2"></rect>
+                    <path d="M16 8v-2a2 2 0 0 0-2-2H10a2 2 0 0 0-2 2v2"></path>
+                    <circle cx="12" cy="14" r="3"></circle>
+                </svg>
+            </div>
+        </div>
+
+        <div class="profile-info-box">
+            <h1 class="profile-name" th:text="${session.loggedInUser.username}">Прізвище Ім'я</h1>
+
+            <div class="profile-detail">
+                <span>E-mail: <span th:text="${session.loggedInUser.email}">---</span></span>
+            </div>
+
+            <div class="profile-detail">
+                <span>Телефон: <span th:text="${session.loggedInUser.phone}">---</span></span>
+            </div>
+
+            <div class="profile-detail">
+                <span>Дата народження: <span th:text="${session.loggedInUser.birthDate != null ? session.loggedInUser.birthDate : '--.--.----'}">--.--.----</span></span>
+            </div>
+
+            <div class="profile-detail profile-status" th:if="${session.loggedInUser.role.name() != 'CLIENT'}">
+                <span>Статус: </span>
+
+                <span th:if="${session.loggedInUser.verificationStatus.name() == 'PENDING'}" style="display: flex; align-items: center; gap: 8px;">
+                    <span class="status-dot pending"></span> Документи обробляються...
+                </span>
+
+                <span th:if="${session.loggedInUser.verificationStatus.name() == 'APPROVED'}" style="display: flex; align-items: center; gap: 8px;">
+                    <span class="status-dot approved"></span> Підтверджено
+                </span>
+            </div>
+        </div>
+
+        <a href="#" class="profile-edit-btn">Редагувати</a>
+    </div>
+</section>
+
+</body>
+</html>

@@ -2,6 +2,7 @@ package com.bakery.Bakery.controller;
 
 import com.bakery.Bakery.model.Role;
 import com.bakery.Bakery.model.User;
+import com.bakery.Bakery.model.VerificationStatus;
 import com.bakery.Bakery.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -85,6 +86,13 @@ public class AuthController {
                 model.addAttribute("error", "Помилка при завантаженні фото!");
                 return "register";
             }
+        }
+
+        // Встановлюємо правильний статус перевірки при реєстрації
+        if (role == Role.ZSU || role == Role.DSNS) {
+            user.setVerificationStatus(VerificationStatus.PENDING); // Очікує на перевірку
+        } else {
+            user.setVerificationStatus(VerificationStatus.NONE); // Звичайний клієнт
         }
 
         // 5. Зберігаємо користувача в базу даних

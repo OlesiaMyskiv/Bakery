@@ -51,4 +51,28 @@ public class User {
 
     public String getDocumentPath() { return documentPath; }
     public void setDocumentPath(String documentPath) { this.documentPath = documentPath; }
+
+    // ... твої старі поля (documentPath тощо) ...
+
+    @Column(name = "birth_date")
+    private java.time.LocalDate birthDate; // Дата народження
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "verification_status")
+    private VerificationStatus verificationStatus = VerificationStatus.NONE; // Статус перевірки
+
+    @Column(name = "profile_picture_path")
+    private String profilePicturePath; // Шлях до аватарки
+
+    // --- ДОДАЙ ГЕТТЕРИ ТА СЕТТЕРИ ВНИЗУ ---
+    public java.time.LocalDate getBirthDate() { return birthDate; }
+    public void setBirthDate(java.time.LocalDate birthDate) { this.birthDate = birthDate; }
+
+    public VerificationStatus getVerificationStatus() { return verificationStatus; }
+    public void setVerificationStatus(VerificationStatus verificationStatus) { this.verificationStatus = verificationStatus; }
+
+    public String getProfilePicturePath() { return profilePicturePath; }
+    public void setProfilePicturePath(String profilePicturePath) { this.profilePicturePath = profilePicturePath; }
+
+
 }
