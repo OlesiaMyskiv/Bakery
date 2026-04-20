@@ -39,20 +39,20 @@
             <div class="profile-detail profile-status">
                 <span>Статус: </span>
 
-                <span th:if="${session.loggedInUser.role.name() == 'CLIENT'}" style="display: flex; align-items: center; gap: 8px;">
+                <span th:if="${session.loggedInUser.role != null and session.loggedInUser.role.name() == 'CLIENT'}" style="display: flex; align-items: center; gap: 8px;">
                     <span class="status-dot approved"></span> Звичайний клієнт
                 </span>
 
-                <span th:if="${session.loggedInUser.role.name() != 'CLIENT' and session.loggedInUser.verificationStatus.name() == 'PENDING'}" style="display: flex; align-items: center; gap: 8px;">
+                <span th:if="${session.loggedInUser.role != null and session.loggedInUser.role.name() != 'CLIENT' and session.loggedInUser.verificationStatus != null and session.loggedInUser.verificationStatus.name() == 'PENDING'}" style="display: flex; align-items: center; gap: 8px;">
                     <span class="status-dot pending"></span> Документи обробляються...
                 </span>
 
-                <span th:if="${session.loggedInUser.role.name() != 'CLIENT' and session.loggedInUser.verificationStatus.name() == 'APPROVED'}" style="display: flex; align-items: center; gap: 8px;">
+                <span th:if="${session.loggedInUser.role != null and session.loggedInUser.role.name() != 'CLIENT' and session.loggedInUser.verificationStatus != null and session.loggedInUser.verificationStatus.name() == 'APPROVED'}" style="display: flex; align-items: center; gap: 8px;">
                     <span class="status-dot approved"></span>
                     <span th:text="'Верифіковано ' + ${session.loggedInUser.role.name()}"></span>
                 </span>
 
-                <span th:if="${session.loggedInUser.role.name() != 'CLIENT' and session.loggedInUser.verificationStatus.name() == 'REJECTED'}" style="display: flex; align-items: center; gap: 8px;">
+                <span th:if="${session.loggedInUser.role != null and session.loggedInUser.role.name() != 'CLIENT' and session.loggedInUser.verificationStatus != null and session.loggedInUser.verificationStatus.name() == 'REJECTED'}" style="display: flex; align-items: center; gap: 8px;">
                     <span class="status-dot" style="background-color: #F44336;"></span> Відхилено (Оновіть документи)
                 </span>
             </div>

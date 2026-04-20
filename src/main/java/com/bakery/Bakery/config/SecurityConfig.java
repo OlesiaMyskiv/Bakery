@@ -11,15 +11,14 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // Дозволяємо доступ до всіх сторінок без авторизації (тимчасово)
+                // Вимикаємо блокування форм, щоб ти могла спокійно завантажувати фото і зберігати профіль
+                .csrf(csrf -> csrf.disable())
+                // Дозволяємо доступ до всіх сторінок (бо ми самі перевіряємо сесії в Контролерах)
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll()
-                )
-                // Тимчасово вимикаємо CSRF-захист, щоб не блокувало форму кошика/реєстрації
-                .csrf(csrf -> csrf.disable());
-
+                );
         return http.build();
     }
 }
