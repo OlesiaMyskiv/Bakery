@@ -18,69 +18,48 @@
 
         <div class="cake-visual-box">
             <h2 class="box-title">Конструктор торта</h2>
-
-            <div class="cake-stack" id="cake-visual-stack">
-            </div>
+            <div class="cake-stack" id="cake-visual-stack"></div>
         </div>
 
         <div class="cake-details-box">
-
             <div class="info-card">
                 <h2 class="box-title">Опис</h2>
-                <ul class="description-list" id="description-list">
-                </ul>
-
+                <ul class="description-list" id="description-list"></ul>
                 <button class="add-layer-btn"><span>+</span> Додати шар</button>
             </div>
 
             <div class="info-card">
                 <h2 class="box-title">Вартість</h2>
-
-                <div class="calc-row">
-                    Введіть кількість гостей:
-                    <div class="highlight-badge">
-                        <input type="number" id="guests-count" class="guests-input" value="5" min="1" max="100" onchange="calculatePrice()">
-                    </div>
-                    <span style="margin-left: 10px;">осіб</span>
-                </div>
-
-                <div class="calc-row">
-                    Рекомендована вага: <span class="highlight-badge" id="recommended-weight">1.25 кг</span>
-                </div>
-
-                <div class="calc-row">
-                    Загальна сума: <span class="highlight-badge" id="total-price">1 000 грн</span>
-                </div>
-
+                <div class="calc-row">Введіть кількість гостей: <div class="highlight-badge"><input type="number" id="guests-count" class="guests-input" value="5" min="1" max="100" onchange="calculatePrice()"></div><span style="margin-left: 10px;">осіб</span></div>
+                <div class="calc-row">Рекомендована вага: <span class="highlight-badge" id="recommended-weight">1.25 кг</span></div>
+                <div class="calc-row">Загальна сума: <span class="highlight-badge" id="total-price">1 000 грн</span></div>
                 <button class="add-to-cart-btn">Додати в кошик</button>
             </div>
-
         </div>
     </div>
 </section>
 
 <script>
-    // 1. БАЗА ДАНИХ ІНГРЕДІЄНТІВ
-    // Коли в тебе будуть справжні картинки, заміни слово "color" на "image: '/img/constructor/твоя_картинка.png'"
+    // 1. БАЗА ДАНИХ ІНГРЕДІЄНТІВ (Твої картинки)
     const ingredients = {
         sponge: [
-            { name: 'Брауні', color: '#4A2511', pricePerKg: 300 },
-            { name: 'Ванільний', color: '#FFF3E0', pricePerKg: 250 },
+            { name: 'Брауні', image: '/img/constructor/Брауні.png', color: '#4A2511', pricePerKg: 300 },
+            { name: 'Ванільний', image: '/img/constructor/Ванільний.png', color: '#FFF3E0', pricePerKg: 250 },
             { name: 'Червоний оксамит', color: '#8B0000', pricePerKg: 320 }
         ],
         cream: [
-            { name: 'Ванільний', color: '#FFFFF0', pricePerKg: 200 },
+            { name: 'Білосніжний крем-сир', image: '/img/constructor/Білосніжний крем-сир.png', color: '#FFFFF0', pricePerKg: 200 },
             { name: 'Шоколадний', color: '#3E2723', pricePerKg: 250 },
             { name: 'Фісташковий', color: '#AED581', pricePerKg: 400 }
         ],
         filling: [
-            { name: 'Солона карамель з горіхами', color: '#D84315', pricePerKg: 350 },
-            { name: 'Вишневе конфі', color: '#C2185B', pricePerKg: 280 },
+            { name: 'Вишневе конфі', image: '/img/constructor/Вишневе конфі.png', color: '#C2185B', pricePerKg: 280 },
+            { name: 'Солона карамель', color: '#D84315', pricePerKg: 350 },
             { name: 'Манго-маракуя', color: '#FBC02D', pricePerKg: 450 }
         ]
     };
 
-    // 2. ПОТОЧНИЙ СТАН ТОРТА (зверху вниз)
+    // 2. СТАН ТОРТА
     let currentCake = [
         { type: 'sponge', title: 'Бісквіт', selectedIndex: 0 },
         { type: 'cream', title: 'Крем', selectedIndex: 0 },
@@ -88,7 +67,10 @@
         { type: 'sponge', title: 'Бісквіт', selectedIndex: 0 }
     ];
 
-    // 3. ФУНКЦІЯ МАЛЮВАННЯ ТОРТА ТА ОПИСУ
+    // Змінна для пам'яті: який шар ми зараз тягнемо мишкою
+    let draggedLayerIndex = null;
+
+    // 3. МАЛЮВАННЯ ТОРТА
     function renderConstructor() {
         const visualStack = document.getElementById('cake-visual-stack');
         const descList = document.getElementById('description-list');
@@ -100,62 +82,110 @@
             const options = ingredients[layer.type];
             const selectedItem = options[layer.selectedIndex];
 
-            // --- Малюємо візуал зліва ---
-            // Якщо є картинка, виводимо <img src="${selectedItem.image}">, інакше просто заливаємо кольором (background-color)
+            // --- HTML для візуального торта зліва (додано Drag & Drop) ---
             const visualHTML = `
-                <div class="cake-layer-row">
-                    <button class="arrow-btn" onclick="changeLayer(${index}, -1)">&#8592;</button>
-                    <div class="layer-image-container" style="background-color: ${selectedItem.color};">
+                <div class="draggable-layer"
+                     draggable="true"
+                     ondragstart="handleDragStart(${index})"
+                     ondragover="handleDragOver(event)"
+                     ondrop="handleDrop(${index})">
+
+                    <div class="drag-handle" title="Потягніть, щоб перемістити">&#8597;</div>
+
+                    <div class="cake-layer-row">
+                        <button class="arrow-btn" onclick="changeLayer(${index}, -1)">&#8592;</button>
+                        <div class="layer-image-container">
+                            <img src="${selectedItem.image || ''}" alt="${selectedItem.name}" style="width: 100%; height: 100%; object-fit: contain; display: ${selectedItem.image ? 'block' : 'none'};">
+                            <div style="width: 100%; height: 100%; background-color: ${selectedItem.color}; display: ${selectedItem.image ? 'none' : 'block'};"></div>
                         </div>
-                    <button class="arrow-btn" onclick="changeLayer(${index}, 1)">&#8594;</button>
+                        <button class="arrow-btn" onclick="changeLayer(${index}, 1)">&#8594;</button>
+                    </div>
                 </div>
             `;
             visualStack.insertAdjacentHTML('beforeend', visualHTML);
 
-            // --- Малюємо текст справа ---
-            const descHTML = `<li><span style="color: #ccc; font-size: 20px;">&#8862;</span> ${index + 1} ${layer.title}: <strong>${selectedItem.name}</strong></li>`;
+            // --- HTML для опису справа (додано Drag & Drop + Трикутники) ---
+            const isFirst = index === 0;
+            const isLast = index === currentCake.length - 1;
+
+            const descHTML = `
+                <li class="draggable-layer"
+                    draggable="true"
+                    ondragstart="handleDragStart(${index})"
+                    ondragover="handleDragOver(event)"
+                    ondrop="handleDrop(${index})">
+
+                    <div class="move-arrows">
+                        <button class="triangle-btn" onclick="moveLayer(${index}, ${index - 1})" style="visibility: ${isFirst ? 'hidden' : 'visible'};" title="Підняти вгору">&#9650;</button>
+                        <button class="triangle-btn" onclick="moveLayer(${index}, ${index + 1})" style="visibility: ${isLast ? 'hidden' : 'visible'};" title="Опустити вниз">&#9660;</button>
+                    </div>
+
+                    <div style="flex-grow: 1; margin-left: 10px;">
+                        <span style="color: #ccc; font-size: 20px;">&#8862;</span> ${index + 1} ${layer.title}: <strong>${selectedItem.name}</strong>
+                    </div>
+                </li>
+            `;
             descList.insertAdjacentHTML('beforeend', descHTML);
         });
 
-        calculatePrice(); // Оновлюємо ціну щоразу, коли міняється склад
+        calculatePrice();
     }
 
-    // 4. ФУНКЦІЯ ПЕРЕМИКАННЯ СТРІЛОЧКАМИ
-    function changeLayer(layerIndex, direction) {
-        const layer = currentCake[layerIndex];
-        const optionsLength = ingredients[layer.type].length;
+    // 4. ЛОГІКА ПЕРЕМІЩЕННЯ ТА DRAG & DROP
+    function handleDragStart(index) {
+        draggedLayerIndex = index; // Запам'ятовуємо, який номер шару взяли мишкою
+    }
 
-        layer.selectedIndex += direction;
+    function handleDragOver(event) {
+        event.preventDefault(); // Дозволяємо "кинути" елемент сюди
+    }
 
-        // Щоб горталося по колу
-        if (layer.selectedIndex < 0) layer.selectedIndex = optionsLength - 1;
-        if (layer.selectedIndex >= optionsLength) layer.selectedIndex = 0;
+    function handleDrop(targetIndex) {
+        if (draggedLayerIndex !== null && draggedLayerIndex !== targetIndex) {
+            moveLayer(draggedLayerIndex, targetIndex); // Переміщуємо шар
+        }
+        draggedLayerIndex = null; // Очищаємо пам'ять
+    }
 
+    // Головна функція переміщення (працює і для мишки, і для трикутників)
+    function moveLayer(fromIndex, toIndex) {
+        // Захист від виходу за межі
+        if (toIndex < 0 || toIndex >= currentCake.length) return;
+
+        // Вирізаємо шар зі старого місця і вставляємо на нове
+        const movedItem = currentCake.splice(fromIndex, 1)[0];
+        currentCake.splice(toIndex, 0, movedItem);
+
+        // Перемальовуємо торт
         renderConstructor();
     }
 
-    // 5. ФУНКЦІЯ КАЛЬКУЛЯТОРА ВАРТОСТІ
+    // 5. ПЕРЕМИКАННЯ ІНГРЕДІЄНТІВ (ВЛІВО-ВПРАВО)
+    function changeLayer(layerIndex, direction) {
+        const layer = currentCake[layerIndex];
+        const optionsLength = ingredients[layer.type].length;
+        layer.selectedIndex += direction;
+        if (layer.selectedIndex < 0) layer.selectedIndex = optionsLength - 1;
+        if (layer.selectedIndex >= optionsLength) layer.selectedIndex = 0;
+        renderConstructor();
+    }
+
+    // 6. КАЛЬКУЛЯТОР ВАРТОСТІ
     function calculatePrice() {
         const guests = parseInt(document.getElementById('guests-count').value) || 1;
-
-        // Рахуємо вагу (250 грам на людину)
         const weightKg = (guests * 0.25).toFixed(2);
         document.getElementById('recommended-weight').innerText = weightKg + ' кг';
 
-        // Рахуємо середню ціну за 1 кг на основі вибраних інгредієнтів
         let totalBasePrice = 0;
         currentCake.forEach(layer => {
             const selectedItem = ingredients[layer.type][layer.selectedIndex];
             totalBasePrice += selectedItem.pricePerKg;
         });
         const averagePricePerKg = totalBasePrice / currentCake.length;
-
-        // Фінальна ціна
         const finalPrice = Math.round(averagePricePerKg * weightKg);
         document.getElementById('total-price').innerText = finalPrice.toLocaleString('uk-UA') + ' грн';
     }
 
-    // Запускаємо при завантаженні сторінки
     renderConstructor();
 </script>
 
