@@ -40,22 +40,49 @@
 </section>
 
 <script>
-    // 1. БАЗА ДАНИХ ІНГРЕДІЄНТІВ (Твої картинки)
+    // 1. БАЗА ДАНИХ ІНГРЕДІЄНТІВ
     const ingredients = {
         sponge: [
-            { name: 'Брауні', image: '/img/constructor/Брауні.png', color: '#4A2511', pricePerKg: 300 },
-            { name: 'Ванільний', image: '/img/constructor/Ванільний.png', color: '#FFF3E0', pricePerKg: 250 },
-            { name: 'Червоний оксамит', color: '#8B0000', pricePerKg: 320 }
+            { name: 'Шоколадний бісквіт', image: '/img/constructor/sponges/choco.png', color: '#3E2723', pricePerKg: 250 },
+            { name: 'Брауні', image: '/img/constructor/sponges/brownie.png', color: '#4A2511', pricePerKg: 300 },
+            { name: 'Дакуаз (горіховий)', image: '/img/constructor/sponges/dakuaz.png', color: '#D7CCC8', pricePerKg: 350 },
+            { name: 'Класичний ванільний', image: '/img/constructor/sponges/vanilla.png', color: '#FFF3E0', pricePerKg: 200 },
+            { name: 'Листкові коржі', image: '/img/constructor/sponges/puff.png', color: '#FFE0B2', pricePerKg: 220 },
+            { name: 'Маковий бісквіт', image: '/img/constructor/sponges/poppy.png', color: '#5D4037', pricePerKg: 260 },
+            { name: 'Медові коржі', image: '/img/constructor/sponges/honey.png', color: '#FFB300', pricePerKg: 230 },
+            { name: 'Морквяний', image: '/img/constructor/sponges/carrot.png', color: '#E65100', pricePerKg: 270 },
+            { name: 'Фісташковий', image: '/img/constructor/sponges/pistachio.png', color: '#AED581', pricePerKg: 400 },
+            { name: 'Червоний оксамит', image: '/img/constructor/sponges/red_velvet.png', color: '#8B0000', pricePerKg: 320 },
+            { name: 'Шифоновий бісквіт', image: '/img/constructor/sponges/chiffon.png', color: '#FFECB3', pricePerKg: 240 }
         ],
         cream: [
-            { name: 'Білосніжний крем-сир', image: '/img/constructor/Білосніжний крем-сир.png', color: '#FFFFF0', pricePerKg: 200 },
-            { name: 'Шоколадний', color: '#3E2723', pricePerKg: 250 },
-            { name: 'Фісташковий', color: '#AED581', pricePerKg: 400 }
+            { name: 'Білосніжний крем-сир', image: '/img/constructor/creams/cream_cheese.png', color: '#FFFFF0', pricePerKg: 280 },
+            { name: 'Заварний (Патісьєр)', image: '/img/constructor/creams/patissier.png', color: '#FFF59D', pricePerKg: 200 },
+            { name: 'Карамельний крем', image: '/img/constructor/creams/caramel_cream.png', color: '#FFB74D', pricePerKg: 250 },
+            { name: 'Крем-чиз на вершках', image: '/img/constructor/creams/cheese_cream.png', color: '#FAFAFA', pricePerKg: 300 },
+            { name: 'Крем-чиз на маслі', image: '/img/constructor/creams/cheese_butter.png', color: '#FFFDE7', pricePerKg: 320 },
+            { name: 'Сметанний крем', image: '/img/constructor/creams/sour_cream.png', color: '#FFFFFF', pricePerKg: 180 },
+            { name: 'Фісташковий крем', image: '/img/constructor/creams/pistachio_cream.png', color: '#C5E1A5', pricePerKg: 450 },
+            { name: 'Ганаш на білому шоколаді', image: '/img/constructor/creams/ganache_white.png', color: '#FFF8E1', pricePerKg: 350 },
+            { name: 'Ганаш на молочному шоколаді', image: '/img/constructor/creams/ganache_milk.png', color: '#795548', pricePerKg: 350 },
+            { name: 'Ганаш на чорному шоколаді', image: '/img/constructor/creams/ganache_dark.png', color: '#3E2723', pricePerKg: 350 }
         ],
         filling: [
-            { name: 'Вишневе конфі', image: '/img/constructor/Вишневе конфі.png', color: '#C2185B', pricePerKg: 280 },
-            { name: 'Солона карамель', color: '#D84315', pricePerKg: 350 },
-            { name: 'Манго-маракуя', color: '#FBC02D', pricePerKg: 450 }
+            { name: 'Безе/Меренга', image: '/img/constructor/fillings/meringue.png', color: '#F5F5F5', pricePerKg: 200 },
+            { name: 'Вишневе конфі', image: '/img/constructor/fillings/cherry.png', color: '#C2185B', pricePerKg: 250 },
+            { name: 'Карамелізовані горіхи', image: '/img/constructor/fillings/caramel_nuts.png', color: '#8D6E63', pricePerKg: 380 },
+            { name: 'Карамелізовані яблука з корицею', image: '/img/constructor/fillings/apple_cinnamon.png', color: '#D84315', pricePerKg: 220 },
+            { name: 'Кокосовий прошарок', image: '/img/constructor/fillings/coconut.png', color: '#FFFFFF', pricePerKg: 280 },
+            { name: 'Лимонний курд', image: '/img/constructor/fillings/lemon_curd.png', color: '#FFEE58', pricePerKg: 240 },
+            { name: 'Малинове компоте', image: '/img/constructor/fillings/raspberry.png', color: '#D81B60', pricePerKg: 270 },
+            { name: 'Манго-маракуя', image: '/img/constructor/fillings/mango_passion.png', color: '#FBC02D', pricePerKg: 350 },
+            { name: 'Полуничне кюлі', image: '/img/constructor/fillings/strawberry.png', color: '#E53935', pricePerKg: 260 },
+            { name: 'Солона карамель', image: '/img/constructor/fillings/salt_caramel.png', color: '#E65100', pricePerKg: 300 },
+            { name: 'Солона карамель з горіхами', image: '/img/constructor/fillings/salt_caramel_nuts.png', color: '#BF360C', pricePerKg: 400 },
+            { name: 'Хрусткий шар (Крустілант)', image: '/img/constructor/fillings/crustilant.png', color: '#5D4037', pricePerKg: 350 },
+            { name: 'Хрусткий шар із вафельними крихтами', image: '/img/constructor/fillings/royaltin.png', color: '#6D4C41', pricePerKg: 360 },
+            { name: 'Чорничне желе', image: '/img/constructor/fillings/blueberry.png', color: '#4527A0', pricePerKg: 280 },
+            { name: 'Шоколадна паста (Праліне)', image: '/img/constructor/fillings/praline.png', color: '#3E2723', pricePerKg: 380 }
         ]
     };
 
