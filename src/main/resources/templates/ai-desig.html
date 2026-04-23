@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Cake House - ШІ Дизайн</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Love+Light&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/globals.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+
+    <style>
+        .ai-section { padding: 50px 0; background-color: #fcfcfc; min-height: 80vh; }
+        .ai-container { max-width: 1000px; margin: 0 auto; padding: 0 40px; }
+        .ai-title { font-family: 'Cormorant Garamond', serif; font-size: 48px; color: #111; text-align: center; margin-bottom: 40px; }
+
+        .ai-grid { display: flex; gap: 40px; }
+        .ai-form { flex: 1; display: flex; flex-direction: column; gap: 20px; }
+
+        .ai-input { width: 100%; padding: 15px; border: 2px solid #C1ECE4; border-radius: 15px; font-family: 'Cormorant Garamond', serif; font-size: 20px; outline: none; transition: border-color 0.3s; background: white; }
+        .ai-input:focus { border-color: #3AA6B9; }
+        textarea.ai-input { resize: vertical; min-height: 150px; }
+
+        .ai-btn-group { display: flex; gap: 15px; margin-top: 10px; }
+        .btn-generate { flex: 2; background-color: #277B8A; color: white; border: none; padding: 15px; border-radius: 30px; font-family: 'Cormorant Garamond', serif; font-size: 22px; cursor: pointer; transition: background 0.3s; font-weight: bold; }
+        .btn-generate:hover { background-color: #1c5f6b; }
+        .btn-clear { flex: 1; background-color: white; border: 2px solid #277B8A; color: #277B8A; border-radius: 30px; padding: 15px; font-family: 'Cormorant Garamond', serif; font-size: 22px; cursor: pointer; transition: all 0.3s; }
+        .btn-clear:hover { background-color: #f0f8f9; }
+
+        .ai-result { flex: 1; border: 2px dashed #C1ECE4; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: white; overflow: hidden; min-height: 400px; padding: 20px; text-align: center; }
+        .ai-result img { width: 100%; height: auto; border-radius: 10px; display: none; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .placeholder-icon { font-size: 60px; margin-bottom: 15px; }
+        .placeholder-text { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: #666; }
+
+        .loader { display: none; border: 5px solid #f3f3f3; border-top: 5px solid #3AA6B9; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<header th:replace="~{header :: header}"></header>
+
+<section class="ai-section">
+    <div class="ai-container">
+        <h1 class="ai-title">ШІ-генератор дизайну</h1>
+
+        <div class="ai-grid">
+            <div class="ai-form">
+                <textarea id="ai-prompt" class="ai-input" placeholder="Опишіть бажаний дизайн (наприклад: триповерховий торт з золотими краплями та фігурками динозаврів)..."></textarea>
+
+                <select id="ai-occasion" class="ai-input">
+                    <option value="" disabled selected>Оберіть подію</option>
+                    <option value="Весілля">Весілля</option>
+                    <option value="День народження">День народження</option>
+                    <option value="Дитяче свято">Дитяче свято</option>
+                    <option value="Корпоратив">Корпоратив</option>
+                </select>
+
+                <select id="ai-colors" class="ai-input">
+                    <option value="" disabled selected>Кольорова гама</option>
+                    <option value="Пастельні відтінки">Пастельні відтінки</option>
+                    <option value="Яскраві кольори">Яскраві кольори</option>
+                    <option value="Чорно-білий">Чорно-білий стиль</option>
+                    <option value="Темний та елегантний">Темний та елегантний</option>
+                </select>
+
+                <div class="ai-btn-group">
+                    <button class="btn-clear" onclick="clearForm()">Очистити</button>
+                    <button class="btn-generate" onclick="generateDesign()">Згенерувати</button>
+                </div>
+            </div>
+
+            <div class="ai-result" id="result-box">
+                <div class="placeholder-icon" id="placeholder-icon">🎂</div>
+                <div class="placeholder-text" id="placeholder-text">Ваш дизайн з'явиться тут</div>
+
+                <div class="loader" id="loader"></div>
+                <img id="generated-img" src="" alt="Згенерований торт">
+
+                <a id="download-btn" href="#" download="cake-design.png" style="display: none; text-decoration: none;">
+                    <button class="btn-generate" style="width: 100%; font-size: 18px;">Завантажити дизайн</button>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function clearForm() {
+        document.getElementById('ai-prompt').value = '';
+        document.getElementById('ai-occasion').selectedIndex = 0;
+        document.getElementById('ai-colors').selectedIndex = 0;
+        resetResultBox();
+    }
+
+    function resetResultBox() {
+        document.getElementById('generated-img').style.display = 'none';
+        document.getElementById('download-btn').style.display = 'none';
+        document.getElementById('placeholder-icon').style.display = 'block';
+        document.getElementById('placeholder-text').style.display = 'block';
+        document.getElementById('placeholder-text').innerText = "Ваш дизайн з'явиться тут";
+        document.getElementById('loader').style.display = 'none';
+    }
+
+    async function generateDesign() {
+        const prompt = document.getElementById('ai-prompt').value;
+        const occasion = document.getElementById('ai-occasion').value;
+        const colors = document.getElementById('ai-colors').value;
+
+        if (!prompt) { alert("Будь ласка, опишіть дизайн!"); return; }
+
+        // Показуємо завантаження
+        document.getElementById('placeholder-icon').style.display = 'none';
+        document.getElementById('placeholder-text').innerText = "Штучний інтелект чаклує над дизайном... (це може зайняти до 15 секунд)";
+        document.getElementById('loader').style.display = 'block';
+        document.getElementById('generated-img').style.display = 'none';
+        document.getElementById('download-btn').style.display = 'none';
+
+        try {
+            const response = await fetch('/api/generate-design', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt, occasion, colors })
+            });
+
+            const data = await response.json();
+
+            if (data.imageUrl) {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('placeholder-text').style.display = 'none';
+
+                const img = document.getElementById('generated-img');
+                img.src = data.imageUrl;
+                img.style.display = 'block';
+
+                const dlBtn = document.getElementById('download-btn');
+                dlBtn.href = data.imageUrl;
+                dlBtn.style.display = 'block';
+            } else {
+                resetResultBox();
+                alert(data.error || "Сталася помилка.");
+            }
+        } catch (error) {
+            resetResultBox();
+            alert("Помилка з'єднання з сервером.");
+        }
+    }
+</script>
+
+</body>
+</html>

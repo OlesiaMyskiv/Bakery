@@ -816,7 +816,20 @@ body {
 
 .constructor-section { padding: 40px 0; background-color: #FFFFFF; min-height: 800px; }
 .constructor-container { max-width: 1300px; margin: 0 auto; display: flex; gap: 40px; padding: 0 40px; }
-.cake-visual-box { flex: 1; border: 2px solid #3AA6B9; border-radius: 20px; padding: 30px; display: flex; flex-direction: column; align-items: center; }
+
+/* Ліва частина */
+.cake-visual-box {
+    flex: 1;
+    border: 2px solid #3AA6B9;
+    border-radius: 20px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    /* ОСЬ ЦЕЙ РЯДОК РОБИТЬ РАМКУ РІВНО ПО РОЗМІРУ ТОРТА */
+    align-self: flex-start;
+}
 .box-title { font-family: 'Cormorant Garamond', serif; font-size: 42px; color: #111; margin-top: 0; margin-bottom: 40px; text-align: center; }
 
 /* Візуал торта */
