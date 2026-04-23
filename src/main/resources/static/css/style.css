@@ -692,3 +692,120 @@ body {
     font-size: 22px;
     color: #888;
 }
+
+/* ===============================
+   СТИЛІ ВЛАДКИ "НАЛАШТУВАННЯ"
+   =============================== */
+.settings-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.settings-form-row {
+    display: flex;
+    gap: 30px;
+}
+
+.settings-input-group {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    width: 100%;
+}
+
+.settings-input-group label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #333333;
+    margin-bottom: 8px;
+}
+
+.settings-input-group input {
+    padding: 12px 15px;
+    border: 1px solid #D9D9D9;
+    border-radius: 12px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    outline: none;
+    transition: border-color 0.3s;
+    background-color: #FDFDFD;
+}
+
+.settings-input-group input:focus {
+    border-color: #3AA6B9;
+}
+
+.save-settings-btn {
+    background-color: #3AA6B9;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 12px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    width: fit-content;
+    margin-top: 10px;
+}
+
+.save-settings-btn:hover { background-color: #2b8494; }
+
+/* Зона небезпеки (Видалення акаунту) */
+.settings-divider {
+    border: none;
+    border-top: 1px solid #EAEAEA;
+    margin: 40px 0;
+}
+
+.delete-account-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #fff0f0;
+    border: 1px solid #ffcccc;
+    padding: 25px;
+    border-radius: 15px;
+}
+
+.delete-btn {
+    background-color: #F44336;
+    color: white;
+    text-decoration: none;
+    padding: 12px 25px;
+    border-radius: 10px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    transition: background-color 0.3s;
+    white-space: nowrap;
+    margin-left: 20px;
+}
+
+.delete-btn:hover { background-color: #d32f2f; }
+
+/* Підказка "Змінити фото" при наведенні */
+.profile-avatar {
+    position: relative; /* Переконайся, що цей рядок є в класі .profile-avatar */
+}
+
+.profile-avatar::after {
+    content: "📸 Змінити";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    padding: 8px 0;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.profile-avatar:hover::after {
+    opacity: 1;
+}

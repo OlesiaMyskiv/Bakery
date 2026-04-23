@@ -88,3 +88,167 @@ html, body {
 .nav-list .icons img:hover {
     transform: scale(1.1);
 }
+
+/* СТИЛІ КОНСТРУКТОРА */
+.constructor-section {
+    padding: 40px 0;
+    background-color: #FFFFFF;
+    min-height: 800px;
+}
+
+.constructor-container {
+    max-width: 1300px;
+    margin: 0 auto;
+    display: flex;
+    gap: 40px;
+    padding: 0 40px;
+}
+
+/* Ліва частина (Візуал торта) */
+.cake-visual-box {
+    flex: 1;
+    border: 2px solid #3AA6B9;
+    border-radius: 20px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.box-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 42px;
+    color: #111;
+    margin-top: 0;
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+/* Шари торта */
+.cake-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 5px; /* Відстань між шарами */
+    width: 100%;
+    max-width: 400px;
+}
+
+.cake-layer-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.arrow-btn {
+    background: none;
+    border: none;
+    font-size: 30px;
+    cursor: pointer;
+    color: #666;
+    transition: color 0.2s;
+    padding: 0 15px;
+}
+
+.arrow-btn:hover { color: #3AA6B9; }
+
+.layer-image-container {
+    flex-grow: 1;
+    height: 60px; /* ТИМЧАСОВА ВИСОТА ДЛЯ КОЛЬОРОВИХ БЛОКІВ */
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* Коли підключиш свої фото, зміниш img стиль */
+.layer-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Права частина (Опис + Вартість) */
+.cake-details-box {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.info-card {
+    border: 2px solid #3AA6B9;
+    border-radius: 20px;
+    padding: 30px;
+    background-color: #fff;
+}
+
+.description-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    color: #111;
+    line-height: 1.6;
+}
+
+.add-layer-btn {
+    background: none;
+    border: none;
+    color: #666;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    cursor: pointer;
+    margin-top: 30px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.add-layer-btn:hover { color: #3AA6B9; }
+
+/* Блок вартості */
+.calc-row {
+    display: flex;
+    align-items: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    color: #111;
+    margin-bottom: 15px;
+}
+
+.highlight-badge {
+    background-color: #C1ECE4;
+    padding: 5px 20px;
+    border-radius: 20px;
+    margin-left: 15px;
+    font-weight: 700;
+}
+
+.guests-input {
+    width: 70px;
+    text-align: center;
+    font-size: 26px;
+    font-family: 'Cormorant Garamond', serif;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-weight: 700;
+}
+
+.add-to-cart-btn {
+    background-color: #277B8A;
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    border-radius: 30px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    cursor: pointer;
+    float: right;
+    margin-top: 10px;
+    transition: background 0.3s;
+}
+
+.add-to-cart-btn:hover { background-color: #1c5f6b; }

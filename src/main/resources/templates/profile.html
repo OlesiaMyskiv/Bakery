@@ -10,22 +10,16 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
-
     <style>
         .cropper-view-box, .cropper-face { border-radius: 50%; }
         .cropper-point, .cropper-line { display: none; }
-        .modal-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.8); z-index: 1000; justify-content: center; align-items: center;
-        }
-        .modal-content {
-            background-color: #3AA6B9; padding: 30px; border-radius: 20px; width: 90%; max-width: 450px;
-            text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-family: 'Cormorant Garamond', serif;
-        }
-        .cropper-img-container {
-            width: 100%; height: 350px; background-color: #D9D9D9; border-radius: 15px; overflow: hidden;
-            margin-bottom: 20px; border: 2px solid white;
-        }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background-color: #3AA6B9; padding: 30px; border-radius: 20px; width: 90%; max-width: 450px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-family: 'Cormorant Garamond', serif; }
+        .cropper-img-container { width: 100%; height: 350px; background-color: #D9D9D9; border-radius: 15px; overflow: hidden; margin-bottom: 20px; border: 2px solid white; }
+
+        /* СТИЛЬ ДЛЯ ПРИХОВУВАННЯ ВЕЛИКИХ БЛОКІВ (ВКЛАДОК) */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
     </style>
 </head>
 <body>
@@ -34,50 +28,35 @@
 
 <section class="profile-header-section">
     <div class="profile-container">
-
         <div class="profile-avatar-box">
             <label for="imageInput" class="profile-avatar" style="cursor: pointer;" title="Змінити фото">
                 <img id="avatarPreview" th:if="${session.loggedInUser.profilePicturePath != null}" th:src="${session.loggedInUser.profilePicturePath}" alt="Аватар">
                 <svg th:unless="${session.loggedInUser.profilePicturePath != null}" class="camera-svg" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="8" width="18" height="12" rx="2" ry="2"></rect>
-                    <path d="M16 8v-2a2 2 0 0 0-2-2H10a2 2 0 0 0-2 2v2"></path>
-                    <circle cx="12" cy="14" r="3"></circle>
+                    <rect x="3" y="8" width="18" height="12" rx="2" ry="2"></rect><path d="M16 8v-2a2 2 0 0 0-2-2H10a2 2 0 0 0-2 2v2"></path><circle cx="12" cy="14" r="3"></circle>
                 </svg>
             </label>
             <form id="quickPhotoForm" th:action="@{/edit-profile}" method="post" enctype="multipart/form-data" style="display: none;">
                 <input type="hidden" name="username" th:value="${session.loggedInUser.username}">
                 <input type="hidden" name="email" th:value="${session.loggedInUser.email}">
+                <input type="hidden" name="phone" th:value="${session.loggedInUser.phone}">
                 <input type="file" id="imageInput" name="profilePicture" accept="image/*">
             </form>
         </div>
 
-        <div id="profile-view-mode" class="profile-info-box">
+        <div class="profile-info-box">
             <h1 class="profile-name" th:text="${session.loggedInUser.username}">Прізвище Ім'я</h1>
-
             <div class="profile-detail"><span>E-mail: <span th:text="${session.loggedInUser.email}"></span></span></div>
             <div class="profile-detail"><span>Телефон: <span th:text="${session.loggedInUser.phone}"></span></span></div>
-            <div class="profile-detail">
-                <span>Дата народження: <span th:text="${session.loggedInUser.birthDate != null ? session.loggedInUser.birthDate : '--.--.----'}"></span></span>
-            </div>
+            <div class="profile-detail"><span>Дата народження: <span th:text="${session.loggedInUser.birthDate != null ? session.loggedInUser.birthDate : '--.--.----'}"></span></span></div>
 
             <div class="profile-detail profile-status">
                 <span>Статус: </span>
-                <span th:if="${session.loggedInUser.role != null and session.loggedInUser.role.name() == 'CLIENT'}" style="display: flex; align-items: center; gap: 8px;">
-                    <span class="status-dot approved"></span> Звичайний клієнт
-                </span>
-                <span th:if="${session.loggedInUser.role != null and session.loggedInUser.role.name() != 'CLIENT' and session.loggedInUser.verificationStatus != null and session.loggedInUser.verificationStatus.name() == 'PENDING'}" style="display: flex; align-items: center; gap: 8px;">
-                    <span class="status-dot pending"></span> Документи обробляються...
-                </span>
-                <span th:if="${session.loggedInUser.role != null and session.loggedInUser.role.name() != 'CLIENT' and session.loggedInUser.verificationStatus != null and session.loggedInUser.verificationStatus.name() == 'APPROVED'}" style="display: flex; align-items: center; gap: 8px;">
-                    <span class="status-dot approved"></span>
-                    <span th:text="'Верифіковано ' + ${session.loggedInUser.role.name()}"></span>
-                </span>
-                <span th:if="${session.loggedInUser.role != null and session.loggedInUser.role.name() != 'CLIENT' and session.loggedInUser.verificationStatus != null and session.loggedInUser.verificationStatus.name() == 'REJECTED'}" style="display: flex; align-items: center; gap: 8px;">
-                    <span class="status-dot" style="background-color: #F44336;"></span> Відхилено (Оновіть документи)
-                </span>
+                <span th:if="${session.loggedInUser.role.name() == 'CLIENT'}" style="display: flex; align-items: center; gap: 8px;"><span class="status-dot approved"></span> Звичайний клієнт</span>
+                <span th:if="${session.loggedInUser.role.name() != 'CLIENT' and session.loggedInUser.verificationStatus.name() == 'PENDING'}" style="display: flex; align-items: center; gap: 8px;"><span class="status-dot pending"></span> Документи обробляються...</span>
+                <span th:if="${session.loggedInUser.role.name() != 'CLIENT' and session.loggedInUser.verificationStatus.name() == 'APPROVED'}" style="display: flex; align-items: center; gap: 8px;"><span class="status-dot approved"></span> <span th:text="'Верифіковано ' + ${session.loggedInUser.role.name()}"></span></span>
+                <span th:if="${session.loggedInUser.role.name() != 'CLIENT' and session.loggedInUser.verificationStatus.name() == 'REJECTED'}" style="display: flex; align-items: center; gap: 8px;"><span class="status-dot" style="background-color: #F44336;"></span> Відхилено (Оновіть документи)</span>
             </div>
         </div>
-
     </div>
 </section>
 
@@ -86,24 +65,75 @@
 
         <aside class="profile-sidebar">
             <ul class="profile-menu">
-                <li><a th:href="@{/profile}" class="active">Активні замовлення</a></li>
-                <li><a href="#">Історія замовлень</a></li>
-                <li><a href="#">Список бажань</a></li>
-                <li><a href="#">Мої відгуки</a></li>
-                <li><a href="#">Мої бонуси</a></li>
-                <li><a href="#">Налаштування безпеки</a></li>
+                <li><a href="#" onclick="switchTab(event, 'orders')" class="tab-link active" id="link-orders">Активні замовлення</a></li>
+                <li><a href="#" onclick="switchTab(event, 'history')" class="tab-link" id="link-history">Історія замовлень</a></li>
+                <li><a href="#" onclick="switchTab(event, 'wishlist')" class="tab-link" id="link-wishlist">Список бажань</a></li>
+                <li><a href="#" onclick="switchTab(event, 'reviews')" class="tab-link" id="link-reviews">Мої відгуки</a></li>
+                <li><a href="#" onclick="switchTab(event, 'bonuses')" class="tab-link" id="link-bonuses">Мої бонуси</a></li>
+                <li><a href="#" onclick="switchTab(event, 'settings')" class="tab-link" id="link-settings">Налаштування безпеки</a></li>
                 <li><a th:href="@{/logout}" class="logout-link">Вихід</a></li>
             </ul>
         </aside>
 
         <main class="profile-content">
-            <h2 class="content-title">Активні замовлення</h2>
 
-            <div class="empty-state">
-                <p>У вас поки немає активних замовлень.</p>
+            <div id="orders" class="tab-content active">
+                <h2 class="content-title">Активні замовлення</h2>
+                <div class="empty-state">
+                    <p>У вас поки немає активних замовлень.</p>
+                </div>
             </div>
-        </main>
 
+            <div id="history" class="tab-content">
+                <h2 class="content-title">Історія замовлень</h2>
+                <div class="empty-state"><p>Історія порожня.</p></div>
+            </div>
+
+            <div id="wishlist" class="tab-content">
+                <h2 class="content-title">Список бажань</h2>
+                <div class="empty-state"><p>Ваш список бажань порожній.</p></div>
+            </div>
+
+            <div id="reviews" class="tab-content">
+                <h2 class="content-title">Мої відгуки</h2>
+                <div class="empty-state"><p>Ви ще не залишали відгуків.</p></div>
+            </div>
+
+            <div id="bonuses" class="tab-content">
+                <h2 class="content-title">Мої бонуси</h2>
+                <div class="empty-state"><p>У вас 0 бонусів.</p></div>
+            </div>
+
+            <div id="settings" class="tab-content">
+                <h2 class="content-title">Налаштування безпеки</h2>
+                <form th:action="@{/edit-profile}" method="post" class="settings-form">
+                    <div class="settings-form-row">
+                        <div class="settings-input-group"><label>Ім'я та Прізвище</label><input type="text" name="username" th:value="${session.loggedInUser.username}" required></div>
+                        <div class="settings-input-group"><label>Номер телефону</label><input type="text" name="phone" th:value="${session.loggedInUser.phone}" required></div>
+                    </div>
+                    <div class="settings-form-row">
+                        <div class="settings-input-group"><label>Електронна пошта</label><input type="email" name="email" th:value="${session.loggedInUser.email}" required></div>
+                        <div class="settings-input-group"><label>Дата народження</label><input type="date" name="birthDate" th:value="${session.loggedInUser.birthDate}"></div>
+                    </div>
+                    <div class="settings-input-group" style="margin-top: 20px;">
+                        <label>Зміна пароля <span style="color: #888; font-size: 16px;">(залиште пустим, якщо не змінюєте)</span></label>
+                        <input type="password" name="password" placeholder="Введіть новий пароль">
+                    </div>
+                    <button type="submit" class="save-settings-btn">Зберегти зміни</button>
+                </form>
+
+                <hr class="settings-divider">
+
+                <div class="delete-account-box">
+                    <div>
+                        <h3 style="color: #F44336; margin: 0 0 5px 0; font-size: 26px; font-family: 'Cormorant Garamond', serif;">Видалити акаунт</h3>
+                        <p style="color: #666; margin: 0; font-size: 18px; font-family: 'Cormorant Garamond', serif;">Увага! Цю дію неможливо скасувати.</p>
+                    </div>
+                    <a th:href="@{/delete-account}" class="delete-btn" onclick="return confirm('Ви впевнені?');">Видалити назавжди</a>
+                </div>
+            </div>
+
+        </main>
     </div>
 </section>
 
@@ -111,27 +141,43 @@
     <div class="modal-content">
         <h2 style="color: white; margin-bottom: 5px; font-size: 32px;">Ідеальне фото</h2>
         <p style="color: #FF9EAA; font-size: 18px; margin-bottom: 15px;">Потягніть фото та покрутіть коліщатко</p>
-
-        <div class="cropper-img-container">
-            <img id="imageToCrop" src="" style="max-width: 100%; display: block;">
-        </div>
-
+        <div class="cropper-img-container"><img id="imageToCrop" src="" style="max-width: 100%; display: block;"></div>
         <div style="display: flex; gap: 15px; justify-content: center;">
             <button type="button" id="cropApplyBtn" class="save-btn" style="font-size: 20px;">Застосувати</button>
-            <button type="button" id="cropCancelBtn" class="cancel-btn" style="font-size: 20px;">Скасувати</button>
+            <button type="button" id="cropCancelBtn" class="cancel-btn" style="font-size: 20px; background-color: #D9D9D9; color: black;">Скасувати</button>
         </div>
     </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script>
-    // --- Оновлена логіка: фото змінюється по кліку на саму аватарку ---
+    // --- 1. МАГІЯ ВКЛАДОК (TABS) ---
+    function switchTab(event, tabId) {
+        event.preventDefault(); // Зупиняємо стрибок сторінки вгору
+
+        // Ховаємо весь контент
+        let contents = document.getElementsByClassName('tab-content');
+        for (let i = 0; i < contents.length; i++) {
+            contents[i].classList.remove('active');
+        }
+
+        // Знімаємо виділення з усіх кнопок в меню
+        let links = document.getElementsByClassName('tab-link');
+        for (let i = 0; i < links.length; i++) {
+            links[i].classList.remove('active');
+        }
+
+        // Показуємо потрібну вкладку і виділяємо потрібну кнопку
+        document.getElementById(tabId).classList.add('active');
+        document.getElementById('link-' + tabId).classList.add('active');
+    }
+
+    // --- 2. МАГІЯ ОБРІЗКИ ФОТО ---
     let cropper = null;
     const imageInput = document.getElementById('imageInput');
     const cropperModal = document.getElementById('cropperModal');
     const imageToCrop = document.getElementById('imageToCrop');
     const quickPhotoForm = document.getElementById('quickPhotoForm');
-
     const cropApplyBtn = document.getElementById('cropApplyBtn');
     const cropCancelBtn = document.getElementById('cropCancelBtn');
 
@@ -141,18 +187,8 @@
             const url = URL.createObjectURL(files[0]);
             imageToCrop.src = url;
             cropperModal.style.display = 'flex';
-
-            if (cropper) { cropper.destroy(); }
-
-            cropper = new Cropper(imageToCrop, {
-                aspectRatio: 1,
-                viewMode: 1,
-                dragMode: 'move',
-                autoCropArea: 1,
-                cropBoxMovable: false,
-                cropBoxResizable: false,
-                background: false
-            });
+            if (cropper) cropper.destroy();
+            cropper = new Cropper(imageToCrop, { aspectRatio: 1, viewMode: 1, dragMode: 'move', autoCropArea: 1, cropBoxMovable: false, cropBoxResizable: false, background: false });
         }
     });
 
@@ -160,26 +196,16 @@
         if (cropper) {
             cropper.getCroppedCanvas({ width: 500, height: 500 }).toBlob(function(blob) {
                 let file = new File([blob], "avatar.jpg", { type: "image/jpeg", lastModified: new Date().getTime() });
-                let container = new DataTransfer();
-                container.items.add(file);
+                let container = new DataTransfer(); container.items.add(file);
                 imageInput.files = container.files;
-
                 closeModal();
-                // Автоматично відправляємо форму після обрізки!
-                quickPhotoForm.submit();
+                quickPhotoForm.submit(); // Відправляємо на сервер!
             }, 'image/jpeg', 0.9);
         }
     });
 
-    cropCancelBtn.addEventListener('click', function() {
-        imageInput.value = '';
-        closeModal();
-    });
-
-    function closeModal() {
-        cropperModal.style.display = 'none';
-        if (cropper) { cropper.destroy(); cropper = null; }
-    }
+    cropCancelBtn.addEventListener('click', function() { imageInput.value = ''; closeModal(); });
+    function closeModal() { cropperModal.style.display = 'none'; if (cropper) { cropper.destroy(); cropper = null; } }
 </script>
 
 </body>

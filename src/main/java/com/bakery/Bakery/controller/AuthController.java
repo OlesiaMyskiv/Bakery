@@ -145,6 +145,7 @@ public class AuthController {
     public String editProfile(
             @RequestParam("username") String username,
             @RequestParam("email") String email,
+            @RequestParam("phone") String phone,
             @RequestParam(value = "password", required = false) String password,
             @RequestParam(value = "birthDate", required = false) String birthDateStr,
             @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture,
@@ -161,6 +162,7 @@ public class AuthController {
         // Оновлюємо текст
         dbUser.setUsername(username);
         dbUser.setEmail(email);
+        dbUser.setPhone(phone);
 
         // Оновлюємо пароль (тільки якщо ввели новий)
         if (password != null && !password.isEmpty()) {
@@ -212,5 +214,23 @@ public class AuthController {
             }
         }
         return "redirect:/profile";
+    }
+    // ==========================================
+    // 6. МЕТОД ВИДАЛЕННЯ АКАУНТУ
+    // ==========================================
+    @GetMapping("/delete-account")
+    public String deleteAccount(jakarta.servlet.http.HttpSession session) {
+        // Дістаємо користувача з сесії
+        User sessionUser = (User) session.getAttribute("loggedInUser");
+
+        if (sessionUser != null) {
+            // Видаляємо його з бази даних назавжди!
+            userRepository.deleteById(sessionUser.getId());
+            // Очищаємо сесію (робимо вихід)
+            session.invalidate();
+        }
+
+        // Перекидаємо на головну сторінку сайту
+        return "redirect:/";
     }
 }

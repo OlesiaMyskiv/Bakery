@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Cake House - Конструктор</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Love+Light&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/globals.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<header th:replace="~{header :: header}"></header>
+
+<section class="constructor-section">
+    <div class="constructor-container">
+
+        <div class="cake-visual-box">
+            <h2 class="box-title">Конструктор торта</h2>
+
+            <div class="cake-stack" id="cake-visual-stack">
+            </div>
+        </div>
+
+        <div class="cake-details-box">
+
+            <div class="info-card">
+                <h2 class="box-title">Опис</h2>
+                <ul class="description-list" id="description-list">
+                </ul>
+
+                <button class="add-layer-btn"><span>+</span> Додати шар</button>
+            </div>
+
+            <div class="info-card">
+                <h2 class="box-title">Вартість</h2>
+
+                <div class="calc-row">
+                    Введіть кількість гостей:
+                    <div class="highlight-badge">
+                        <input type="number" id="guests-count" class="guests-input" value="5" min="1" max="100" onchange="calculatePrice()">
+                    </div>
+                    <span style="margin-left: 10px;">осіб</span>
+                </div>
+
+                <div class="calc-row">
+                    Рекомендована вага: <span class="highlight-badge" id="recommended-weight">1.25 кг</span>
+                </div>
+
+                <div class="calc-row">
+                    Загальна сума: <span class="highlight-badge" id="total-price">1 000 грн</span>
+                </div>
+
+                <button class="add-to-cart-btn">Додати в кошик</button>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<script>
+    // 1. БАЗА ДАНИХ ІНГРЕДІЄНТІВ
+    // Коли в тебе будуть справжні картинки, заміни слово "color" на "image: '/img/constructor/твоя_картинка.png'"
+    const ingredients = {
+        sponge: [
+            { name: 'Брауні', color: '#4A2511', pricePerKg: 300 },
+            { name: 'Ванільний', color: '#FFF3E0', pricePerKg: 250 },
+            { name: 'Червоний оксамит', color: '#8B0000', pricePerKg: 320 }
+        ],
+        cream: [
+            { name: 'Ванільний', color: '#FFFFF0', pricePerKg: 200 },
+            { name: 'Шоколадний', color: '#3E2723', pricePerKg: 250 },
+            { name: 'Фісташковий', color: '#AED581', pricePerKg: 400 }
+        ],
+        filling: [
+            { name: 'Солона карамель з горіхами', color: '#D84315', pricePerKg: 350 },
+            { name: 'Вишневе конфі', color: '#C2185B', pricePerKg: 280 },
+            { name: 'Манго-маракуя', color: '#FBC02D', pricePerKg: 450 }
+        ]
+    };
+
+    // 2. ПОТОЧНИЙ СТАН ТОРТА (зверху вниз)
+    let currentCake = [
+        { type: 'sponge', title: 'Бісквіт', selectedIndex: 0 },
+        { type: 'cream', title: 'Крем', selectedIndex: 0 },
+        { type: 'filling', title: 'Начинка', selectedIndex: 0 },
+        { type: 'sponge', title: 'Бісквіт', selectedIndex: 0 }
+    ];
+
+    // 3. ФУНКЦІЯ МАЛЮВАННЯ ТОРТА ТА ОПИСУ
+    function renderConstructor() {
+        const visualStack = document.getElementById('cake-visual-stack');
+        const descList = document.getElementById('description-list');
+
+        visualStack.innerHTML = '';
+        descList.innerHTML = '';
+
+        currentCake.forEach((layer, index) => {
+            const options = ingredients[layer.type];
+            const selectedItem = options[layer.selectedIndex];
+
+            // --- Малюємо візуал зліва ---
+            // Якщо є картинка, виводимо <img src="${selectedItem.image}">, інакше просто заливаємо кольором (background-color)
+            const visualHTML = `
+                <div class="cake-layer-row">
+                    <button class="arrow-btn" onclick="changeLayer(${index}, -1)">&#8592;</button>
+                    <div class="layer-image-container" style="background-color: ${selectedItem.color};">
+                        </div>
+                    <button class="arrow-btn" onclick="changeLayer(${index}, 1)">&#8594;</button>
+                </div>
+            `;
+            visualStack.insertAdjacentHTML('beforeend', visualHTML);
+
+            // --- Малюємо текст справа ---
+            const descHTML = `<li><span style="color: #ccc; font-size: 20px;">&#8862;</span> ${index + 1} ${layer.title}: <strong>${selectedItem.name}</strong></li>`;
+            descList.insertAdjacentHTML('beforeend', descHTML);
+        });
+
+        calculatePrice(); // Оновлюємо ціну щоразу, коли міняється склад
+    }
+
+    // 4. ФУНКЦІЯ ПЕРЕМИКАННЯ СТРІЛОЧКАМИ
+    function changeLayer(layerIndex, direction) {
+        const layer = currentCake[layerIndex];
+        const optionsLength = ingredients[layer.type].length;
+
+        layer.selectedIndex += direction;
+
+        // Щоб горталося по колу
+        if (layer.selectedIndex < 0) layer.selectedIndex = optionsLength - 1;
+        if (layer.selectedIndex >= optionsLength) layer.selectedIndex = 0;
+
+        renderConstructor();
+    }
+
+    // 5. ФУНКЦІЯ КАЛЬКУЛЯТОРА ВАРТОСТІ
+    function calculatePrice() {
+        const guests = parseInt(document.getElementById('guests-count').value) || 1;
+
+        // Рахуємо вагу (250 грам на людину)
+        const weightKg = (guests * 0.25).toFixed(2);
+        document.getElementById('recommended-weight').innerText = weightKg + ' кг';
+
+        // Рахуємо середню ціну за 1 кг на основі вибраних інгредієнтів
+        let totalBasePrice = 0;
+        currentCake.forEach(layer => {
+            const selectedItem = ingredients[layer.type][layer.selectedIndex];
+            totalBasePrice += selectedItem.pricePerKg;
+        });
+        const averagePricePerKg = totalBasePrice / currentCake.length;
+
+        // Фінальна ціна
+        const finalPrice = Math.round(averagePricePerKg * weightKg);
+        document.getElementById('total-price').innerText = finalPrice.toLocaleString('uk-UA') + ' грн';
+    }
+
+    // Запускаємо при завантаженні сторінки
+    renderConstructor();
+</script>
+
+</body>
+</html>

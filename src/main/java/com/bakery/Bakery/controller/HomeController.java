@@ -28,10 +28,14 @@ public class HomeController {
 
     @GetMapping("/profile")
     public String profilePage(jakarta.servlet.http.HttpSession session) {
-        // Якщо користувач не увійшов, відправляємо його на сторінку логіну
-        if (session.getAttribute("loggedInUser") == null) {
-            return "redirect:/login";
-        }
-        return "profile";
+        if (session.getAttribute("loggedInUser") == null) return "redirect:/login";
+        return "profile"; // Відкриває сторінку "Активні замовлення"
     }
+
+    @GetMapping("/constructor")
+    public String constructorPage() {
+        return "constructor";
+    }
+
+
 }
