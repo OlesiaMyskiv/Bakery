@@ -1,30 +1,31 @@
 package com.bakery.Bakery.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 @Service
 public class AiImageService {
+    @Value("${google.gemini.api.key}")
+    private String apiKey;
 
-    public String generateCakeDesign(String userPrompt) {
-        try {
-            // Формуємо магічний запит для ШІ
-            String finalPrompt = "Professional studio photography of a realistic beautiful cake. Perfect lighting, bakery aesthetic. Details: " + userPrompt;
+    private final WebClient webClient;
 
-            // ШІ краще розуміє URL, коли там немає пробілів (кодуємо текст)
-            String encodedPrompt = URLEncoder.encode(finalPrompt, StandardCharsets.UTF_8.toString());
-
-            // Використовуємо БЕЗКОШТОВНИЙ сервіс Pollinations.ai (без API-ключів!)
-            // Параметр nologo=true прибирає водяні знаки
-            String imageUrl = "https://image.pollinations.ai/prompt/" + encodedPrompt + "?width=1024&height=1024&nologo=true";
-
-            // Сервіс генерує картинку "на льоту" за цим посиланням
-            return imageUrl;
-
-        } catch (Exception e) {
-            System.err.println("Помилка генерації зображення: " + e.getMessage());
-            return null;
-        }
+    public AiImageService(WebClient.Builder webClientBuilder) {
+        this.webClient = webClientBuilder.baseUrl("https://generativelanguage.googleapis.com/v1beta").build();
     }
+
+    public String generateCakeImage(String prompt) {
+        // Логіка запиту до моделі imagen-3
+        // 1. Формуємо JSON з промптом
+        // 2. Відправляємо POST запит з вашим API ключем
+        // 3. Отримуємо байтовий масив картинки
+        // 4. Повертаємо посилання або Base64 рядок для HTML
+        return "посилання_на_зображення";
+    }
+
+    
 }

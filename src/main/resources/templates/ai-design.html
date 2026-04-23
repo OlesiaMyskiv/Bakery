@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Cake Designer - Bakery</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Love+Light&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/css/globals.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<header th:replace="~{header :: header}"></header>
+
+<main class="ai-page-wrapper">
+    <h1 class="ai-title">ШІ-дизайнер тортів</h1>
+
+    <section class="designer-section">
+
+        <div class="prompt-side">
+            <h3>Опишіть ваш ідеальний торт</h3>
+            <p>Або оберіть швидкі підказки нижче:</p>
+
+            <div class="suggestions-container">
+                <span class="suggestion-tag" onclick="addTextToPrompt('Весільний торт')">💍 Весільний</span>
+                <span class="suggestion-tag" onclick="addTextToPrompt('З днем народження')">🎉 З днем народження</span>
+                <span class="suggestion-tag" onclick="addTextToPrompt('Мінімалізм')">🤍 Мінімалізм</span>
+                <span class="suggestion-tag" onclick="addTextToPrompt('Для хлопчика')">👦 Для хлопчика</span>
+                <span class="suggestion-tag" onclick="addTextToPrompt('Для дівчинки')">👧 Для дівчинки</span>
+                <span class="suggestion-tag" onclick="addTextToPrompt('Космічний стиль')">🌌 Космічний</span>
+                <span class="suggestion-tag" onclick="addTextToPrompt('Багато ягід')">🍓 З ягодами</span>
+            </div>
+
+            <form th:action="@{/ai-design/generate}" method="post" style="display: flex; flex-direction: column; flex-grow: 1;">
+                <textarea
+                        id="cake-prompt-input"
+                        name="prompt"
+                        class="prompt-textarea"
+                        placeholder="Наприклад: Триярусний торт у стилі 'Аліса в країні чудес'..."
+                        required></textarea>
+
+                <button type="submit" class="btn-generate">
+                    ✨ Згенерувати результат
+                </button>
+            </form>
+        </div>
+
+        <div class="result-side">
+            <div th:if="${generatedImageUrl == null}" class="result-placeholder">
+                <div style="font-size: 50px;">🎂</div>
+                <p>Тут з'явиться ваш дизайн після генерації</p>
+            </div>
+
+            <img th:if="${generatedImageUrl != null}"
+                 th:src="${generatedImageUrl}"
+                 alt="Ваш торт"
+                 class="generated-image">
+        </div>
+
+    </section>
+
+    <section class="how-it-works-bar">
+        <div class="work-step">
+            <h4>01. Опис</h4>
+            <p>Ви вводите текст, описуючи кольори, форму та тематику вашого свята.</p>
+        </div>
+        <div class="work-step">
+            <h4>02. Магія ШІ</h4>
+            <p>Нейромережа створює фотореалістичний концепт торта за 10-20 секунд.</p>
+        </div>
+        <div class="work-step">
+            <h4>03. Замовлення</h4>
+            <p>Ви можете зберегти фото та обговорити його з нашим кондитером для реалізації.</p>
+        </div>
+    </section>
+</main>
+
+<script>
+    function addTextToPrompt(text) {
+        // Знаходимо наше текстове поле за ID
+        const textarea = document.getElementById('cake-prompt-input');
+
+        // Перевіряємо, чи є вже якийсь текст. Якщо є, додаємо кому перед новим словом
+        let currentValue = textarea.value.trim();
+
+        if (currentValue.length > 0) {
+            // Якщо текст не закінчується на кому, додаємо її
+            if (!currentValue.endsWith(',')) {
+                textarea.value = currentValue + ', ' + text;
+            } else {
+                textarea.value = currentValue + ' ' + text;
+            }
+        } else {
+            // Якщо поле порожнє, просто вставляємо текст
+            textarea.value = text;
+        }
+
+        // Повертаємо курсор у текстове поле, щоб користувач міг одразу продовжити писати
+        textarea.focus();
+    }
+</script>
+
+</body>
+</html>

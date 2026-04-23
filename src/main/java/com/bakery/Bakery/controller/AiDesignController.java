@@ -1,44 +1,37 @@
 package com.bakery.Bakery.controller;
 
-import com.bakery.Bakery.service.AiImageService;
-import org.springframework.beans.factory.annotation.Autowired;
+// 1. ВИПРАВЛЕНО: Правильний імпорт
+import org.springframework.ui.Model;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.HashMap;
-import java.util.Map;
+// Імпортуємо наш сервіс (переконайтеся, що шлях правильний)
+import com.bakery.Bakery.service.AiImageService;
 
 @Controller
 public class AiDesignController {
 
-    @Autowired
-    private AiImageService aiImageService;
+    // 2. ВИПРАВЛЕНО: Додаємо сервіс у контролер
+    private final AiImageService aiImageService;
 
-    // Відкриває саму сторінку
-    @GetMapping("/ai-design")
-    public String getAiDesignPage() {
-        return "ai-design"; // HTML шаблон
+    // Spring автоматично "інжектить" (підставить) цей сервіс сюди
+    public AiDesignController(AiImageService aiImageService) {
+        this.aiImageService = aiImageService;
     }
 
-    // Приймає дані з форми і повертає картинку
-    @PostMapping("/api/generate-design")
-    @ResponseBody
-    public Map<String, String> generateDesignEndpoint(@RequestBody Map<String, String> payload) {
-        String prompt = payload.get("prompt");
-        String occasion = payload.get("occasion");
-        String colors = payload.get("colors");
+    @GetMapping("/ai-design")
+    public String showAiDesignPage() {
+        return "ai-desig"; // назва вашого HTML файлу (у вас він названий ai-desig)
+    }
 
-        // Об'єднуємо всі побажання клієнта в один запит
-        String fullPrompt = String.format("Подія: %s. Кольорова гама: %s. Опис від клієнта: %s", occasion, colors, prompt);
-
-        String imageUrl = aiImageService.generateCakeDesign(fullPrompt);
-
-        Map<String, String> response = new HashMap<>();
-        if (imageUrl != null) {
-            response.put("imageUrl", imageUrl);
-        } else {
-            response.put("error", "Сталася помилка при генерації. Перевірте API-ключ.");
-        }
-        return response;
+    @PostMapping("/ai-design/generate")
+    public String generate(@RequestParam("prompt") String prompt, Model model) {
+        // Тепер aiImageService працює!
+        String imageUrl = aiImageService.generateCakeImage(prompt);
+        model.addAttribute("generatedImageUrl", imageUrl);
+        model.addAttribute("userPrompt", prompt);
+        return "ai-desig";
     }
 }
