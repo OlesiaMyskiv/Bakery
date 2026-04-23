@@ -8,6 +8,73 @@
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Love+Light&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/globals.css}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+
+    <style>
+        .constructor-section { padding: 40px 0; background-color: #FFFFFF; min-height: 800px; }
+        .constructor-container { max-width: 1300px; margin: 0 auto; display: flex; gap: 40px; padding: 0 40px; }
+        .cake-visual-box { flex: 1; border: 2px solid #3AA6B9; border-radius: 20px; padding: 30px; display: flex; flex-direction: column; align-items: center; }
+        .box-title { font-family: 'Cormorant Garamond', serif; font-size: 42px; color: #111; margin-top: 0; margin-bottom: 40px; text-align: center; }
+
+        /* БЕТОННІ ПРАВИЛА ДЛЯ ТОРТА */
+        #cake-visual-stack {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 0px !important; /* НУЛЬ ПРОБІЛІВ */
+            width: 100% !important;
+            max-width: 550px !important;
+        }
+
+        .draggable-layer {
+            display: flex !important;
+            align-items: center !important;
+            gap: 15px !important;
+            padding: 0px !important;
+            margin: 0px !important;
+            border: none !important;
+            background-color: transparent;
+            cursor: grab;
+        }
+
+        .cake-layer-row {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            flex-grow: 1 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        .layer-image-container {
+            flex-grow: 1 !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            background: transparent !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border: none !important; /* ВБИВАЄМО РАМКИ */
+            line-height: 0 !important;
+        }
+
+        .arrow-btn { background: none; border: none; font-size: 30px; cursor: pointer; color: #666; transition: color 0.2s; padding: 0 15px; }
+        .arrow-btn:hover { color: #3AA6B9; }
+
+        /* Права частина залишається без змін */
+        .cake-details-box { flex: 1; display: flex; flex-direction: column; gap: 20px; }
+        .info-card { border: 2px solid #3AA6B9; border-radius: 20px; padding: 30px; background-color: #fff; }
+        .description-list { list-style: none; padding: 0; margin: 0; font-family: 'Cormorant Garamond', serif; font-size: 26px; color: #111; line-height: 1.6; display: flex; flex-direction: column; gap: 10px; }
+        .add-layer-btn { background: none; border: none; color: #666; font-family: 'Cormorant Garamond', serif; font-size: 22px; cursor: pointer; margin-top: 30px; display: flex; align-items: center; gap: 10px; }
+        .add-layer-btn:hover { color: #3AA6B9; }
+        .calc-row { display: flex; align-items: center; font-family: 'Cormorant Garamond', serif; font-size: 28px; color: #111; margin-bottom: 15px; }
+        .highlight-badge { background-color: #C1ECE4; padding: 5px 20px; border-radius: 20px; margin-left: 15px; font-weight: 700; }
+        .guests-input { width: 70px; text-align: center; font-size: 26px; font-family: 'Cormorant Garamond', serif; border: none; background: transparent; outline: none; font-weight: 700; }
+        .add-to-cart-btn { background-color: #277B8A; color: white; border: none; padding: 15px 40px; border-radius: 30px; font-family: 'Cormorant Garamond', serif; font-size: 24px; cursor: pointer; float: right; margin-top: 10px; transition: background 0.3s; }
+        .add-to-cart-btn:hover { background-color: #1c5f6b; }
+        .drag-handle { color: #ccc; font-size: 24px; cursor: grab; padding-right: 10px; }
+        .move-arrows { display: flex; flex-direction: column; gap: 2px; }
+        .triangle-btn { background: none; border: none; color: #3AA6B9; cursor: pointer; font-size: 16px; padding: 0; line-height: 1; transition: color 0.2s; }
+        .triangle-btn:hover { color: #277B8A; }
+    </style>
 </head>
 <body>
 
@@ -17,7 +84,7 @@
     <div class="constructor-container">
 
         <div class="cake-visual-box">
-            <h2 class="box-title">Конструктор торта</h2>
+            <h2 class="box-title">Створіть свій торт</h2>
             <div class="cake-stack" id="cake-visual-stack"></div>
         </div>
 
@@ -45,43 +112,19 @@
             { name: 'Шоколадний бісквіт', image: '/img/constructor/sponges/choco.png', color: '#3E2723', pricePerKg: 250 },
             { name: 'Брауні', image: '/img/constructor/sponges/brownie.png', color: '#4A2511', pricePerKg: 300 },
             { name: 'Дакуаз (горіховий)', image: '/img/constructor/sponges/dakuaz.png', color: '#D7CCC8', pricePerKg: 350 },
-            { name: 'Класичний ванільний', image: '/img/constructor/sponges/vanilla.png', color: '#FFF3E0', pricePerKg: 200 },
-            { name: 'Листкові коржі', image: '/img/constructor/sponges/puff.png', color: '#FFE0B2', pricePerKg: 220 },
-            { name: 'Маковий бісквіт', image: '/img/constructor/sponges/poppy.png', color: '#5D4037', pricePerKg: 260 },
-            { name: 'Медові коржі', image: '/img/constructor/sponges/honey.png', color: '#FFB300', pricePerKg: 230 },
-            { name: 'Морквяний', image: '/img/constructor/sponges/carrot.png', color: '#E65100', pricePerKg: 270 },
-            { name: 'Фісташковий', image: '/img/constructor/sponges/pistachio.png', color: '#AED581', pricePerKg: 400 },
-            { name: 'Червоний оксамит', image: '/img/constructor/sponges/red_velvet.png', color: '#8B0000', pricePerKg: 320 },
-            { name: 'Шифоновий бісквіт', image: '/img/constructor/sponges/chiffon.png', color: '#FFECB3', pricePerKg: 240 }
+            { name: 'Класичний ванільний', image: '/img/constructor/sponges/vanilla.png', color: '#FFF3E0', pricePerKg: 200 }
         ],
         cream: [
             { name: 'Білосніжний крем-сир', image: '/img/constructor/creams/cream_cheese.png', color: '#FFFFF0', pricePerKg: 280 },
             { name: 'Заварний (Патісьєр)', image: '/img/constructor/creams/patissier.png', color: '#FFF59D', pricePerKg: 200 },
             { name: 'Карамельний крем', image: '/img/constructor/creams/caramel_cream.png', color: '#FFB74D', pricePerKg: 250 },
-            { name: 'Крем-чиз на вершках', image: '/img/constructor/creams/cheese_cream.png', color: '#FAFAFA', pricePerKg: 300 },
-            { name: 'Крем-чиз на маслі', image: '/img/constructor/creams/cheese_butter.png', color: '#FFFDE7', pricePerKg: 320 },
-            { name: 'Сметанний крем', image: '/img/constructor/creams/sour_cream.png', color: '#FFFFFF', pricePerKg: 180 },
-            { name: 'Фісташковий крем', image: '/img/constructor/creams/pistachio_cream.png', color: '#C5E1A5', pricePerKg: 450 },
-            { name: 'Ганаш (білий шок.)', image: '/img/constructor/creams/ganache_white.png', color: '#FFF8E1', pricePerKg: 350 },
-            { name: 'Ганаш (молочний шок.)', image: '/img/constructor/creams/ganache_milk.png', color: '#795548', pricePerKg: 350 },
-            { name: 'Ганаш (чорний шок.)', image: '/img/constructor/creams/ganache_dark.png', color: '#3E2723', pricePerKg: 350 }
+            { name: 'Шоколадний', color: '#3E2723', pricePerKg: 250 }
         ],
         filling: [
             { name: 'Безе/Меренга', image: '/img/constructor/fillings/meringue.png', color: '#F5F5F5', pricePerKg: 200 },
             { name: 'Вишневе конфі', image: '/img/constructor/fillings/cherry.png', color: '#C2185B', pricePerKg: 250 },
             { name: 'Карамелізовані горіхи', image: '/img/constructor/fillings/caramel_nuts.png', color: '#8D6E63', pricePerKg: 380 },
-            { name: 'Яблука з корицею', image: '/img/constructor/fillings/apple_cinnamon.png', color: '#D84315', pricePerKg: 220 },
-            { name: 'Кокосовий прошарок', image: '/img/constructor/fillings/coconut.png', color: '#FFFFFF', pricePerKg: 280 },
-            { name: 'Лимонний курд', image: '/img/constructor/fillings/lemon_curd.png', color: '#FFEE58', pricePerKg: 240 },
-            { name: 'Малинове компоте', image: '/img/constructor/fillings/raspberry.png', color: '#D81B60', pricePerKg: 270 },
-            { name: 'Манго-маракуя', image: '/img/constructor/fillings/mango_passion.png', color: '#FBC02D', pricePerKg: 350 },
-            { name: 'Полуничне кюлі', image: '/img/constructor/fillings/strawberry.png', color: '#E53935', pricePerKg: 260 },
-            { name: 'Солона карамель', image: '/img/constructor/fillings/salt_caramel.png', color: '#E65100', pricePerKg: 300 },
-            { name: 'Солона карамель з горіхами', image: '/img/constructor/fillings/salt_caramel_nuts.png', color: '#BF360C', pricePerKg: 400 },
-            { name: 'Крустілант', image: '/img/constructor/fillings/crustilant.png', color: '#5D4037', pricePerKg: 350 },
-            { name: 'Роялтін', image: '/img/constructor/fillings/royaltin.png', color: '#6D4C41', pricePerKg: 360 },
-            { name: 'Чорничне желе', image: '/img/constructor/fillings/blueberry.png', color: '#4527A0', pricePerKg: 280 },
-            { name: 'Праліне', image: '/img/constructor/fillings/praline.png', color: '#3E2723', pricePerKg: 380 }
+            { name: 'Солона карамель', color: '#D84315', pricePerKg: 350 }
         ]
     };
 
@@ -105,31 +148,29 @@
             const options = ingredients[layer.type];
             const selectedItem = options[layer.selectedIndex];
 
-            // -------------------------------------------------------------
-            // ОСЬ ТУТ Я ЗБІЛЬШИВ ВИСОТУ ДЛЯ ВСІХ ШАРІВ І ДОДАВ cover
-            // -------------------------------------------------------------
-            let blockHeight = '60px';
-            let imgHeightStyle = 'height: 60px; object-fit: cover;'; // Для крему
+            // ТУТ ЖОРСТКО ЗАДАЄМО ПРОПОРЦІЇ
+            let blockHeight = '40px';
+            // object-fit: fill розтягує картинку, щоб не було порожнечі!
+            let imgStyle = 'height: 40px; width: 100%; object-fit: fill; display: block; margin: 0; padding: 0;';
 
             if (layer.type === 'sponge') {
-                blockHeight = '150px'; // Корж став ще вищим (150px)
-                imgHeightStyle = 'height: 150px; object-fit: cover;';
+                blockHeight = '140px';
+                imgStyle = 'height: 140px; width: 100%; object-fit: fill; display: block; margin: 0; padding: 0;';
             }
             if (layer.type === 'filling') {
-                blockHeight = '80px'; // Начинка середньої товщини (80px)
-                imgHeightStyle = 'height: 80px; object-fit: cover;';
+                blockHeight = '70px';
+                imgStyle = 'height: 70px; width: 100%; object-fit: fill; display: block; margin: 0; padding: 0;';
             }
 
             const visualHTML = `
                 <div class="draggable-layer" draggable="true" ondragstart="handleDragStart(${index})" ondragover="handleDragOver(event)" ondrop="handleDrop(${index})">
-                    <div class="drag-handle" title="Потягніть, щоб перемістити">&#8597;</div>
+                    <div class="drag-handle" title="Потягніть">&#8597;</div>
                     <div class="cake-layer-row">
                         <button class="arrow-btn" onclick="changeLayer(${index}, -1)">&#8592;</button>
 
                         <div class="layer-image-container">
-                            <img src="${selectedItem.image || ''}" alt="${selectedItem.name}" style="width: 100%; display: ${selectedItem.image ? 'block' : 'none'}; ${imgHeightStyle}">
-
-                            <div style="width: 100%; height: ${blockHeight}; background-color: ${selectedItem.color}; display: ${selectedItem.image ? 'none' : 'block'};"></div>
+                            <img src="${selectedItem.image || ''}" alt="${selectedItem.name}" style="${imgStyle} display: ${selectedItem.image ? 'block' : 'none'};">
+                            <div style="width: 100%; height: ${blockHeight}; background-color: ${selectedItem.color}; display: ${selectedItem.image ? 'none' : 'block'}; margin: 0; padding: 0;"></div>
                         </div>
 
                         <button class="arrow-btn" onclick="changeLayer(${index}, 1)">&#8594;</button>
@@ -144,8 +185,8 @@
             const descHTML = `
                 <li class="draggable-layer" draggable="true" ondragstart="handleDragStart(${index})" ondragover="handleDragOver(event)" ondrop="handleDrop(${index})">
                     <div class="move-arrows">
-                        <button class="triangle-btn" onclick="moveLayer(${index}, ${index - 1})" style="visibility: ${isFirst ? 'hidden' : 'visible'};" title="Підняти вгору">&#9650;</button>
-                        <button class="triangle-btn" onclick="moveLayer(${index}, ${index + 1})" style="visibility: ${isLast ? 'hidden' : 'visible'};" title="Опустити вниз">&#9660;</button>
+                        <button class="triangle-btn" onclick="moveLayer(${index}, ${index - 1})" style="visibility: ${isFirst ? 'hidden' : 'visible'};">&#9650;</button>
+                        <button class="triangle-btn" onclick="moveLayer(${index}, ${index + 1})" style="visibility: ${isLast ? 'hidden' : 'visible'};">&#9660;</button>
                     </div>
                     <div style="flex-grow: 1; margin-left: 10px;">
                         <span style="color: #ccc; font-size: 20px;">&#8862;</span> ${index + 1} ${layer.title}: <strong>${selectedItem.name}</strong>
@@ -161,9 +202,7 @@
     function handleDragStart(index) { draggedLayerIndex = index; }
     function handleDragOver(event) { event.preventDefault(); }
     function handleDrop(targetIndex) {
-        if (draggedLayerIndex !== null && draggedLayerIndex !== targetIndex) {
-            moveLayer(draggedLayerIndex, targetIndex);
-        }
+        if (draggedLayerIndex !== null && draggedLayerIndex !== targetIndex) moveLayer(draggedLayerIndex, targetIndex);
         draggedLayerIndex = null;
     }
 
@@ -187,15 +226,9 @@
         const guests = parseInt(document.getElementById('guests-count').value) || 1;
         const weightKg = (guests * 0.25).toFixed(2);
         document.getElementById('recommended-weight').innerText = weightKg + ' кг';
-
         let totalBasePrice = 0;
-        currentCake.forEach(layer => {
-            const selectedItem = ingredients[layer.type][layer.selectedIndex];
-            totalBasePrice += selectedItem.pricePerKg;
-        });
-        const averagePricePerKg = totalBasePrice / currentCake.length;
-        const finalPrice = Math.round(averagePricePerKg * weightKg);
-        document.getElementById('total-price').innerText = finalPrice.toLocaleString('uk-UA') + ' грн';
+        currentCake.forEach(layer => { totalBasePrice += ingredients[layer.type][layer.selectedIndex].pricePerKg; });
+        document.getElementById('total-price').innerText = Math.round((totalBasePrice / currentCake.length) * weightKg).toLocaleString('uk-UA') + ' грн';
     }
 
     renderConstructor();
