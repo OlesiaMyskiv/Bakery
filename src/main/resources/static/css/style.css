@@ -814,19 +814,31 @@ body {
 .constructor-section { padding: 40px 0; background-color: #FFFFFF; min-height: 800px; }
 .constructor-container { max-width: 1300px; margin: 0 auto; display: flex; gap: 40px; padding: 0 40px; }
 
-/* Ліва частина */
-.cake-visual-box { flex: 1; border: 2px solid #3AA6B9; border-radius: 20px; padding: 30px; display: flex; flex-direction: column; align-items: center; }
+.cake-visual-box {
+    flex: 1; /* This takes up half the width of the main container */
+    border: 2px solid #3AA6B9;
+}
+
 .box-title { font-family: 'Cormorant Garamond', serif; font-size: 42px; color: #111; margin-top: 0; margin-bottom: 40px; text-align: center; }
-.cake-stack { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 400px; }
+
+.cake-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0px; /* БУЛО 10px, робимо 0 */
+    width: 100%;
+    max-width: 650px;
+}
 
 /* Стилі для рядка шару */
 .draggable-layer {
     display: flex; align-items: center; gap: 15px;
-    padding: 5px; border-radius: 15px;
+    padding: 0px 5px; /* БУЛО 5px (з усіх боків), тепер 0 зверху/знизу і 5 по боках */
+    border-radius: 15px;
     background-color: transparent;
     transition: background-color 0.2s;
-    cursor: grab; /* Курсор "рука" для перетягування */
+    cursor: grab;
 }
+
 .draggable-layer:hover { background-color: #f0f8f9; }
 .draggable-layer:active { cursor: grabbing; } /* Курсор "стиснута рука" при перетягуванні */
 
@@ -836,12 +848,13 @@ body {
 
 .layer-image-container {
     flex-grow: 1;
-    height: 120px; /* Можеш збільшити чи зменшити висоту під свої фото */
+    height: 180px; /* <--- ЗБІЛЬШИЛИ або ЗМЕНШИТИ */
+    border-radius: 10px;
     display: flex;
     justify-content: center;
     align-items: center;
-    background: transparent; /* Робимо фон повністю прозорим */
-    /* Ми видалили border (рамку) та border-radius (заокруглення) */
+    overflow: hidden;
+    border: 1px solid transparent;
 }
 
 /* Права частина */
