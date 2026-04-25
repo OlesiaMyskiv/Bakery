@@ -112,7 +112,7 @@ public class AuthController {
             Model model) {
 
         // Шукаємо користувача в базі за поштою
-        User user = userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email).orElse(null);
 
         // Перевірка, чи знайшовся користувач і чи збігається пароль
         if (user != null && user.getPassword().equals(password)) {

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <title>Адмін - Асортимент</title>
+</head>
+<body>
+<div class="admin-wrapper">
+    <main class="admin-main">
+        <h1>Керування асортиментом</h1>
+
+        <div class="assortment-form">
+            <h3 style="grid-column: span 2;">Додати новий елемент</h3>
+            <input type="text" placeholder="Назва (напр. Манго-Маракуя)">
+            <select>
+                <option>Бісквіт</option>
+                <option>Крем</option>
+                <option>Начинка</option>
+            </select>
+            <input type="number" placeholder="Ціна за кг">
+            <input type="file">
+            <button class="login-btn" style="margin:0">Додати до бази</button>
+        </div>
+
+        <h3>Поточний список</h3>
+        <table class="admin-table">
+            <thead><tr><th>Тип</th><th>Назва</th><th>Ціна</th><th>Дія</th></tr></thead>
+            <tbody>
+            <tr><td>Бісквіт</td><td>Шоколадний</td><td>250 грн</td><td><button style="color:red">Видалити</button></td></tr>
+            </tbody>
+        </table>
+    </main>
+</div>
+</body>
+</html>
