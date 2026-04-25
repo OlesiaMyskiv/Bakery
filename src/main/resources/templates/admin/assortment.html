@@ -1,32 +1,66 @@
 <!DOCTYPE html>
 <html lang="uk" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <meta charset="UTF-8">
     <title>Адмін - Асортимент</title>
+    <link rel="stylesheet" th:href="@{/css/globals.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<div class="admin-wrapper">
-    <main class="admin-main">
-        <h1>Керування асортиментом</h1>
+<div class="admin-container">
+    <aside class="admin-sidebar">
+        <a href="/" class="admin-logo">Cake House</a>
+        <a href="/admin/orders" class="admin-nav-link">📦 Замовлення</a>
+        <a href="/admin/users" class="admin-nav-link">👥 Клієнти</a>
+        <a href="/admin/verification" class="admin-nav-link">✅ Верифікація</a>
+        <a href="/admin/assortment" class="admin-nav-link active">🍰 Асортимент</a>
+        <a href="/admin/reviews" class="admin-nav-link">💬 Відгуки</a>
+        <div style="margin-top: auto;">
+            <a href="/logout" class="admin-nav-link" style="color: #d32f2f;">🚪 Вихід</a>
+        </div>
+    </aside>
 
-        <div class="assortment-form">
-            <h3 style="grid-column: span 2;">Додати новий елемент</h3>
-            <input type="text" placeholder="Назва (напр. Манго-Маракуя)">
-            <select>
-                <option>Бісквіт</option>
-                <option>Крем</option>
-                <option>Начинка</option>
-            </select>
-            <input type="number" placeholder="Ціна за кг">
-            <input type="file">
-            <button class="login-btn" style="margin:0">Додати до бази</button>
+    <main class="admin-main">
+        <div class="admin-header">
+            <h1 class="admin-title">Керування асортиментом</h1>
         </div>
 
-        <h3>Поточний список</h3>
+        <div class="admin-form-card">
+            <h3 style="margin-bottom: 20px;">Додати новий торт чи начинку</h3>
+            <form action="/admin/assortment/add" method="POST" enctype="multipart/form-data">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <input type="text" name="name" class="admin-input" placeholder="Назва (напр. Червоний оксамит)" required>
+                    <select name="type" class="admin-input" required>
+                        <option value="CAKE">Готовий торт</option>
+                        <option value="SPONGE">Бісквіт (для конструктора)</option>
+                        <option value="CREAM">Крем (для конструктора)</option>
+                        <option value="FILLING">Начинка (для конструктора)</option>
+                    </select>
+                    <input type="number" name="price" class="admin-input" placeholder="Ціна (грн)" required>
+                    <input type="file" name="image" class="admin-input">
+                </div>
+                <button type="submit" class="btn-admin-add">Додати до бази ✨</button>
+            </form>
+        </div>
+
         <table class="admin-table">
-            <thead><tr><th>Тип</th><th>Назва</th><th>Ціна</th><th>Дія</th></tr></thead>
+            <thead>
+            <tr>
+                <th>Фото</th>
+                <th>Назва</th>
+                <th>Тип</th>
+                <th>Ціна</th>
+                <th>Дія</th>
+            </tr>
+            </thead>
             <tbody>
-            <tr><td>Бісквіт</td><td>Шоколадний</td><td>250 грн</td><td><button style="color:red">Видалити</button></td></tr>
+            <tr>
+                <td><img th:src="@{/img/1.png}" width="60" style="border-radius: 8px;"></td>
+                <td>Шоколадний з вишнею</td>
+                <td>Готовий торт</td>
+                <td>850 грн</td>
+                <td><button style="color: #d32f2f; background: none; border: none; cursor: pointer;">Видалити</button></td>
+            </tr>
             </tbody>
         </table>
     </main>

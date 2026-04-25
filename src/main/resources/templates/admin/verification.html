@@ -1,16 +1,37 @@
-<table class="admin-table">
-    <thead>
-    <tr><th>Клієнт</th><th>Статус</th><th>Документ</th><th>Дія</th></tr>
-    </thead>
-    <tbody>
-    <tr>
-        <td>Іван Петренко</td>
-        <td>ДПСУ</td>
-        <td><a href="#" target="_blank">Переглянути фото</a></td>
-        <td>
-            <button class="action-btn btn-approve">Підтвердити</button>
-            <button class="action-btn btn-reject">Відхилити</button>
-        </td>
-    </tr>
-    </tbody>
-</table>
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Адмін - Верифікація</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="admin-container">
+    <aside class="admin-sidebar" th:insert="~{admin/assortment :: aside}"></aside> <main class="admin-main">
+    <h1 class="admin-title">Верифікація пільгових статусів</h1>
+
+    <table class="admin-table">
+        <thead>
+        <tr>
+            <th>Клієнт</th>
+            <th>Статус</th>
+            <th>Документ</th>
+            <th>Дії</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Максим Петренко</td>
+            <td><span style="color: #2e7d32; font-weight: bold;">ДПСУ</span></td>
+            <td><a href="#" style="color: #277B8A;">📄 Відкрити фото</a></td>
+            <td>
+                <button class="btn-admin-add" style="padding: 8px 15px; font-size: 14px;">Підтвердити</button>
+                <button style="background: #ffebee; color: #c62828; border: none; padding: 8px 15px; border-radius: 20px; margin-left: 10px;">Відхилити</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+</div>
+</body>
+</html>
