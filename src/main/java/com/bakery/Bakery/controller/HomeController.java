@@ -1,6 +1,7 @@
 package com.bakery.Bakery.controller;
 
-import ch.qos.logback.core.model.Model;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.ui.Model;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -28,19 +29,14 @@ public class HomeController {
     }
 
     @GetMapping("/profile")
-    public String profilePage(jakarta.servlet.http.HttpSession session) {
+    public String profilePage(HttpSession session, Model model) {
         if (session.getAttribute("loggedInUser") == null) return "redirect:/login";
-        return "profile"; // Відкриває сторінку "Активні замовлення"
+        // тут можна додати логіку отримання даних користувача
+        return "profile";
     }
 
     @GetMapping("/constructor")
     public String constructorPage() {
         return "constructor";
-    }
-
-    @GetMapping("/profile")
-    public String profilePage(Model model) {
-        // Тут можна додати логіку отримання даних поточного користувача
-        return "profile";
     }
 }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uk" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<html lang="uk" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
 <header th:fragment="header" class="header">
     <nav class="navigation-menu">
@@ -10,21 +10,17 @@
             <li class="logo"><a th:href="@{/}">Cake House</a></li>
 
             <li><a th:href="@{/ai-design}">ШІ-Дизайн</a></li>
-            <div class="header-icons">
+
+            <li class="icons">
                 <a th:href="@{/login}" sec:authorize="isAnonymous()" class="icon-link">
                     <img th:src="@{/img/user-icon.svg}" alt="Увійти" title="Увійти">
                 </a>
-
                 <a th:href="@{/profile}" sec:authorize="isAuthenticated()" class="icon-link">
                     <img th:src="@{/img/user-icon.svg}" alt="Мій профіль" title="Перейти до профілю">
                 </a>
-
                 <a th:href="@{/cart}" class="icon-link">
                     <img th:src="@{/img/cart-icon.svg}" alt="Кошик">
                 </a>
-            </div>
-            <li class="icons">
-                <a th:href="@{/cart}"><img th:src="@{/img/cart-icon.svg}" alt="Кошик"></a>
             </li>
         </ul>
     </nav>
