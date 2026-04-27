@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Суперадмін - Замовлення</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <a href="/" class="sidebar-logo">Cake House</a>
+
+        <a href="/admin/orders" class="sidebar-link active">📦 Замовлення</a>
+        <a href="/admin/users" class="sidebar-link">👥 Клієнти</a>
+        <a href="/admin/verification" class="sidebar-link">✅ Верифікація</a>
+        <a href="/admin/assortment" class="sidebar-link">🍰 Асортимент</a>
+        <a href="/admin/reviews" class="sidebar-link">💬 Відгуки</a>
+
+        <div style="margin-top: auto;">
+            <a href="/logout" class="sidebar-link" style="color: #D32F2F;">🚪 Вихід</a>
+        </div>
+    </aside>
+
+    <main class="admin-main-content">
+        <h1 style="font-size: 42px; margin-bottom: 30px;">Нові замовлення</h1>
+
+        <table class="admin-table">
+        </table>
+    </main>
+</div>
+</body>
+</html>

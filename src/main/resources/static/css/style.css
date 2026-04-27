@@ -1174,3 +1174,4 @@ body {
 .admin-input:focus { border-color: #3AA6B9; }
 .btn-admin-add { background: #277B8A; color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 18px; cursor: pointer; transition: 0.3s; }
 .btn-admin-add:hover { background: #1c5f6b; }
+
