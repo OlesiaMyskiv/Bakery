@@ -4,6 +4,8 @@ import com.bakery.Bakery.model.Role;
 import com.bakery.Bakery.model.User;
 import com.bakery.Bakery.model.VerificationStatus;
 import com.bakery.Bakery.repository.UserRepository;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -48,6 +50,7 @@ public class AuthController {
             @RequestParam("role") Role role,
             @RequestParam(value = "consent", defaultValue = "false") boolean consent,
             @RequestParam(value = "document", required = false) MultipartFile document,
+            HttpServletRequest request, // <--- ДОДАНО ДЛЯ АВТОВХОДУ
             Model model) {
 
         if (!password.equals(confirmPassword)) {
@@ -64,8 +67,7 @@ public class AuthController {
         user.setUsername(username);
         user.setPhone(phone);
         user.setEmail(email);
-        // Хешуємо пароль перед збереженням
-        user.setPassword(passwordEncoder.encode(password));
+        user.setPassword(passwordEncoder.encode(password)); // Зберігаємо хеш
         user.setRole(role);
         user.setConsent(consent);
 
@@ -75,6 +77,7 @@ public class AuthController {
             user.setVerificationStatus(VerificationStatus.NONE);
         }
 
+        // Логіка збереження файлу...
         if ((role == Role.ZSU || role == Role.DSNS) && document != null && !document.isEmpty()) {
             try {
                 saveFile(document, UPLOAD_DIRECTORY, user, true);
@@ -84,8 +87,20 @@ public class AuthController {
             }
         }
 
-        userRepository.save(user);
-        return "redirect:/login?success";
+        userRepository.save(user); // Зберегли в базу
+
+        // ==========================================
+        // АВТОВХІД ЧЕРЕЗ SPRING SECURITY
+        // ==========================================
+        try {
+            // request.login сам захешує введений пароль і порівняє з базою
+            request.login(email, password);
+        } catch (ServletException e) {
+            e.printStackTrace();
+            return "redirect:/login"; // Якщо щось пішло не так, кидаємо на логін
+        }
+
+        return "redirect:/profile"; // Успішно! Перекидаємо одразу в профіль
     }
 
     // ==========================================

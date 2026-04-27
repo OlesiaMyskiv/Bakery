@@ -26,21 +26,33 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .csrf(csrf -> csrf.disable()) // За потреби вимкніть для розробки
                 .authorizeHttpRequests(auth -> auth
-                        // Відкриті ендпоінти
-                        .requestMatchers("/", "/assortment", "/constructor", "/login", "/register", "/css/**", "/img/**", "/js/**").permitAll()
-                        // Захищені ендпоінти
-                        .requestMatchers("/profile/**").hasAuthority("CLIENT")
-                        .requestMatchers("/admin/**").hasAuthority("SUPER_ADMIN")
+                        .requestMatchers("/", "/register", "/login", "/assortment", "/constructor", "/css/**", "/img/**", "/js/**").permitAll()
+                        .requestMatchers("/admin/**").hasAuthority("SUPER_ADMIN") // Тільки для адміна
+                        .requestMatchers("/profile/**").authenticated() // Для всіх авторизованих
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/") // або налаштуйте AuthenticationSuccessHandler для різного редиректу
+                        // РОЗУМНИЙ РЕДИРЕКТ ПІСЛЯ ЛОГІНУ
+                        .successHandler((request, response, authentication) -> {
+                            // Перевіряємо роль користувача
+                            String role = authentication.getAuthorities().iterator().next().getAuthority();
+
+                            if (role.equals("SUPER_ADMIN") || role.equals("ROLE_SUPER_ADMIN")) {
+                                response.sendRedirect("/admin/admin"); // Шлях до вашої адмінки
+                            } else {
+                                response.sendRedirect("/profile"); // Шлях для клієнтів (CLIENT, ZSU, DSNS)
+                            }
+                        })
                         .permitAll()
                 )
                 .logout(logout -> logout
+                        .logoutUrl("/logout")
                         .logoutSuccessUrl("/")
+                        .invalidateHttpSession(true)
+                        .clearAuthentication(true)
                         .permitAll()
                 );
 
