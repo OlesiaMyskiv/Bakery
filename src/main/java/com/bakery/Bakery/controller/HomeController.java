@@ -1,5 +1,6 @@
 package com.bakery.Bakery.controller;
 
+import ch.qos.logback.core.model.Model;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -37,4 +38,9 @@ public class HomeController {
         return "constructor";
     }
 
+    @GetMapping("/profile")
+    public String profilePage(Model model) {
+        // Тут можна додати логіку отримання даних поточного користувача
+        return "profile";
+    }
 }
