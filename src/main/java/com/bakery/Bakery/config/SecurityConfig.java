@@ -26,23 +26,23 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // Доступ до адмінки ТІЛЬКИ Суперадміну
+                        // Відкриті ендпоінти
+                        .requestMatchers("/", "/assortment", "/constructor", "/login", "/register", "/css/**", "/img/**", "/js/**").permitAll()
+                        // Захищені ендпоінти
+                        .requestMatchers("/profile/**").hasAuthority("CLIENT")
                         .requestMatchers("/admin/**").hasAuthority("SUPER_ADMIN")
-                        // Публічні сторінки
-                        .requestMatchers("/", "/login", "/register", "/assortment", "/constructor", "/ai-design/**").permitAll()
-                        .requestMatchers("/css/**", "/js/**", "/img/**", "/uploads/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/", true)
+                        .defaultSuccessUrl("/") // або налаштуйте AuthenticationSuccessHandler для різного редиректу
                         .permitAll()
                 )
                 .logout(logout -> logout
                         .logoutSuccessUrl("/")
-                        .permitAll());
+                        .permitAll()
+                );
 
         return http.build();
     }
