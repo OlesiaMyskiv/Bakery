@@ -79,6 +79,21 @@
 </main>
 
 <script>
+    // --- НОВИЙ КОД ДЛЯ АНІМАЦІЇ ЗАВАНТАЖЕННЯ ---
+    const aiForm = document.querySelector('form');
+    const resultSide = document.querySelector('.result-side');
+    const generateBtn = document.querySelector('.btn-generate');
+
+    aiForm.onsubmit = function() {
+        // Додаємо клас завантаження до контейнера з картинкою
+        resultSide.classList.add('is-loading');
+
+        // Робимо кнопку неактивною та міняємо текст
+        generateBtn.classList.add('disabled');
+        generateBtn.innerHTML = "🔮 Чаклуємо...";
+    };
+
+    // --- ВАШ ІСНУЮЧИЙ КОД ДЛЯ ПІДКАЗОК ---
     function addTextToPrompt(text) {
         // Знаходимо наше текстове поле за ID
         const textarea = document.getElementById('cake-prompt-input');

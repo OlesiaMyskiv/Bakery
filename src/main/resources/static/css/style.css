@@ -80,6 +80,125 @@ body {
 }
 
 /* ===============================
+   ГОЛОВНИЙ ХЕДЕР (З ЕФЕКТАМИ)
+   =============================== */
+.main-header {
+    background-color: #FFFFFF;
+    padding: 10px 0;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.03);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.header-container {
+    max-width: 1300px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    padding: 0 30px;
+}
+
+.header-left {
+    display: flex;
+    flex: 1;
+    justify-content: flex-end;
+    padding-right: 50px;
+}
+
+/* Ефект для ЛОГОТИПУ: легке збільшення та насиченість */
+.logo-central {
+    font-family: 'Love Light', cursive;
+    font-size: 64px;
+    color: #FF9EAA;
+    text-decoration: none;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    transition: all 0.4s ease; /* Плавність для всіх змін */
+}
+
+.logo-central:hover {
+    color: #e88d99; /* Трошки темніший рожевий */
+    transform: scale(1.05); /* Легке збільшення */
+    text-shadow: 2px 2px 10px rgba(255, 158, 170, 0.3); /* Ніжне сяйво */
+}
+
+.header-right {
+    display: flex;
+    flex: 1;
+    justify-content: flex-start;
+    align-items: center;
+    padding-left: 50px;
+    gap: 50px;
+}
+
+.main-nav ul {
+    list-style: none;
+    display: flex;
+    gap: 80px;
+    margin: 0;
+    padding: 0;
+}
+
+/* Ефект для ПОСИЛАНЬ МЕНЮ */
+.main-nav ul li a {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    color: #333333;
+    text-decoration: none;
+    font-weight: 400;
+    white-space: nowrap;
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.main-nav ul li a:hover {
+    color: #FF9EAA; /* Зміна кольору на рожевий при наведенні */
+}
+
+/* Додаємо тонку лінію, що з'являється знизу (опціонально, для стилю) */
+.main-nav ul li a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 1px;
+    bottom: -2px;
+    left: 0;
+    background-color: #FF9EAA;
+    transition: width 0.3s ease;
+}
+
+.main-nav ul li a:hover::after {
+    width: 100%; /* Лінія розширюється під словом */
+}
+
+.header-icons {
+    display: flex;
+    gap: 55px;
+}
+
+/* Ефект для ІКОНОК: затемнення через фільтр */
+.icon-link {
+    display: flex;
+    align-items: center;
+    transition: transform 0.3s ease;
+}
+
+.icon-link img {
+    width: 28px;
+    height: 28px;
+    opacity: 0.7; /* Початкова легка прозорість */
+    filter: grayscale(20%); /* Трошки приглушені кольори */
+    transition: all 0.3s ease;
+}
+
+.icon-link:hover img {
+    opacity: 1;
+    transform: scale(1.2); /* Іконка стає більшою */
+    filter: grayscale(0%) brightness(0.8); /* Стає чіткою та трохи темнішою */
+}
+/* ===============================
    СЕКЦІЯ "ПРО НАС" (ABOUT US)
    =============================== */
 .about-us {
@@ -149,6 +268,252 @@ body {
     padding: 0 20px;
 }
 
+/* =========================================
+   AI Cake Designer Page Styles (ЯСКРАВІ 3 КОЛЬОРИ)
+   ========================================= */
+
+/* --- Анімації --- */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Анімація перетікання фону */
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Анімація пульсації ТІЛЬКИ для тексту */
+@keyframes pulseOpacity {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+@keyframes fadeInImage {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* --- Загальна структура --- */
+.ai-page-wrapper {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+.ai-title {
+    color: #5d4037;
+    font-family: 'Love Light', cursive;
+    font-size: 5rem;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: 400;
+    animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.designer-section {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 50px;
+    align-items: stretch;
+    animation: fadeInUp 1s ease-out 0.2s forwards;
+    opacity: 0;
+}
+
+/* --- Ліва частина: Форма --- */
+.prompt-side {
+    box-sizing: border-box;
+    width: 50%;
+    flex: 0 0 calc(50% - 15px);
+    background: #fff;
+    padding: 30px;
+    border-radius: 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    min-height: 550px;
+}
+
+.prompt-side h3 {
+    margin-top: 0;
+    color: #5d4037;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.prompt-side p {
+    color: #8d6e63;
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+}
+
+/* Підказки (Chips) */
+.suggestions-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.suggestion-tag {
+    background: #fce4ec;
+    color: #d81b60;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    user-select: none;
+}
+
+.suggestion-tag:hover {
+    background: #f8bbd0;
+    border-color: #f06292;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(240, 98, 146, 0.2);
+}
+
+.prompt-textarea {
+    box-sizing: border-box;
+    flex-grow: 1;
+    width: 100%;
+    min-height: 150px;
+    border: 2px solid #fce4ec;
+    border-radius: 16px;
+    padding: 20px;
+    margin: 10px 0 20px 0;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    resize: none;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.prompt-textarea:focus {
+    border-color: #f06292;
+}
+
+.btn-generate {
+    background: #f06292;
+    color: white;
+    border: none;
+    padding: 18px;
+    border-radius: 12px;
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 700;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn-generate:hover {
+    background: #ec407a;
+}
+
+.btn-generate.disabled {
+    background: #d9d9d9;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* --- Права частина: Результат --- */
+.result-side {
+    box-sizing: border-box;
+    width: 50%;
+    flex: 0 0 calc(50% - 15px);
+    background: #fdf2f5;
+    border: 3px dashed #f8bbd0;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    min-height: 550px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+/* Ховаємо старий тортик під час завантаження */
+.result-side.is-loading .result-placeholder {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* НОВЕ: 1. КОЛЬОРОВИЙ ФОН (М'ятний, Кораловий, Білий) */
+.result-side.is-loading::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    /* Градієнт під кутом для красивого перетікання */
+    background: linear-gradient(135deg, #C1ECE4, #FFFFFF, #FF9EAA, #C1ECE4);
+    background-size: 400% 400%;
+    z-index: 5;
+    animation: gradientShift 3s ease infinite; /* Швидке і яскраве переливання */
+}
+
+/* НОВЕ: 2. ТЕКСТ ПОВЕРХ ФОНУ */
+.result-side.is-loading::after {
+    content: "✨ Готуємо ваш шедевр...";
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%); /* Ідеально по центру */
+    font-size: 1.5rem; /* Трішки зменшили розмір */
+    font-weight: 700;
+    color: #5d4037;
+    z-index: 10;
+    white-space: nowrap; /* ФІКС: Забороняємо тексту розриватися на два рядки! */
+    animation: pulseOpacity 1.5s ease-in-out infinite;
+}
+
+.result-placeholder {
+    text-align: center;
+    color: #ad1457;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+.generated-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: relative;
+    z-index: 20; /* Картинка перекриває магію, коли завантажиться */
+    animation: fadeInImage 1s ease-in-out;
+}
+
+/* --- Секція "Як це працює" --- */
+.how-it-works-bar {
+    background: #5d4037;
+    color: white;
+    padding: 40px;
+    border-radius: 24px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    font-family: 'Cormorant Garamond', serif;
+    animation: fadeInUp 1s ease-out 0.4s forwards;
+    opacity: 0;
+}
+
+.work-step h4 {
+    color: #f06292;
+    margin-bottom: 10px;
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+
+.work-step p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    line-height: 1.4;
+}
 /* ===============================
    СТОРІНКА ВХОДУ (LOGIN PAGE)
    =============================== */
@@ -431,6 +796,7 @@ body {
     line-height: 1.4;
     font-family: 'Cormorant Garamond', serif;
 }
+
 
 /* ===============================
    ПРОФІЛЬ КОРИСТУВАЧА (СИНЯ ШАПКА)
@@ -971,207 +1337,3 @@ body {
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(58,166,185,0.3);
 }
-
-/* =========================================
-   AI Cake Designer Page Styles
-   ========================================= */
-
-.ai-page-wrapper {
-    max-width: 1300px;
-    margin: 40px auto;
-    padding: 0 20px;
-    font-family: 'Cormorant Garamond', serif;
-}
-
-.ai-title {
-    color: #5d4037;
-    font-family: 'Love Light', cursive;
-    font-size: 5rem;
-    margin-bottom: 20px;
-    text-align: center;
-    font-weight: 400;
-}
-
-.designer-section {
-    display: flex;
-    gap: 30px;
-    margin-bottom: 50px;
-    align-items: stretch;
-}
-
-.prompt-side {
-    flex: 1;
-    background: #fff;
-    padding: 30px;
-    border-radius: 24px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    display: flex;
-    flex-direction: column;
-}
-
-.prompt-side h3 {
-    margin-top: 0;
-    color: #5d4037;
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 5px;
-}
-
-.prompt-side p {
-    color: #8d6e63;
-    font-size: 1.1rem;
-    margin-bottom: 15px;
-}
-
-/* --- Підказки (Chips) --- */
-.suggestions-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
-.suggestion-tag {
-    background: #fce4ec;
-    color: #d81b60;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 1.1rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: 1px solid transparent;
-    user-select: none;
-}
-
-.suggestion-tag:hover {
-    background: #f8bbd0;
-    border-color: #f06292;
-    transform: translateY(-2px);
-}
-
-/* --- Форма введення --- */
-.prompt-textarea {
-    box-sizing: border-box;
-    flex-grow: 1;
-    width: 100%;
-    min-height: 150px;
-    border: 2px solid #fce4ec;
-    border-radius: 16px;
-    padding: 20px;
-    margin: 10px 0 20px 0;
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.2rem;
-    resize: none;
-    outline: none;
-    transition: border-color 0.3s;
-}
-
-.prompt-textarea:focus {
-    border-color: #f06292;
-}
-
-.btn-generate {
-    background: #f06292;
-    color: white;
-    border: none;
-    padding: 18px;
-    border-radius: 12px;
-    font-family: 'Cormorant Garamond', serif;
-    font-weight: 700;
-    font-size: 1.3rem;
-    cursor: pointer;
-    transition: background 0.3s;
-}
-
-.btn-generate:hover {
-    background: #ec407a;
-}
-
-/* --- Права частина: Результат --- */
-.result-side {
-    flex: 1;
-    background: #fdf2f5;
-    border: 3px dashed #f8bbd0;
-    border-radius: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    position: relative;
-    min-height: 450px;
-}
-
-.result-placeholder {
-    text-align: center;
-    color: #ad1457;
-    font-family: 'Cormorant Garamond', serif;
-}
-
-.generated-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-/* --- Секція "Як це працює" --- */
-.how-it-works-bar {
-    background: #5d4037;
-    color: white;
-    padding: 40px;
-    border-radius: 24px;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 30px;
-    font-family: 'Cormorant Garamond', serif;
-}
-
-.work-step h4 {
-    color: #f06292;
-    margin-bottom: 10px;
-    font-size: 1.6rem;
-    font-weight: 700;
-}
-
-.work-step p {
-    font-size: 1.1rem;
-    opacity: 0.9;
-    line-height: 1.4;
-}
-
-/* --- ADMIN PANEL --- */
-.admin-container { display: flex; min-height: 100vh; background: #fdfdfd; font-family: 'Cormorant Garamond', serif; }
-
-.admin-sidebar {
-    width: 280px; background: white; border-right: 1px solid #eee;
-    padding: 40px 20px; display: flex; flex-direction: column; gap: 10px;
-    position: sticky; top: 0; height: 100vh;
-}
-
-.admin-logo { font-family: 'Love Light', cursive; font-size: 42px; color: #277B8A; text-align: center; margin-bottom: 30px; text-decoration: none; }
-
-.admin-nav-link {
-    display: flex; align-items: center; gap: 15px; padding: 15px 20px;
-    text-decoration: none; color: #555; font-size: 20px; border-radius: 15px; transition: 0.3s;
-}
-
-.admin-nav-link.active { background: #3AA6B9; color: white; font-weight: bold; }
-.admin-nav-link:hover:not(.active) { background: #f0f8f9; color: #3AA6B9; }
-
-.admin-main { flex: 1; padding: 50px; }
-.admin-header { margin-bottom: 40px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
-.admin-title { font-size: 48px; color: #111; font-weight: 400; }
-
-/* Tables */
-.admin-table { width: 100%; border-collapse: collapse; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.03); margin-top: 20px; }
-.admin-table th { background: #F0F8F9; color: #277B8A; padding: 20px; text-align: left; font-size: 18px; border-bottom: 2px solid #C1ECE4; }
-.admin-table td { padding: 20px; border-bottom: 1px solid #f9f9f9; font-size: 18px; vertical-align: middle; }
-
-/* Forms */
-.admin-form-card { background: white; padding: 30px; border-radius: 20px; border: 1px solid #C1ECE4; margin-bottom: 40px; }
-.admin-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 18px; margin-bottom: 15px; outline: none; }
-.admin-input:focus { border-color: #3AA6B9; }
-.btn-admin-add { background: #277B8A; color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 18px; cursor: pointer; transition: 0.3s; }
-.btn-admin-add:hover { background: #1c5f6b; }
-
