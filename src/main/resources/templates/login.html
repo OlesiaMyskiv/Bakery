@@ -17,6 +17,14 @@
     <div class="login-card">
         <h2 class="login-title">Вхід</h2>
 
+        <div th:if="${param.error}" style="color: #d9534f; background-color: #f2dede; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center; font-weight: bold; font-family: 'Cormorant Garamond', serif; font-size: 1.2rem;">
+            Невірна електронна пошта або пароль!
+        </div>
+
+        <div th:if="${param.logout}" style="color: #3c763d; background-color: #dff0d8; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center; font-family: 'Cormorant Garamond', serif; font-size: 1.2rem;">
+            Ви успішно вийшли з системи.
+        </div>
+
         <form th:action="@{/login}" method="post">
             <div class="input-group">
                 <label>Електронна пошта</label>

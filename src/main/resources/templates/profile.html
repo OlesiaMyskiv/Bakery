@@ -30,31 +30,32 @@
     <div class="profile-container">
         <div class="profile-avatar-box">
             <label for="imageInput" class="profile-avatar" style="cursor: pointer;" title="Змінити фото">
-                <img id="avatarPreview" th:if="${session.loggedInUser.profilePicturePath != null}" th:src="${session.loggedInUser.profilePicturePath}" alt="Аватар">
-                <svg th:unless="${session.loggedInUser.profilePicturePath != null}" class="camera-svg" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <img th:if="${user.profilePicturePath != null}"
+                     th:src="@{${user.profilePicturePath}}" alt="Аватар">
+                <svg th:unless="${user.profilePicturePath != null}" class="camera-svg" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="8" width="18" height="12" rx="2" ry="2"></rect><path d="M16 8v-2a2 2 0 0 0-2-2H10a2 2 0 0 0-2 2v2"></path><circle cx="12" cy="14" r="3"></circle>
                 </svg>
             </label>
             <form id="quickPhotoForm" th:action="@{/edit-profile}" method="post" enctype="multipart/form-data" style="display: none;">
-                <input type="hidden" name="username" th:value="${session.loggedInUser.username}">
-                <input type="hidden" name="email" th:value="${session.loggedInUser.email}">
-                <input type="hidden" name="phone" th:value="${session.loggedInUser.phone}">
+                <input type="hidden" name="username" th:value="${user.username}">
+                <input type="hidden" name="email" th:value="${user.email}">
+                <input type="hidden" name="phone" th:value="${user.phone}">
                 <input type="file" id="imageInput" name="profilePicture" accept="image/*">
             </form>
         </div>
 
         <div class="profile-info-box">
-            <h1 class="profile-name" th:text="${session.loggedInUser.username}">Прізвище Ім'я</h1>
-            <div class="profile-detail"><span>E-mail: <span th:text="${session.loggedInUser.email}"></span></span></div>
-            <div class="profile-detail"><span>Телефон: <span th:text="${session.loggedInUser.phone}"></span></span></div>
-            <div class="profile-detail"><span>Дата народження: <span th:text="${session.loggedInUser.birthDate != null ? session.loggedInUser.birthDate : '--.--.----'}"></span></span></div>
+            <h1 class="profile-name" th:text="${user.username}">Прізвище Ім'я</h1>
+            <div class="profile-detail"><span>E-mail: <span th:text="${user.email}"></span></span></div>
+            <div class="profile-detail"><span>Телефон: <span th:text="${user.phone}"></span></span></div>
+            <div class="profile-detail"><span>Дата народження: <span th:text="${user.birthDate != null ? user.birthDate : '--.--.----'}"></span></span></div>
 
             <div class="profile-detail profile-status">
                 <span>Статус: </span>
-                <span th:if="${session.loggedInUser.role.name() == 'CLIENT'}" style="display: flex; align-items: center; gap: 8px;"><span class="status-dot approved"></span> Звичайний клієнт</span>
-                <span th:if="${session.loggedInUser.role.name() != 'CLIENT' and session.loggedInUser.verificationStatus.name() == 'PENDING'}" style="display: flex; align-items: center; gap: 8px;"><span class="status-dot pending"></span> Документи обробляються...</span>
-                <span th:if="${session.loggedInUser.role.name() != 'CLIENT' and session.loggedInUser.verificationStatus.name() == 'APPROVED'}" style="display: flex; align-items: center; gap: 8px;"><span class="status-dot approved"></span> <span th:text="'Верифіковано ' + ${session.loggedInUser.role.name()}"></span></span>
-                <span th:if="${session.loggedInUser.role.name() != 'CLIENT' and session.loggedInUser.verificationStatus.name() == 'REJECTED'}" style="display: flex; align-items: center; gap: 8px;"><span class="status-dot" style="background-color: #F44336;"></span> Відхилено (Оновіть документи)</span>
+                <span th:if="${user.role.name() == 'CLIENT'}" style="display: flex; align-items: center; gap: 8px;"><span class="status-dot approved"></span> Звичайний клієнт</span>
+                <span th:if="${user.role.name() != 'CLIENT' and user.verificationStatus.name() == 'PENDING'}" style="display: flex; align-items: center; gap: 8px;"><span class="status-dot pending"></span> Документи обробляються...</span>
+                <span th:if="${user.role.name() != 'CLIENT' and user.verificationStatus.name() == 'APPROVED'}" style="display: flex; align-items: center; gap: 8px;"><span class="status-dot approved"></span> <span th:text="'Верифіковано ' + ${user.role.name()}"></span></span>
+                <span th:if="${user.role.name() != 'CLIENT' and user.verificationStatus.name() == 'REJECTED'}" style="display: flex; align-items: center; gap: 8px;"><span class="status-dot" style="background-color: #F44336;"></span> Відхилено (Оновіть документи)</span>
             </div>
         </div>
     </div>
@@ -108,12 +109,12 @@
                 <h2 class="content-title">Налаштування безпеки</h2>
                 <form th:action="@{/edit-profile}" method="post" class="settings-form">
                     <div class="settings-form-row">
-                        <div class="settings-input-group"><label>Ім'я та Прізвище</label><input type="text" name="username" th:value="${session.loggedInUser.username}" required></div>
-                        <div class="settings-input-group"><label>Номер телефону</label><input type="text" name="phone" th:value="${session.loggedInUser.phone}" required></div>
+                        <div class="settings-input-group"><label>Ім'я та Прізвище</label><input type="text" name="username" th:value="${user.username}" required></div>
+                        <div class="settings-input-group"><label>Номер телефону</label><input type="text" name="phone" th:value="${user.phone}" required></div>
                     </div>
                     <div class="settings-form-row">
-                        <div class="settings-input-group"><label>Електронна пошта</label><input type="email" name="email" th:value="${session.loggedInUser.email}" required></div>
-                        <div class="settings-input-group"><label>Дата народження</label><input type="date" name="birthDate" th:value="${session.loggedInUser.birthDate}"></div>
+                        <div class="settings-input-group"><label>Електронна пошта</label><input type="email" name="email" th:value="${user.email}" required></div>
+                        <div class="settings-input-group"><label>Дата народження</label><input type="date" name="birthDate" th:value="${user.birthDate}"></div>
                     </div>
                     <div class="settings-input-group" style="margin-top: 20px;">
                         <label>Зміна пароля <span style="color: #888; font-size: 16px;">(залиште пустим, якщо не змінюєте)</span></label>
