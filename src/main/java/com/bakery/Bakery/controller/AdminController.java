@@ -26,11 +26,6 @@ public class AdminController {
     @Autowired private ProductRepository productRepository;
     @Autowired private ReviewRepository reviewRepository;
 
-    private User getCurrentAdmin() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated()) return null;
-        return userRepository.findByEmail(auth.getName()).orElse(null);
-    }
 
     // =============================================
     // ЗАМОВЛЕННЯ
