@@ -4,12 +4,12 @@ import com.bakery.Bakery.model.Role;
 import com.bakery.Bakery.model.User;
 import com.bakery.Bakery.model.VerificationStatus;
 import com.bakery.Bakery.repository.UserRepository;
+import com.bakery.Bakery.service.FileStorageService;
 import com.bakery.Bakery.service.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -20,25 +20,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Controller
 public class AuthController {
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private UserService userService;
-    public static final String UPLOAD_DIRECTORY = System.getProperty("user.dir") + "/uploads/documents";
-    public static final String PROFILE_PICS_DIRECTORY = System.getProperty("user.dir") + "/uploads/profiles";
+    @Autowired private UserRepository userRepository;
+    @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired private UserService userService;
+    @Autowired private FileStorageService fileStorageService;
 
     // ==========================================
     // 1. РЕЄСТРАЦІЯ
@@ -53,7 +43,7 @@ public class AuthController {
             @RequestParam("role") Role role,
             @RequestParam(value = "consent", defaultValue = "false") boolean consent,
             @RequestParam(value = "document", required = false) MultipartFile document,
-            HttpServletRequest request, // <--- ДОДАНО ДЛЯ АВТОВХОДУ
+            HttpServletRequest request,
             Model model) {
 
         if (!password.equals(confirmPassword)) {
@@ -70,7 +60,7 @@ public class AuthController {
         user.setUsername(username);
         user.setPhone(phone);
         user.setEmail(email);
-        user.setPassword(passwordEncoder.encode(password)); // Зберігаємо хеш
+        user.setPassword(passwordEncoder.encode(password));
         user.setRole(role);
         user.setConsent(consent);
 
@@ -80,30 +70,26 @@ public class AuthController {
             user.setVerificationStatus(VerificationStatus.NONE);
         }
 
-        // Логіка збереження файлу...
         if ((role == Role.ZSU || role == Role.DSNS) && document != null && !document.isEmpty()) {
             try {
-                saveFile(document, UPLOAD_DIRECTORY, user, true);
+                String savedPath = fileStorageService.saveFile(document, "uploads/documents");
+                user.setDocumentPath(savedPath);
             } catch (IOException e) {
                 model.addAttribute("error", "Помилка при завантаженні документа!");
                 return "register";
             }
         }
 
-        userRepository.save(user); // Зберегли в базу
+        userRepository.save(user);
 
-        // ==========================================
-        // АВТОВХІД ЧЕРЕЗ SPRING SECURITY
-        // ==========================================
         try {
-            // request.login сам захешує введений пароль і порівняє з базою
             request.login(email, password);
         } catch (ServletException e) {
             e.printStackTrace();
-            return "redirect:/login"; // Якщо щось пішло не так, кидаємо на логін
+            return "redirect:/login";
         }
 
-        return "redirect:/profile"; // Успішно! Перекидаємо одразу в профіль
+        return "redirect:/profile";
     }
 
     // ==========================================
@@ -118,7 +104,7 @@ public class AuthController {
             @RequestParam(value = "birthDate", required = false) String birthDateStr,
             @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture) {
 
-        User dbUser = getCurrentUser();
+        User dbUser = userService.getCurrentUser();
         if (dbUser == null) return "redirect:/login";
 
         dbUser.setUsername(username);
@@ -135,7 +121,8 @@ public class AuthController {
 
         if (profilePicture != null && !profilePicture.isEmpty()) {
             try {
-                saveFile(profilePicture, PROFILE_PICS_DIRECTORY, dbUser, false);
+                String savedPath = fileStorageService.saveFile(profilePicture, "uploads/profiles");
+                dbUser.setProfilePicturePath(savedPath);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -150,7 +137,7 @@ public class AuthController {
     // ==========================================
     @GetMapping("/delete-avatar")
     public String deleteAvatar() {
-        User dbUser = getCurrentUser();
+        User dbUser = userService.getCurrentUser();
         if (dbUser != null) {
             dbUser.setProfilePicturePath(null);
             userRepository.save(dbUser);
@@ -163,42 +150,12 @@ public class AuthController {
     // ==========================================
     @GetMapping("/delete-account")
     public String deleteAccount(HttpSession session) {
-        User dbUser = getCurrentUser();
+        User dbUser = userService.getCurrentUser();
         if (dbUser != null) {
             userRepository.deleteById(dbUser.getId());
             session.invalidate();
             SecurityContextHolder.clearContext();
         }
         return "redirect:/";
-    }
-
-    // ==========================================
-    // СЛУЖБОВІ МЕТОДИ (ПРИВАТНІ)
-    // ==========================================
-
-    private User getCurrentUser() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
-            return null;
-        }
-        return userRepository.findByEmail(auth.getName()).orElse(null);
-    }
-
-    private void saveFile(MultipartFile file, String directory, User user, boolean isDocument) throws IOException {
-        Path uploadPath = Paths.get(directory);
-        if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
-        }
-
-        String uniqueFileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-        Path filePath = uploadPath.resolve(uniqueFileName);
-        Files.write(filePath, file.getBytes());
-
-        String webPath = (isDocument ? "/uploads/documents/" : "/uploads/profiles/") + uniqueFileName;
-        if (isDocument) {
-            user.setDocumentPath(webPath);
-        } else {
-            user.setProfilePicturePath(webPath);
-        }
     }
 }

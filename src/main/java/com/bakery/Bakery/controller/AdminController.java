@@ -45,13 +45,11 @@ public class AdminController {
         } catch (Exception e) {
             orderStatus = Order.OrderStatus.NEW;
         }
-        model.addAttribute("orders",
-                orderRepository.findByOrderStatusOrderByCreatedAtDesc(orderStatus));
+        model.addAttribute("orders", orderRepository.findByOrderStatusOrderByCreatedAtDesc(orderStatus));
         model.addAttribute("currentStatus", orderStatus);
 
         for (Order.OrderStatus s : Order.OrderStatus.values()) {
-            model.addAttribute("count_" + s.name(),
-                    orderRepository.findByOrderStatusOrderByCreatedAtDesc(s).size());
+            model.addAttribute("count_" + s.name(), orderRepository.findByOrderStatusOrderByCreatedAtDesc(s).size());
         }
         return "admin/orders";
     }
@@ -75,8 +73,7 @@ public class AdminController {
     public String users(Model model) {
         model.addAttribute("users", userRepository.findAll());
         model.addAttribute("totalCount", userRepository.count());
-        model.addAttribute("pendingCount",
-                userRepository.countByVerificationStatus(VerificationStatus.PENDING));
+        model.addAttribute("pendingCount", userRepository.countByVerificationStatus(VerificationStatus.PENDING));
         return "admin/users";
     }
 
@@ -86,12 +83,9 @@ public class AdminController {
 
     @GetMapping("/verification")
     public String verification(Model model) {
-        model.addAttribute("pendingUsers",
-                userRepository.findByVerificationStatusOrderByIdDesc(VerificationStatus.PENDING));
-        model.addAttribute("approvedUsers",
-                userRepository.findByVerificationStatusOrderByIdDesc(VerificationStatus.APPROVED));
-        model.addAttribute("pendingCount",
-                userRepository.countByVerificationStatus(VerificationStatus.PENDING));
+        model.addAttribute("pendingUsers", userRepository.findByVerificationStatusOrderByIdDesc(VerificationStatus.PENDING));
+        model.addAttribute("approvedUsers", userRepository.findByVerificationStatusOrderByIdDesc(VerificationStatus.APPROVED));
+        model.addAttribute("pendingCount", userRepository.countByVerificationStatus(VerificationStatus.PENDING));
         return "admin/verification";
     }
 
@@ -118,10 +112,7 @@ public class AdminController {
     // =============================================
 
     @GetMapping("/assortment")
-    public String assortment(
-            @RequestParam(defaultValue = "FLAVOR") String catalog,
-            Model model) {
-
+    public String assortment(@RequestParam(defaultValue = "FLAVOR") String catalog, Model model) {
         Product.CatalogType catalogType;
         try {
             catalogType = Product.CatalogType.valueOf(catalog);
@@ -187,8 +178,7 @@ public class AdminController {
     }
 
     @PostMapping("/assortment/{id}/delete")
-    public String deleteProduct(@PathVariable Long id,
-                                @RequestParam(defaultValue = "FLAVOR") String catalog) {
+    public String deleteProduct(@PathVariable Long id, @RequestParam(defaultValue = "FLAVOR") String catalog) {
         productRepository.findById(id).ifPresent(p -> {
             if (p.getImagePath() != null) {
                 try {
@@ -202,8 +192,7 @@ public class AdminController {
     }
 
     @PostMapping("/assortment/{id}/toggle")
-    public String toggleProduct(@PathVariable Long id,
-                                @RequestParam(defaultValue = "FLAVOR") String catalog) {
+    public String toggleProduct(@PathVariable Long id, @RequestParam(defaultValue = "FLAVOR") String catalog) {
         productRepository.findById(id).ifPresent(p -> {
             p.setAvailable(!p.isAvailable());
             productRepository.save(p);
@@ -234,9 +223,7 @@ public class AdminController {
     }
 
     @PostMapping("/reviews/{id}/reply")
-    public String replyToReview(@PathVariable Long id,
-                                @RequestParam String reply,
-                                @RequestParam(defaultValue = "all") String filter) {
+    public String replyToReview(@PathVariable Long id, @RequestParam String reply, @RequestParam(defaultValue = "all") String filter) {
         reviewRepository.findById(id).ifPresent(review -> {
             review.setAdminReply(reply);
             reviewRepository.save(review);
@@ -245,8 +232,7 @@ public class AdminController {
     }
 
     @PostMapping("/reviews/{id}/hide")
-    public String hideReview(@PathVariable Long id,
-                             @RequestParam(defaultValue = "all") String filter) {
+    public String hideReview(@PathVariable Long id, @RequestParam(defaultValue = "all") String filter) {
         reviewRepository.findById(id).ifPresent(review -> {
             review.setHidden(!review.isHidden());
             reviewRepository.save(review);

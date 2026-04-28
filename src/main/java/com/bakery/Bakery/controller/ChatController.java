@@ -17,13 +17,8 @@ public class ChatController {
     @Autowired private ChatMessageRepository messageRepo;
     @Autowired private UserService userService;
 
-    // ─────────────────────────────────────────────────────────────────────
-    // КЛІЄНТ / ГІСТЬ — отримати або створити сесію
-    // ─────────────────────────────────────────────────────────────────────
     @PostMapping("/api/chat/session")
-    public ResponseEntity<?> getOrCreateSession(
-            @RequestBody(required = false) Map<String, String> body) {
-
+    public ResponseEntity<?> getOrCreateSession(@RequestBody(required = false) Map<String, String> body) {
         User currentUser = userService.getCurrentUser();
         ChatSession session;
 
@@ -56,8 +51,7 @@ public class ChatController {
     }
 
     @GetMapping("/api/chat/{sessionId}/messages")
-    public ResponseEntity<?> getMessages(@PathVariable Long sessionId,
-                                         @RequestParam(required = false) String guestToken) {
+    public ResponseEntity<?> getMessages(@PathVariable Long sessionId, @RequestParam(required = false) String guestToken) {
         if (!hasAccess(sessionId, guestToken)) return ResponseEntity.status(403).build();
 
         sessionRepo.findById(sessionId).ifPresent(s -> {
@@ -70,8 +64,7 @@ public class ChatController {
     }
 
     @PostMapping("/api/chat/{sessionId}/send")
-    public ResponseEntity<?> sendMessage(@PathVariable Long sessionId,
-                                         @RequestBody Map<String, String> body) {
+    public ResponseEntity<?> sendMessage(@PathVariable Long sessionId, @RequestBody Map<String, String> body) {
         String guestToken = body.get("guestToken");
         if (!hasAccess(sessionId, guestToken)) return ResponseEntity.status(403).build();
 
@@ -125,8 +118,7 @@ public class ChatController {
     }
 
     @PostMapping("/api/admin/chat/{sessionId}/send")
-    public ResponseEntity<?> adminSend(@PathVariable Long sessionId,
-                                       @RequestBody Map<String, String> body) {
+    public ResponseEntity<?> adminSend(@PathVariable Long sessionId, @RequestBody Map<String, String> body) {
         if (!isAdmin()) return ResponseEntity.status(403).build();
 
         String text = body.get("text");
@@ -147,8 +139,6 @@ public class ChatController {
 
         return ResponseEntity.ok(Map.of("ok", true));
     }
-
-    // ─── Допоміжні ───────────────────────────────────────────────────────
 
     private boolean isAdmin() {
         User u = userService.getCurrentUser();
