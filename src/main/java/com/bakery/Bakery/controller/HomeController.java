@@ -78,11 +78,4 @@ public class HomeController {
         return "product-detail";
     }
 
-    @GetMapping("/gen-password")
-    @ResponseBody
-    public String genPass() {
-        org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder encoder =
-                new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
-        return encoder.encode("19102005");
-    }
 }

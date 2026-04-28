@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Оформити замовлення — CakeHouse</title>
+    <th:block th:replace="~{header :: head}"></th:block>
+</head>
+<body>
+<th:block th:replace="~{header :: navbar}"></th:block>
+
+<main class="container" style="max-width:640px; margin:3rem auto; padding:0 1rem;">
+    <h1 class="page-title">🎂 Оформити замовлення</h1>
+
+    <!-- Flash-повідомлення про помилку -->
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <form th:action="@{/orders/new}" th:object="${orderDto}" method="post">
+
+        <!-- Склад замовлення -->
+        <div class="form-group">
+            <label>Що замовляєте? *</label>
+            <textarea th:field="*{composition}" class="form-control" rows="4"
+                      placeholder="Наприклад: Торт на день народження, шоколадний, 2 кг, з малиною..."
+                      required></textarea>
+            <small th:if="${#fields.hasErrors('composition')}" class="text-danger"
+                   th:errors="*{composition}"></small>
+        </div>
+
+        <!-- Дедлайн -->
+        <div class="form-group">
+            <label>Коли потрібно? *</label>
+            <input type="datetime-local" th:field="*{deadline}" class="form-control" required>
+            <small th:if="${#fields.hasErrors('deadline')}" class="text-danger"
+                   th:errors="*{deadline}"></small>
+        </div>
+
+        <!-- Вага -->
+        <div class="form-group">
+            <label>Приблизна вага (кг)</label>
+            <input type="number" th:field="*{weightKg}" class="form-control"
+                   step="0.1" min="0.5" placeholder="1.5">
+        </div>
+
+        <!-- Адреса -->
+        <div class="form-group">
+            <label>Адреса доставки / самовивіз *</label>
+            <input type="text" th:field="*{address}" class="form-control"
+                   placeholder="вул. Шевченка 12, кв. 4" required>
+            <small th:if="${#fields.hasErrors('address')}" class="text-danger"
+                   th:errors="*{address}"></small>
+        </div>
+
+        <!-- Коментар -->
+        <div class="form-group">
+            <label>Додаткові побажання</label>
+            <textarea th:field="*{comment}" class="form-control" rows="3"
+                      placeholder="Написати на торті, алергії, особливі побажання..."></textarea>
+        </div>
+
+        <!-- Приховані поля (заповнюються AI/конструктором) -->
+        <input type="hidden" th:field="*{aiImageUrl}">
+        <input type="hidden" th:field="*{constructorImg}">
+
+        <button type="submit" class="btn btn-primary" style="width:100%; margin-top:1rem;">
+            Відправити замовлення
+        </button>
+    </form>
+</main>
+</body>
+</html>

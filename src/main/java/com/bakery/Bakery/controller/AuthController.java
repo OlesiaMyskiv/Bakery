@@ -1,23 +1,26 @@
 package com.bakery.Bakery.controller;
 
+import com.bakery.Bakery.dto.EditProfileDTO;
+import com.bakery.Bakery.dto.RegisterDTO;
 import com.bakery.Bakery.model.Role;
 import com.bakery.Bakery.model.User;
 import com.bakery.Bakery.model.VerificationStatus;
 import com.bakery.Bakery.repository.UserRepository;
 import com.bakery.Bakery.service.FileStorageService;
+import com.bakery.Bakery.service.PasswordResetService;
 import com.bakery.Bakery.service.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -25,52 +28,69 @@ import java.time.LocalDate;
 @Controller
 public class AuthController {
 
-    @Autowired private UserRepository userRepository;
-    @Autowired private PasswordEncoder passwordEncoder;
-    @Autowired private UserService userService;
-    @Autowired private FileStorageService fileStorageService;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final UserService userService;
+    private final FileStorageService fileStorageService;
+    private final PasswordResetService passwordResetService;
 
-    // ==========================================
-    // 1. РЕЄСТРАЦІЯ
-    // ==========================================
+    public AuthController(UserRepository userRepository,
+                          PasswordEncoder passwordEncoder,
+                          UserService userService,
+                          FileStorageService fileStorageService,
+                          PasswordResetService passwordResetService) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.userService = userService;
+        this.fileStorageService = fileStorageService;
+        this.passwordResetService = passwordResetService;
+    }
+
+    // ── Реєстрація ────────────────────────────────────────────────────────────
+
+    @GetMapping("/register")
+    public String registerPage(Model model) {
+        model.addAttribute("registerDto", new RegisterDTO());
+        return "register";
+    }
+
     @PostMapping("/register")
     public String registerUser(
-            @RequestParam("username") String username,
-            @RequestParam("phone") String phone,
-            @RequestParam("email") String email,
-            @RequestParam("password") String password,
-            @RequestParam("confirm_password") String confirmPassword,
-            @RequestParam("role") Role role,
-            @RequestParam(value = "consent", defaultValue = "false") boolean consent,
+            @Valid @ModelAttribute("registerDto") RegisterDTO dto,
+            BindingResult bindingResult,
             @RequestParam(value = "document", required = false) MultipartFile document,
             HttpServletRequest request,
             Model model) {
 
-        if (!password.equals(confirmPassword)) {
+        // ── Валідація ──────────────────────────────────────────────────────────
+        if (bindingResult.hasErrors()) return "register";
+
+        if (!dto.passwordsMatch()) {
             model.addAttribute("error", "Паролі не співпадають!");
             return "register";
         }
-
-        if (userRepository.findByEmail(email).isPresent()) {
+        if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
             model.addAttribute("error", "Користувач з такою поштою вже існує!");
             return "register";
         }
 
+        // ── Створення юзера ───────────────────────────────────────────────────
         User user = new User();
-        user.setUsername(username);
-        user.setPhone(phone);
-        user.setEmail(email);
-        user.setPassword(passwordEncoder.encode(password));
-        user.setRole(role);
-        user.setConsent(consent);
+        user.setUsername(dto.getUsername());
+        user.setPhone(dto.getPhone());
+        user.setEmail(dto.getEmail());
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        user.setRole(dto.getRole());
+        user.setConsent(dto.isConsent());
 
-        if (role == Role.ZSU || role == Role.DSNS) {
-            user.setVerificationStatus(VerificationStatus.PENDING);
-        } else {
-            user.setVerificationStatus(VerificationStatus.NONE);
-        }
+        boolean needsVerification = dto.getRole() == Role.ZSU
+                || dto.getRole() == Role.DSNS
+                || dto.getRole() == Role.DPSU;
+        user.setVerificationStatus(needsVerification
+                ? VerificationStatus.PENDING
+                : VerificationStatus.NONE);
 
-        if ((role == Role.ZSU || role == Role.DSNS) && document != null && !document.isEmpty()) {
+        if (needsVerification && document != null && !document.isEmpty()) {
             try {
                 String savedPath = fileStorageService.saveFile(document, "uploads/documents");
                 user.setDocumentPath(savedPath);
@@ -82,60 +102,60 @@ public class AuthController {
 
         userRepository.save(user);
 
+        // ── Автологін після реєстрації ────────────────────────────────────────
         try {
-            request.login(email, password);
+            request.login(dto.getEmail(), dto.getPassword());
         } catch (ServletException e) {
-            e.printStackTrace();
             return "redirect:/login";
         }
-
         return "redirect:/profile";
     }
 
-    // ==========================================
-    // 2. РЕДАГУВАННЯ ПРОФІЛЮ
-    // ==========================================
+    // ── Редагування профілю ───────────────────────────────────────────────────
+
     @PostMapping("/edit-profile")
     public String editProfile(
-            @RequestParam("username") String username,
-            @RequestParam("email") String email,
-            @RequestParam("phone") String phone,
-            @RequestParam(value = "password", required = false) String password,
-            @RequestParam(value = "birthDate", required = false) String birthDateStr,
-            @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture) {
+            @Valid @ModelAttribute EditProfileDTO dto,
+            BindingResult bindingResult,
+            @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture,
+            RedirectAttributes redirectAttributes) {
+
+        if (bindingResult.hasErrors()) {
+            redirectAttributes.addFlashAttribute("error", "Перевірте введені дані.");
+            return "redirect:/profile";
+        }
 
         User dbUser = userService.getCurrentUser();
         if (dbUser == null) return "redirect:/login";
 
-        dbUser.setUsername(username);
-        dbUser.setEmail(email);
-        dbUser.setPhone(phone);
+        dbUser.setUsername(dto.getUsername());
+        dbUser.setEmail(dto.getEmail());
+        dbUser.setPhone(dto.getPhone());
 
-        if (password != null && !password.isEmpty()) {
-            dbUser.setPassword(passwordEncoder.encode(password));
+        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+            dbUser.setPassword(passwordEncoder.encode(dto.getPassword()));
         }
-
-        if (birthDateStr != null && !birthDateStr.isEmpty()) {
-            dbUser.setBirthDate(LocalDate.parse(birthDateStr));
+        if (dto.getBirthDate() != null && !dto.getBirthDate().isBlank()) {
+            dbUser.setBirthDate(LocalDate.parse(dto.getBirthDate()));
         }
-
         if (profilePicture != null && !profilePicture.isEmpty()) {
             try {
                 String savedPath = fileStorageService.saveFile(profilePicture, "uploads/profiles");
                 dbUser.setProfilePicturePath(savedPath);
             } catch (IOException e) {
-                e.printStackTrace();
+                redirectAttributes.addFlashAttribute("error", "Помилка завантаження фото.");
+                return "redirect:/profile";
             }
         }
 
         userRepository.save(dbUser);
-        return "redirect:/profile?updated";
+        redirectAttributes.addFlashAttribute("successMsg", "Профіль успішно оновлено!");
+        return "redirect:/profile";
     }
 
-    // ==========================================
-    // 3. ВИДАЛЕННЯ АВАТАРКИ
-    // ==========================================
-    @GetMapping("/delete-avatar")
+    // ── Видалення аватарки ────────────────────────────────────────────────────
+
+    @PostMapping("/delete-avatar")
     public String deleteAvatar() {
         User dbUser = userService.getCurrentUser();
         if (dbUser != null) {
@@ -145,10 +165,9 @@ public class AuthController {
         return "redirect:/profile";
     }
 
-    // ==========================================
-    // 4. ВИДАЛЕННЯ АКАУНТУ
-    // ==========================================
-    @GetMapping("/delete-account")
+    // ── Видалення акаунту ─────────────────────────────────────────────────────
+
+    @PostMapping("/delete-account")
     public String deleteAccount(HttpSession session) {
         User dbUser = userService.getCurrentUser();
         if (dbUser != null) {
@@ -157,5 +176,17 @@ public class AuthController {
             SecurityContextHolder.clearContext();
         }
         return "redirect:/";
+    }
+
+    // ── Відновлення пароля ────────────────────────────────────────────────────
+
+    @PostMapping("/forgot-password")
+    public String forgotPassword(@RequestParam("email") String email,
+                                 RedirectAttributes redirectAttributes) {
+        // Завжди показуємо успіх — щоб не розкривати наявність email у системі
+        passwordResetService.resetPassword(email.trim().toLowerCase());
+        redirectAttributes.addFlashAttribute("successMsg",
+                "Якщо такий email зареєстрований — тимчасовий пароль надіслано.");
+        return "redirect:/forgot-password";
     }
 }
