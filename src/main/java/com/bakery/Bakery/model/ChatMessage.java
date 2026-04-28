@@ -11,13 +11,14 @@ public class ChatMessage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // До якої сесії належить повідомлення
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", nullable = false)
-    private Order order;
+    @JoinColumn(name = "session_id", nullable = false)
+    private ChatSession session;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sender_id", nullable = false)
-    private User sender;
+    // true = від адміна, false = від клієнта/гостя
+    @Column(name = "from_admin")
+    private boolean fromAdmin = false;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String text;
@@ -25,26 +26,19 @@ public class ChatMessage {
     @Column(name = "sent_at")
     private LocalDateTime sentAt = LocalDateTime.now();
 
-    // true = прочитано клієнтом, false = нове повідомлення від адміна
-    @Column(name = "read_by_client")
-    private boolean readByClient = false;
-
     // Getters & Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
-    public Order getOrder() { return order; }
-    public void setOrder(Order order) { this.order = order; }
+    public ChatSession getSession() { return session; }
+    public void setSession(ChatSession session) { this.session = session; }
 
-    public User getSender() { return sender; }
-    public void setSender(User sender) { this.sender = sender; }
+    public boolean isFromAdmin() { return fromAdmin; }
+    public void setFromAdmin(boolean fromAdmin) { this.fromAdmin = fromAdmin; }
 
     public String getText() { return text; }
     public void setText(String text) { this.text = text; }
 
     public LocalDateTime getSentAt() { return sentAt; }
     public void setSentAt(LocalDateTime sentAt) { this.sentAt = sentAt; }
-
-    public boolean isReadByClient() { return readByClient; }
-    public void setReadByClient(boolean readByClient) { this.readByClient = readByClient; }
 }

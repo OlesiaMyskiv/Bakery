@@ -300,4 +300,11 @@ public class AdminController {
         });
         return "redirect:/admin/reviews?filter=" + filter;
     }
+
+    @GetMapping("/chats")
+    public String chatsPage(Model model) {
+        model.addAttribute("adminUser", getCurrentAdmin());
+        return "admin/chats";
+    }
+
 }

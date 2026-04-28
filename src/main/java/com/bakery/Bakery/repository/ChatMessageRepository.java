@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> {
-    List<ChatMessage> findByOrderIdOrderBySentAtAsc(Long orderId);
-    long countByOrderIdAndReadByClientFalse(Long orderId);
+    List<ChatMessage> findBySessionIdOrderBySentAtAsc(Long sessionId);
+    long countBySessionIdAndFromAdminFalse(Long sessionId); // непрочитані від клієнта
 }
