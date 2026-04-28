@@ -1,0 +1,245 @@
+/* =========================================
+   AI Cake Designer Page Styles
+   ========================================= */
+
+/* --- Анімації --- */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Анімація перетікання фону */
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Анімація пульсації ТІЛЬКИ для тексту */
+@keyframes pulseOpacity {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+@keyframes fadeInImage {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* --- Загальна структура --- */
+.ai-page-wrapper {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+.ai-title {
+    color: #5d4037;
+    font-family: 'Love Light', cursive;
+    font-size: 5rem;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: 400;
+    animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.designer-section {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 50px;
+    align-items: stretch;
+    animation: fadeInUp 1s ease-out 0.2s forwards;
+    opacity: 0;
+}
+
+/* --- Ліва частина: Форма --- */
+.prompt-side {
+    box-sizing: border-box;
+    width: 50%;
+    flex: 0 0 calc(50% - 15px);
+    background: #fff;
+    padding: 30px;
+    border-radius: 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    min-height: 550px;
+}
+
+.prompt-side h3 {
+    margin-top: 0;
+    color: #5d4037;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.prompt-side p {
+    color: #8d6e63;
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+}
+
+/* Підказки (Chips) */
+.suggestions-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.suggestion-tag {
+    background: #fce4ec;
+    color: #d81b60;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    user-select: none;
+}
+
+.suggestion-tag:hover {
+    background: #f8bbd0;
+    border-color: #f06292;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(240, 98, 146, 0.2);
+}
+
+.prompt-textarea {
+    box-sizing: border-box;
+    flex-grow: 1;
+    width: 100%;
+    min-height: 150px;
+    border: 2px solid #fce4ec;
+    border-radius: 16px;
+    padding: 20px;
+    margin: 10px 0 20px 0;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    resize: none;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.prompt-textarea:focus {
+    border-color: #f06292;
+}
+
+.btn-generate {
+    background: #f06292;
+    color: white;
+    border: none;
+    padding: 18px;
+    border-radius: 12px;
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 700;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn-generate:hover {
+    background: #ec407a;
+}
+
+.btn-generate.disabled {
+    background: #d9d9d9;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* --- Права частина: Результат --- */
+.result-side {
+    box-sizing: border-box;
+    width: 50%;
+    flex: 0 0 calc(50% - 15px);
+    background: #fdf2f5;
+    border: 3px dashed #f8bbd0;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    min-height: 550px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+/* Ховаємо старий тортик під час завантаження */
+.result-side.is-loading .result-placeholder {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* КОЛЬОРОВИЙ ФОН (М'ятний, Кораловий, Білий) */
+.result-side.is-loading::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, #C1ECE4, #FFFFFF, #FF9EAA, #C1ECE4);
+    background-size: 400% 400%;
+    z-index: 5;
+    animation: gradientShift 3s ease infinite;
+}
+
+/* ТЕКСТ ПОВЕРХ ФОНУ */
+.result-side.is-loading::after {
+    content: "✨ Готуємо ваш шедевр...";
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #5d4037;
+    z-index: 10;
+    white-space: nowrap;
+    animation: pulseOpacity 1.5s ease-in-out infinite;
+}
+
+.result-placeholder {
+    text-align: center;
+    color: #ad1457;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+.generated-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: relative;
+    z-index: 20;
+    animation: fadeInImage 1s ease-in-out;
+}
+
+/* --- Секція "Як це працює" --- */
+.how-it-works-bar {
+    background: #5d4037;
+    color: white;
+    padding: 40px;
+    border-radius: 24px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    font-family: 'Cormorant Garamond', serif;
+    animation: fadeInUp 1s ease-out 0.4s forwards;
+    opacity: 0;
+}
+
+.work-step h4 {
+    color: #f06292;
+    margin-bottom: 10px;
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+
+.work-step p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    line-height: 1.4;
+}

@@ -1,0 +1,233 @@
+/* ===============================
+   СТИЛІ АВТОРИЗАЦІЇ (ВХІД, РЕЄСТРАЦІЯ, ПАРОЛЬ)
+   =============================== */
+
+/* --- Загальна структура сторінок --- */
+.login-body {
+    background-color: #C1ECE4;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.login-main {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* --- Картки (Login & Register) --- */
+.login-card {
+    background-color: #FFFFFF;
+    padding: 40px 50px;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 450px;
+    font-family: 'Cormorant Garamond', serif;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+}
+
+.register-card {
+    max-width: 500px; /* Трохи ширша для реєстрації */
+    margin-top: 50px;
+    margin-bottom: 50px;
+}
+
+.login-title {
+    color: #3AA6B9;
+    font-size: 38px;
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 30px;
+    font-weight: 400;
+}
+
+/* --- Поля вводу та лейбли --- */
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label, .status-label-main {
+    display: block;
+    color: #333333;
+    font-size: 20px;
+    margin-bottom: 8px;
+}
+
+.input-group input {
+    width: 100%;
+    background-color: #D9D9D9;
+    border: none;
+    border-radius: 20px;
+    padding: 12px 20px;
+    font-size: 18px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+/* --- Кнопки та посилання --- */
+.login-btn {
+    background-color: #FF9EAA;
+    border: none;
+    border-radius: 20px;
+    width: 100%;
+    height: 48px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 15px;
+    font-family: 'Cormorant Garamond', serif !important;
+    font-size: 26px;
+    color: #333333;
+    font-weight: 400;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-btn:hover {
+    background-color: #E2A8A8;
+}
+
+.forgot-password {
+    display: block;
+    color: #3AA6B9;
+    font-size: 16px;
+    margin-top: 8px;
+    text-decoration: none;
+}
+
+.register-link {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 20px;
+    color: #333333;
+}
+
+.register-link a {
+    color: #3AA6B9;
+    text-decoration: none;
+}
+
+/* --- Спеціальні елементи реєстрації --- */
+
+/* 1. Кастомні Радіокнопки (Статус) */
+.status-group { margin-bottom: 25px; }
+
+.custom-radio {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin-bottom: 10px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+}
+
+.custom-radio input[type="radio"] { display: none; }
+
+.radio-mark {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+    margin-right: 10px;
+    display: inline-block;
+    position: relative;
+    transition: border-color 0.3s ease;
+}
+
+.radio-mark::after {
+    content: "";
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff9eaa 0%, #e2a8a8 100%);
+    transition: transform 0.3s ease;
+}
+
+.custom-radio input[type="radio"]:checked + .radio-mark { border-color: #ff9eaa; }
+.custom-radio input[type="radio"]:checked + .radio-mark::after { transform: translate(-50%, -50%) scale(1); }
+
+/* 2. Блок завантаження фото */
+.file-upload-box {
+    width: 140px; height: 140px;
+    background-color: #D9D9D9;
+    border-radius: 20px;
+    margin: 15px auto 25px auto;
+    position: relative;
+    overflow: hidden;
+}
+
+.file-upload-box input { display: none; }
+.file-upload-box label {
+    display: flex; justify-content: center; align-items: center;
+    width: 100%; height: 100%;
+    font-size: 40px; color: #FFFFFF;
+    cursor: pointer; transition: background-color 0.3s ease;
+}
+.file-upload-box label:hover { background-color: #cccccc; }
+
+/* 3. Кастомний Чекбокс (Галочка) */
+.custom-checkbox {
+    display: flex;
+    align-items: flex-start;
+    cursor: pointer;
+    margin-bottom: 25px;
+    position: relative;
+    user-select: none;
+}
+
+.custom-checkbox input { position: absolute; opacity: 0; cursor: pointer; height: 0; width: 0; }
+
+.checkmark {
+    width: 22px; height: 22px;
+    background-color: #D9D9D9;
+    margin-right: 15px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    position: relative;
+    transition: background-color 0.3s ease;
+}
+
+.custom-checkbox input:checked ~ .checkmark { background-color: #FF9EAA; }
+.checkmark:after { content: ""; position: absolute; display: none; }
+.custom-checkbox input:checked ~ .checkmark:after { display: block; }
+
+.custom-checkbox .checkmark:after {
+    left: 7px; top: 3px;
+    width: 6px; height: 12px;
+    border: solid white;
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+}
+
+.consent-text {
+    font-size: 16px;
+    color: #333333;
+    line-height: 1.4;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+/* --- Додаткові утиліти (Помилки та Повідомлення) --- */
+.auth-alert {
+    background: #fdecea;
+    color: #c62828;
+    border: 1px solid #ef9a9a;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.auth-text {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.text-center { text-align: center; }

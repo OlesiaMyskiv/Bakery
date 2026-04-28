@@ -1,0 +1,119 @@
+/* ===============================
+   ГОЛОВНА ШАПКА (HEADER)
+   =============================== */
+.main-header {
+    background-color: #FFFFFF;
+    padding: 10px 0;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.03);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.header-container {
+    max-width: 1300px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    padding: 0 30px;
+}
+
+.header-left {
+    display: flex;
+    flex: 1;
+    justify-content: flex-end;
+    padding-right: 50px;
+}
+
+/* --- Ефект для ЛОГОТИПУ --- */
+.logo-central {
+    font-family: 'Love Light', cursive;
+    font-size: 64px;
+    color: #FF9EAA;
+    text-decoration: none;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    transition: all 0.4s ease;
+}
+
+.logo-central:hover {
+    color: #e88d99;
+    transform: scale(1.05);
+    text-shadow: 2px 2px 10px rgba(255, 158, 170, 0.3);
+}
+
+.header-right {
+    display: flex;
+    flex: 1;
+    justify-content: flex-start;
+    align-items: center;
+    padding-left: 50px;
+    gap: 50px;
+}
+
+/* --- Меню навігації --- */
+.main-nav ul {
+    list-style: none;
+    display: flex;
+    gap: 80px;
+    margin: 0;
+    padding: 0;
+}
+
+.main-nav ul li a {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    color: #333333;
+    text-decoration: none;
+    font-weight: 400;
+    white-space: nowrap;
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.main-nav ul li a:hover {
+    color: #FF9EAA;
+}
+
+/* Тонка лінія при наведенні */
+.main-nav ul li a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 1px;
+    bottom: -2px;
+    left: 0;
+    background-color: #FF9EAA;
+    transition: width 0.3s ease;
+}
+
+.main-nav ul li a:hover::after {
+    width: 100%;
+}
+
+/* --- Іконки (Кошик, Профіль) --- */
+.header-icons {
+    display: flex;
+    gap: 55px;
+}
+
+.icon-link {
+    display: flex;
+    align-items: center;
+    transition: transform 0.3s ease;
+}
+
+.icon-link img {
+    width: 28px;
+    height: 28px;
+    opacity: 0.7;
+    filter: grayscale(20%);
+    transition: all 0.3s ease;
+}
+
+.icon-link:hover img {
+    opacity: 1;
+    transform: scale(1.2);
+    filter: grayscale(0%) brightness(0.8);
+}
