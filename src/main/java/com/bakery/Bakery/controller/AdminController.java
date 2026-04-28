@@ -3,6 +3,8 @@ package com.bakery.Bakery.controller;
 import com.bakery.Bakery.model.*;
 import com.bakery.Bakery.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -23,36 +25,35 @@ public class AdminController {
     @Autowired private ProductRepository productRepository;
     @Autowired private ReviewRepository reviewRepository;
 
+    // Допоміжний метод — отримати поточного адміна для сайдбару
+    private User getCurrentAdmin() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) return null;
+        return userRepository.findByEmail(auth.getName()).orElse(null);
+    }
+
     // =============================================
     // ЗАМОВЛЕННЯ
     // =============================================
 
-    @GetMapping("/admin")
-    public String adminHome(Model model) {
-        return ordersPage("NEW", model);
-    }
-
-    @GetMapping("/orders")
+    @GetMapping({"/admin", "/orders"})
     public String orders(@RequestParam(defaultValue = "NEW") String status, Model model) {
-        return ordersPage(status, model);
-    }
-
-    private String ordersPage(String status, Model model) {
-        Orderі.OrderStatus orderStatus;
+        Order.OrderStatus orderStatus;
         try {
-            orderStatus = Orderі.OrderStatus.valueOf(status);
+            orderStatus = Order.OrderStatus.valueOf(status);
         } catch (Exception e) {
-            orderStatus = Orderі.OrderStatus.NEW;
+            orderStatus = Order.OrderStatus.NEW;
         }
 
-        model.addAttribute("orders", orderRepository.findByOrderStatusOrderByCreatedAtDesc(orderStatus));
+        model.addAttribute("orders",
+                orderRepository.findByOrderStatusOrderByCreatedAtDesc(orderStatus));
         model.addAttribute("currentStatus", orderStatus);
-        model.addAttribute("allStatuses", Orderі.OrderStatus.values());
+        model.addAttribute("adminUser", getCurrentAdmin());
 
-        // лічильники для вкладок
-        for (Orderі.OrderStatus s : Orderі.OrderStatus.values()) {
+        // Лічильники для вкладок
+        for (Order.OrderStatus s : Order.OrderStatus.values()) {
             model.addAttribute("count_" + s.name(),
-                orderRepository.findByOrderStatusOrderByCreatedAtDesc(s).size());
+                    orderRepository.findByOrderStatusOrderByCreatedAtDesc(s).size());
         }
         return "admin/orders";
     }
@@ -62,7 +63,7 @@ public class AdminController {
                                     @RequestParam String status,
                                     @RequestParam(defaultValue = "NEW") String currentStatus) {
         orderRepository.findById(id).ifPresent(order -> {
-            order.setOrderStatus(Orderі.OrderStatus.valueOf(status));
+            order.setOrderStatus(Order.OrderStatus.valueOf(status));
             orderRepository.save(order);
         });
         return "redirect:/admin/orders?status=" + currentStatus;
@@ -77,7 +78,8 @@ public class AdminController {
         model.addAttribute("users", userRepository.findAll());
         model.addAttribute("totalCount", userRepository.count());
         model.addAttribute("pendingCount",
-            userRepository.countByVerificationStatus(VerificationStatus.PENDING));
+                userRepository.countByVerificationStatus(VerificationStatus.PENDING));
+        model.addAttribute("adminUser", getCurrentAdmin());
         return "admin/users";
     }
 
@@ -88,11 +90,12 @@ public class AdminController {
     @GetMapping("/verification")
     public String verification(Model model) {
         model.addAttribute("pendingUsers",
-            userRepository.findByVerificationStatusOrderByIdDesc(VerificationStatus.PENDING));
+                userRepository.findByVerificationStatusOrderByIdDesc(VerificationStatus.PENDING));
         model.addAttribute("approvedUsers",
-            userRepository.findByVerificationStatusOrderByIdDesc(VerificationStatus.APPROVED));
+                userRepository.findByVerificationStatusOrderByIdDesc(VerificationStatus.APPROVED));
         model.addAttribute("pendingCount",
-            userRepository.countByVerificationStatus(VerificationStatus.PENDING));
+                userRepository.countByVerificationStatus(VerificationStatus.PENDING));
+        model.addAttribute("adminUser", getCurrentAdmin());
         return "admin/verification";
     }
 
@@ -123,16 +126,18 @@ public class AdminController {
         if (type != null && !type.isEmpty()) {
             try {
                 model.addAttribute("products",
-                    productRepository.findByTypeOrderByNameAsc(Product.ProductType.valueOf(type)));
+                        productRepository.findByTypeOrderByNameAsc(Product.ProductType.valueOf(type)));
                 model.addAttribute("currentType", type);
             } catch (Exception e) {
                 model.addAttribute("products", productRepository.findAllByOrderByTypeAscNameAsc());
+                model.addAttribute("currentType", "ALL");
             }
         } else {
             model.addAttribute("products", productRepository.findAllByOrderByTypeAscNameAsc());
             model.addAttribute("currentType", "ALL");
         }
         model.addAttribute("productTypes", Product.ProductType.values());
+        model.addAttribute("adminUser", getCurrentAdmin());
         return "admin/assortment";
     }
 
@@ -154,7 +159,6 @@ public class AdminController {
             String uploadDir = System.getProperty("user.dir") + "/uploads/products";
             Path uploadPath = Paths.get(uploadDir);
             if (!Files.exists(uploadPath)) Files.createDirectories(uploadPath);
-
             String fileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
             Files.write(uploadPath.resolve(fileName), image.getBytes());
             product.setImagePath("/uploads/products/" + fileName);
@@ -188,29 +192,30 @@ public class AdminController {
         switch (filter) {
             case "unanswered":
                 model.addAttribute("reviews",
-                    reviewRepository.findByAdminReplyIsNullAndHiddenFalseOrderByCreatedAtDesc());
+                        reviewRepository.findByAdminReplyIsNullAndHiddenFalseOrderByCreatedAtDesc());
                 break;
             case "hidden":
                 model.addAttribute("reviews",
-                    reviewRepository.findAllByOrderByCreatedAtDesc()
-                        .stream().filter(r -> r.isHidden()).toList());
+                        reviewRepository.findAllByOrderByCreatedAtDesc()
+                                .stream().filter(Review::isHidden).toList());
                 break;
             default:
                 model.addAttribute("reviews",
-                    reviewRepository.findByHiddenFalseOrderByCreatedAtDesc());
+                        reviewRepository.findByHiddenFalseOrderByCreatedAtDesc());
         }
         model.addAttribute("filter", filter);
         model.addAttribute("unansweredCount",
-            reviewRepository.countByAdminReplyIsNullAndHiddenFalse());
+                reviewRepository.countByAdminReplyIsNullAndHiddenFalse());
         model.addAttribute("totalCount",
-            reviewRepository.findByHiddenFalseOrderByCreatedAtDesc().size());
+                reviewRepository.findByHiddenFalseOrderByCreatedAtDesc().size());
+        model.addAttribute("adminUser", getCurrentAdmin());
         return "admin/reviews";
     }
 
     @PostMapping("/reviews/{id}/reply")
     public String replyToReview(@PathVariable Long id,
-                                 @RequestParam String reply,
-                                 @RequestParam(defaultValue = "all") String filter) {
+                                @RequestParam String reply,
+                                @RequestParam(defaultValue = "all") String filter) {
         reviewRepository.findById(id).ifPresent(review -> {
             review.setAdminReply(reply);
             reviewRepository.save(review);
@@ -220,7 +225,7 @@ public class AdminController {
 
     @PostMapping("/reviews/{id}/hide")
     public String hideReview(@PathVariable Long id,
-                              @RequestParam(defaultValue = "all") String filter) {
+                             @RequestParam(defaultValue = "all") String filter) {
         reviewRepository.findById(id).ifPresent(review -> {
             review.setHidden(!review.isHidden());
             reviewRepository.save(review);

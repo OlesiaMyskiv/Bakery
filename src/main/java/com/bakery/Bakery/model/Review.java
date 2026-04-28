@@ -17,13 +17,20 @@ public class Review {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")
-    private Orderі order;
+    private Order order;          // ← тут було Orderі (кирилиця) — виправлено на Order
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
+    private Product product;      // ← додано зв'язок з товаром
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String text;
 
     @Column(name = "rating", nullable = false)
-    private Integer rating; // 1-5
+    private Integer rating;
+
+    @Column(name = "photo_path")
+    private String photoPath;     // фото від клієнта
 
     @Column(name = "admin_reply", columnDefinition = "TEXT")
     private String adminReply;
@@ -41,14 +48,20 @@ public class Review {
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
 
-    public Orderі getOrder() { return order; }
-    public void setOrder(Orderі order) { this.order = order; }
+    public Order getOrder() { return order; }
+    public void setOrder(Order order) { this.order = order; }
+
+    public Product getProduct() { return product; }
+    public void setProduct(Product product) { this.product = product; }
 
     public String getText() { return text; }
     public void setText(String text) { this.text = text; }
 
     public Integer getRating() { return rating; }
     public void setRating(Integer rating) { this.rating = rating; }
+
+    public String getPhotoPath() { return photoPath; }
+    public void setPhotoPath(String photoPath) { this.photoPath = photoPath; }
 
     public String getAdminReply() { return adminReply; }
     public void setAdminReply(String adminReply) { this.adminReply = adminReply; }

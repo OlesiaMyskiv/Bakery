@@ -48,7 +48,8 @@ public class SecurityConfig {
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .usernameParameter("username") // Якщо в HTML ви залишили name="email", змініть це на "email"
+                        .usernameParameter("username")
+                        .passwordParameter("password")
                         .successHandler((request, response, authentication) -> {
                             String role = authentication.getAuthorities().iterator().next().getAuthority();
                             if (role.equals("SUPER_ADMIN") || role.equals("ROLE_SUPER_ADMIN")) {

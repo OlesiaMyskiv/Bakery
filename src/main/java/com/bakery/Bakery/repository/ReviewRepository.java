@@ -1,4 +1,3 @@
-// ===================== ReviewRepository.java =====================
 package com.bakery.Bakery.repository;
 
 import com.bakery.Bakery.model.Review;
@@ -10,4 +9,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<Review> findByAdminReplyIsNullAndHiddenFalseOrderByCreatedAtDesc();
     List<Review> findAllByOrderByCreatedAtDesc();
     long countByAdminReplyIsNullAndHiddenFalse();
+
+    // ← цей метод був відсутній — саме через нього падала помилка в HomeController
+    List<Review> findByProductIdAndHiddenFalse(Long productId);
 }

@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "orders")
-public class Orderі {
+public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,13 +16,28 @@ public class Orderі {
     private User user;
 
     @Column(name = "composition", columnDefinition = "TEXT")
-    private String composition; // склад замовлення
+    private String composition;
 
     @Column(name = "deadline")
     private LocalDateTime deadline;
 
     @Column(name = "price")
-    private Integer price; // ціна в гривнях
+    private Integer price;
+
+    @Column(name = "weight_kg")
+    private Double weightKg;
+
+    @Column(name = "address")
+    private String address;
+
+    @Column(name = "comment", columnDefinition = "TEXT")
+    private String comment;
+
+    @Column(name = "ai_image_url")
+    private String aiImageUrl;
+
+    @Column(name = "constructor_img")
+    private String constructorImg;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status")
@@ -74,6 +89,21 @@ public class Orderі {
 
     public Integer getPrice() { return price; }
     public void setPrice(Integer price) { this.price = price; }
+
+    public Double getWeightKg() { return weightKg; }
+    public void setWeightKg(Double weightKg) { this.weightKg = weightKg; }
+
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+
+    public String getComment() { return comment; }
+    public void setComment(String comment) { this.comment = comment; }
+
+    public String getAiImageUrl() { return aiImageUrl; }
+    public void setAiImageUrl(String aiImageUrl) { this.aiImageUrl = aiImageUrl; }
+
+    public String getConstructorImg() { return constructorImg; }
+    public void setConstructorImg(String constructorImg) { this.constructorImg = constructorImg; }
 
     public PaymentStatus getPaymentStatus() { return paymentStatus; }
     public void setPaymentStatus(PaymentStatus paymentStatus) { this.paymentStatus = paymentStatus; }
