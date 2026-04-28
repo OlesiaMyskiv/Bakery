@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Controller
@@ -25,7 +27,6 @@ public class AdminController {
     @Autowired private ProductRepository productRepository;
     @Autowired private ReviewRepository reviewRepository;
 
-    // Допоміжний метод — отримати поточного адміна для сайдбару
     private User getCurrentAdmin() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated()) return null;
@@ -44,13 +45,10 @@ public class AdminController {
         } catch (Exception e) {
             orderStatus = Order.OrderStatus.NEW;
         }
-
         model.addAttribute("orders",
                 orderRepository.findByOrderStatusOrderByCreatedAtDesc(orderStatus));
         model.addAttribute("currentStatus", orderStatus);
         model.addAttribute("adminUser", getCurrentAdmin());
-
-        // Лічильники для вкладок
         for (Order.OrderStatus s : Order.OrderStatus.values()) {
             model.addAttribute("count_" + s.name(),
                     orderRepository.findByOrderStatusOrderByCreatedAtDesc(s).size());
@@ -122,21 +120,29 @@ public class AdminController {
     // =============================================
 
     @GetMapping("/assortment")
-    public String assortment(@RequestParam(required = false) String type, Model model) {
-        if (type != null && !type.isEmpty()) {
-            try {
-                model.addAttribute("products",
-                        productRepository.findByTypeOrderByNameAsc(Product.ProductType.valueOf(type)));
-                model.addAttribute("currentType", type);
-            } catch (Exception e) {
-                model.addAttribute("products", productRepository.findAllByOrderByTypeAscNameAsc());
-                model.addAttribute("currentType", "ALL");
-            }
-        } else {
-            model.addAttribute("products", productRepository.findAllByOrderByTypeAscNameAsc());
-            model.addAttribute("currentType", "ALL");
+    public String assortment(
+            @RequestParam(defaultValue = "FLAVOR") String catalog,
+            Model model) {
+
+        Product.CatalogType catalogType;
+        try {
+            catalogType = Product.CatalogType.valueOf(catalog);
+        } catch (Exception e) {
+            catalogType = Product.CatalogType.FLAVOR;
         }
-        model.addAttribute("productTypes", Product.ProductType.values());
+
+        // Товари поточного каталогу (для адміна — всі, включно з прихованими)
+        model.addAttribute("products",
+                productRepository.findByCatalogTypeOrderByNameAsc(catalogType));
+        model.addAttribute("currentCatalog", catalogType);
+        model.addAttribute("catalogTypes", Product.CatalogType.values());
+
+        // Enum-и для форми
+        model.addAttribute("flavorBases",   Product.FlavorBase.values());
+        model.addAttribute("designEvents",  Product.DesignEvent.values());
+        model.addAttribute("productLines",  Product.ProductLine.values());
+        model.addAttribute("urgencies",     Product.Urgency.values());
+
         model.addAttribute("adminUser", getCurrentAdmin());
         return "admin/assortment";
     }
@@ -144,17 +150,50 @@ public class AdminController {
     @PostMapping("/assortment/add")
     public String addProduct(
             @RequestParam String name,
-            @RequestParam String type,
+            @RequestParam String catalogType,
+            @RequestParam(required = false) String flavorBase,
+            @RequestParam(required = false) List<String> dietaryTags,
+            @RequestParam(required = false) String designEvent,
+            @RequestParam(required = false) String productLine,
+            @RequestParam(required = false) String urgency,
             @RequestParam Integer price,
+            @RequestParam String priceUnit,
             @RequestParam(required = false) String description,
             @RequestParam(required = false) MultipartFile image) throws IOException {
 
         Product product = new Product();
         product.setName(name);
-        product.setType(Product.ProductType.valueOf(type));
-        product.setPricePerKg(price);
+        product.setPrice(price);
+        product.setPriceUnit(priceUnit);
         product.setDescription(description);
+        product.setCatalogType(Product.CatalogType.valueOf(catalogType));
 
+        // Смак
+        if (flavorBase != null && !flavorBase.isEmpty()) {
+            product.setFlavorBase(Product.FlavorBase.valueOf(flavorBase));
+        }
+
+        // Дієтичні теги — зберігаємо через кому
+        if (dietaryTags != null && !dietaryTags.isEmpty()) {
+            product.setDietaryTags(String.join(",", dietaryTags));
+        }
+
+        // Дизайн
+        if (designEvent != null && !designEvent.isEmpty()) {
+            product.setDesignEvent(Product.DesignEvent.valueOf(designEvent));
+        }
+
+        // Лінійка
+        if (productLine != null && !productLine.isEmpty()) {
+            product.setProductLine(Product.ProductLine.valueOf(productLine));
+        }
+
+        // Терміновість
+        if (urgency != null && !urgency.isEmpty()) {
+            product.setUrgency(Product.Urgency.valueOf(urgency));
+        }
+
+        // Фото
         if (image != null && !image.isEmpty()) {
             String uploadDir = System.getProperty("user.dir") + "/uploads/products";
             Path uploadPath = Paths.get(uploadDir);
@@ -165,22 +204,24 @@ public class AdminController {
         }
 
         productRepository.save(product);
-        return "redirect:/admin/assortment";
+        return "redirect:/admin/assortment?catalog=" + catalogType;
     }
 
     @PostMapping("/assortment/{id}/delete")
-    public String deleteProduct(@PathVariable Long id) {
+    public String deleteProduct(@PathVariable Long id,
+                                @RequestParam(defaultValue = "FLAVOR") String catalog) {
         productRepository.deleteById(id);
-        return "redirect:/admin/assortment";
+        return "redirect:/admin/assortment?catalog=" + catalog;
     }
 
     @PostMapping("/assortment/{id}/toggle")
-    public String toggleProduct(@PathVariable Long id) {
+    public String toggleProduct(@PathVariable Long id,
+                                @RequestParam(defaultValue = "FLAVOR") String catalog) {
         productRepository.findById(id).ifPresent(p -> {
             p.setAvailable(!p.isAvailable());
             productRepository.save(p);
         });
-        return "redirect:/admin/assortment";
+        return "redirect:/admin/assortment?catalog=" + catalog;
     }
 
     // =============================================

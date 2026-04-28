@@ -4,19 +4,195 @@
     <meta charset="UTF-8">
     <title>Cake House — Асортимент</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Love+Light&display=swap" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/globals.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
-    <link rel="stylesheet" th:href="@{/css/admin.css}">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Cormorant Garamond', Georgia, serif; background: #f2f2ec; font-size: 16px; }
+
+        /* ---- LAYOUT ---- */
+        .admin-layout { display: flex; min-height: 100vh; }
+
+        /* ---- SIDEBAR ---- */
+        .admin-sidebar {
+            width: 220px; min-width: 220px;
+            background: #3AA6B9;
+            display: flex; flex-direction: column; align-items: center;
+            padding: 28px 0 24px;
+        }
+        .sidebar-avatar-circle {
+            width: 86px; height: 86px; border-radius: 50%;
+            overflow: hidden; background: #a8d8e0;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 10px; border: 3px solid rgba(255,255,255,0.35);
+        }
+        .sidebar-avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
+        .sidebar-avatar-circle svg { width: 44px; height: 44px; opacity: 0.7; }
+        .sidebar-name { font-size: 22px; font-weight: 700; color: white; text-align: center; }
+        .sidebar-role { font-size: 11px; letter-spacing: 2px; color: rgba(255,255,255,0.65); text-transform: uppercase; margin-top: 2px; margin-bottom: 24px; }
+        .sidebar-nav { width: 100%; display: flex; flex-direction: column; }
+        .sidebar-link { font-size: 17px; color: rgba(255,255,255,0.8); text-decoration: none; padding: 9px 28px; display: block; transition: background 0.15s; }
+        .sidebar-link:hover { color: white; background: rgba(255,255,255,0.12); }
+        .sidebar-link.active { color: white; font-weight: 700; }
+        .sidebar-exit { color: rgba(255,255,255,0.45) !important; margin-top: auto; }
+
+        /* ---- MAIN ---- */
+        .admin-content { flex: 1; padding: 28px 32px; }
+        .admin-card { background: #dff0ec; border-radius: 20px; padding: 28px 32px; }
+        .page-title { font-size: 32px; font-weight: 700; text-align: center; color: #1a1a1a; margin-bottom: 22px; }
+
+        /* ---- КАТАЛОГ КНОПКИ ---- */
+        .catalog-tabs { display: flex; gap: 12px; justify-content: center; margin-bottom: 26px; }
+        .catalog-tab {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 18px; font-weight: 700;
+            padding: 10px 30px; border-radius: 30px;
+            border: 2px solid #3AA6B9;
+            background: white; color: #3AA6B9;
+            text-decoration: none; cursor: pointer; transition: all 0.2s;
+        }
+        .catalog-tab:hover, .catalog-tab.active { background: #3AA6B9; color: white; }
+
+        /* ---- ОСНОВНИЙ КОНТЕНТ ---- */
+        .assort-body { display: flex; gap: 18px; align-items: flex-start; }
+
+        /* ТЕРМІНОВІСТЬ ЗБОКУ */
+        .urgency-sidebar {
+            width: 185px; min-width: 185px;
+            background: white; border-radius: 14px; padding: 16px 14px;
+            position: sticky; top: 20px;
+        }
+        .urgency-sidebar h3 {
+            font-size: 13px; font-weight: 700; color: #3AA6B9;
+            letter-spacing: 1px; text-transform: uppercase;
+            margin-bottom: 10px; border-bottom: 1px solid #e8e8e4; padding-bottom: 7px;
+        }
+        .urgency-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 15px; color: #444; border-bottom: 1px solid #f0f0ec; }
+        .urgency-item:last-child { border-bottom: none; }
+        .urgency-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+        .dot-today { background: #27ae60; }
+        .dot-24    { background: #f39c12; }
+        .dot-48    { background: #e74c3c; }
+
+        /* ЦЕНТРАЛЬНА ЧАСТИНА */
+        .assort-center { flex: 1; display: flex; flex-direction: column; gap: 20px; }
+
+        /* ФОРМА ДОДАВАННЯ */
+        .add-form-card { background: white; border-radius: 14px; padding: 22px 26px; }
+        .add-form-title { font-size: 22px; font-weight: 700; color: #1a1a1a; margin-bottom: 18px; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 22px; }
+        .form-field { display: flex; flex-direction: column; gap: 5px; }
+        .form-field.full { grid-column: 1 / -1; }
+
+        .form-field label { font-size: 14px; color: #888; font-weight: 600; }
+
+        .form-field input[type="text"],
+        .form-field input[type="number"],
+        .form-field select,
+        .form-field textarea {
+            padding: 10px 13px;
+            border: 1px solid #ddd; border-radius: 8px;
+            font-size: 17px; font-family: 'Cormorant Garamond', Georgia, serif;
+            background: white; color: #1a1a1a; transition: border-color 0.15s;
+        }
+        .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+            outline: none; border-color: #3AA6B9;
+        }
+        .form-field textarea { resize: vertical; }
+
+        /* Ціна з кнопками */
+        .price-wrap { display: flex; gap: 6px; align-items: center; }
+        .price-input {
+            flex: 1; padding: 10px 13px;
+            border: 1px solid #ddd; border-radius: 8px;
+            font-size: 17px; font-family: 'Cormorant Garamond', Georgia, serif;
+        }
+        .price-input:focus { outline: none; border-color: #3AA6B9; }
+        .price-btn {
+            width: 36px; height: 42px; border: 1px solid #ddd; border-radius: 8px;
+            background: #f5f5f0; font-size: 20px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; color: #555; flex-shrink: 0;
+        }
+        .price-btn:hover { background: #3AA6B9; color: white; border-color: #3AA6B9; }
+
+        /* Теги-чекбокси */
+        .tags-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
+        .tag-label {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: #f5f5f0; border: 1px solid #ddd; border-radius: 20px;
+            padding: 5px 13px; font-size: 15px; cursor: pointer;
+            font-family: 'Cormorant Garamond', Georgia, serif; transition: all 0.15s;
+        }
+        .tag-label:has(input:checked) { background: #3AA6B9; border-color: #3AA6B9; color: white; }
+        .tag-label input { display: none; }
+
+        .btn-add {
+            margin-top: 18px; background: #3AA6B9; color: white;
+            border: none; border-radius: 10px; padding: 12px 32px;
+            font-size: 18px; font-weight: 700; cursor: pointer;
+            font-family: 'Cormorant Garamond', Georgia, serif; transition: background 0.15s;
+        }
+        .btn-add:hover { background: #2d8a9e; }
+
+        /* ТАБЛИЦЯ ТОВАРІВ */
+        .products-table-wrap { background: white; border-radius: 14px; overflow: hidden; }
+        .products-table { width: 100%; border-collapse: collapse; font-size: 16px; }
+        .products-table thead tr { background: #f9c9c9; }
+        .products-table thead th {
+            padding: 12px 14px; text-align: left;
+            font-size: 15px; font-weight: 700; color: #3AA6B9;
+        }
+        .products-table tbody tr { background: white; border-bottom: 1px solid #f0f0ec; }
+        .products-table tbody tr:hover { background: #fafaf8; }
+        .products-table tbody tr:last-child { border-bottom: none; }
+        .products-table td { padding: 12px 14px; vertical-align: middle; }
+        .row-dim { opacity: 0.45; }
+
+        .product-thumb { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; }
+        .no-thumb { width: 56px; height: 56px; background: #f0f0ec; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #ccc; font-size: 22px; }
+
+        .tag-pill { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 13px; font-weight: 700; background: #e0f5f9; color: #2d8a9e; margin: 1px; }
+        .urgency-pill { display: inline-block; padding: 3px 11px; border-radius: 20px; font-size: 14px; font-weight: 700; }
+        .u-today { background: #d4edda; color: #155724; }
+        .u-24    { background: #fff3cd; color: #856404; }
+        .u-48    { background: #f8d7da; color: #721c24; }
+
+        .status-on  { color: #27ae60; font-size: 14px; font-weight: 700; }
+        .status-off { color: #e74c3c; font-size: 14px; font-weight: 700; }
+        .muted { color: #aaa; font-size: 13px; }
+
+        .btn-sm {
+            border: none; border-radius: 16px;
+            padding: 6px 14px; font-size: 14px; font-weight: 700;
+            cursor: pointer; font-family: inherit;
+            display: block; width: 100%; margin-bottom: 5px;
+        }
+        .btn-blue { background: #3AA6B9; color: white; }
+        .btn-red  { background: #e74c3c; color: white; }
+
+        .empty-row { text-align: center; color: #bbb; padding: 36px !important; font-size: 17px; }
+
+        /* Розділювач секцій форми */
+        .form-section-label {
+            font-size: 13px; font-weight: 700; color: #3AA6B9;
+            text-transform: uppercase; letter-spacing: 1px;
+            grid-column: 1 / -1;
+            border-bottom: 1px solid #e8e8e4;
+            padding-bottom: 6px; margin-top: 6px;
+        }
+    </style>
 </head>
 <body>
 
+<!-- ХЕДЕР — той самий що скрізь -->
 <header th:replace="~{header :: header}"></header>
 
 <div class="admin-layout">
+
+    <!-- SIDEBAR -->
     <aside class="admin-sidebar">
-        <div class="sidebar-avatar-wrap">
+        <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:20px;padding:0 16px;">
             <div class="sidebar-avatar-circle">
                 <img th:if="${adminUser != null and adminUser.profilePicturePath != null}"
                      th:src="${adminUser.profilePicturePath}" alt="Фото">
@@ -30,203 +206,303 @@
         </div>
         <nav class="sidebar-nav">
             <a th:href="@{/admin/orders}"      class="sidebar-link">Замовлення</a>
-            <a th:href="@{/admin/users}"       class="sidebar-link">Клієнти</a>
+            <a th:href="@{/admin/users}"        class="sidebar-link">Клієнти</a>
             <a th:href="@{/admin/verification}" class="sidebar-link">Верифікація</a>
-            <a th:href="@{/admin/assortment}"  class="sidebar-link active">Асортимент</a>
-            <a th:href="@{/admin/reviews}"     class="sidebar-link">Відгуки</a>
-            <a th:href="@{/logout}"            class="sidebar-link sidebar-exit">Вихід</a>
+            <a th:href="@{/admin/assortment}"   class="sidebar-link active">Асортимент</a>
+            <a th:href="@{/admin/reviews}"      class="sidebar-link">Відгуки</a>
+            <a th:href="@{/logout}"             class="sidebar-link sidebar-exit">Вихід</a>
         </nav>
     </aside>
 
+    <!-- КОНТЕНТ -->
     <main class="admin-content">
         <div class="admin-card">
-            <h1 class="admin-page-title">Асортимент</h1>
+            <h1 class="page-title">Асортимент</h1>
 
-            <!-- ФОРМА ДОДАВАННЯ НОВОГО ТОВАРУ -->
-            <div class="assort-form-card">
-                <h2 class="form-section-title">Додати новий виріб</h2>
+            <!-- 3 КНОПКИ КАТАЛОГІВ -->
+            <div class="catalog-tabs">
+                <a th:each="ct : ${catalogTypes}"
+                   th:href="@{/admin/assortment(catalog=${ct.name()})}"
+                   th:text="${ct.label}"
+                   th:classappend="${currentCatalog.name() == ct.name()} ? ' active'"
+                   class="catalog-tab"></a>
+            </div>
 
-                <form th:action="@{/admin/assortment/add}" method="post" enctype="multipart/form-data"
-                      class="assort-add-form">
+            <div class="assort-body">
 
-                    <div class="form-two-col">
-                        <!-- ЛІВА КОЛОНКА: Назва та фото -->
-                        <div class="form-col">
-                            <div class="form-field">
-                                <label>Назва виробу *</label>
-                                <input type="text" name="name" placeholder="Наприклад: Шоколадне бенто" required>
-                            </div>
+                <!-- ТЕРМІНОВІСТЬ — статична збоку -->
+                <div class="urgency-sidebar">
+                    <h3>Терміновість</h3>
+                    <div class="urgency-item">
+                        <span class="urgency-dot dot-today"></span>Готові сьогодні
+                    </div>
+                    <div class="urgency-item">
+                        <span class="urgency-dot dot-24"></span>24 год
+                    </div>
+                    <div class="urgency-item">
+                        <span class="urgency-dot dot-48"></span>48 год+
+                    </div>
+                </div>
 
-                            <div class="form-field">
-                                <label>Ціна (грн) *</label>
-                                <div style="display:flex; gap:10px; align-items:center;">
-                                    <input type="number" name="price" placeholder="350" min="1" required style="flex:1;">
-                                    <select name="priceUnit" style="width:110px;">
-                                        <option value="шт">за шт</option>
-                                        <option value="кг">за кг</option>
-                                        <option value="порція">за порцію</option>
-                                        <option value="набір">за набір</option>
+                <!-- ЦЕНТР: ФОРМА + ТАБЛИЦЯ -->
+                <div class="assort-center">
+
+                    <!-- ФОРМА ДОДАВАННЯ -->
+                    <div class="add-form-card">
+                        <div class="add-form-title">
+                            + Додати до «<span th:text="${currentCatalog.label}"></span>»
+                        </div>
+
+                        <form th:action="@{/admin/assortment/add}" method="post"
+                              enctype="multipart/form-data">
+
+                            <input type="hidden" name="catalogType" th:value="${currentCatalog.name()}">
+
+                            <div class="form-grid">
+
+                                <!-- ОСНОВНА ІНФОРМАЦІЯ -->
+                                <div class="form-section-label">Основна інформація</div>
+
+                                <div class="form-field">
+                                    <label>Назва виробу *</label>
+                                    <input type="text" name="name"
+                                           placeholder="Наприклад: Шоколадне бенто" required>
+                                </div>
+
+                                <div class="form-field">
+                                    <label>Фото виробу</label>
+                                    <input type="file" name="image" accept="image/*">
+                                </div>
+
+                                <!-- ЦІНА -->
+                                <div class="form-section-label">Ціна</div>
+
+                                <div class="form-field">
+                                    <label>Сума (грн) *</label>
+                                    <div class="price-wrap">
+                                        <button type="button" class="price-btn" onclick="changePrice(-50)">−</button>
+                                        <input type="number" name="price" id="priceInput"
+                                               class="price-input" value="100" min="1" required>
+                                        <button type="button" class="price-btn" onclick="changePrice(50)">+</button>
+                                    </div>
+                                </div>
+
+                                <div class="form-field">
+                                    <label>Одиниця виміру *</label>
+                                    <select name="priceUnit">
+                                        <option value="грн/шт">грн / шт</option>
+                                        <option value="грн/кг">грн / кг</option>
+                                        <option value="грн/пачку">грн / пачку</option>
+                                        <option value="грн/порцію">грн / порцію</option>
+                                        <option value="грн/набір">грн / набір</option>
                                     </select>
                                 </div>
-                            </div>
 
-                            <div class="form-field">
-                                <label>Опис</label>
-                                <textarea name="description" rows="3"
-                                          placeholder="Смак, склад, особливості..."></textarea>
-                            </div>
+                                <!-- ТЕРМІНОВІСТЬ — в формі теж -->
+                                <div class="form-section-label">Терміновість</div>
 
-                            <div class="form-field">
-                                <label>Фото виробу</label>
-                                <input type="file" name="image" accept="image/*">
-                            </div>
-                        </div>
-
-                        <!-- ПРАВА КОЛОНКА: Категорії -->
-                        <div class="form-col">
-
-                            <!-- 1. ЛІНІЙКА ВИРОБІВ (обов'язково) -->
-                            <div class="form-field">
-                                <label class="category-label">Лінійка виробів *</label>
-                                <div class="tag-group">
-                                    <label class="tag-radio" th:each="pl : ${productLines}">
-                                        <input type="radio" name="productLineId"
-                                               th:value="${pl.id}" required>
-                                        <span th:text="${pl.name}"></span>
-                                    </label>
+                                <div class="form-field full">
+                                    <div class="tags-wrap">
+                                        <label class="tag-label" th:each="u : ${urgencies}">
+                                            <input type="radio" name="urgency" th:value="${u.name()}">
+                                            <span th:text="${u.label}"></span>
+                                        </label>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <!-- 2. КАТАЛОГ СМАКІВ -->
-                            <div class="form-field">
-                                <label class="category-label">Основа смаку</label>
-                                <div class="tag-group">
-                                    <label class="tag-check">
-                                        <input type="radio" name="flavorCategoryId" value="">
-                                        <span>— не вказано</span>
-                                    </label>
-                                    <label class="tag-radio" th:each="fc : ${flavorCategories}">
-                                        <input type="radio" name="flavorCategoryId" th:value="${fc.id}">
-                                        <span th:text="${fc.name}"></span>
-                                    </label>
-                                </div>
-                            </div>
+                                <!-- ====== КАТАЛОГ СМАКІВ ====== -->
+                                <th:block th:if="${currentCatalog.name() == 'FLAVOR'}">
+                                    <div class="form-section-label">Каталог смаків</div>
 
-                            <!-- 3. ПОДІЯ / ДИЗАЙН -->
-                            <div class="form-field">
-                                <label class="category-label">Подія / Дизайн</label>
-                                <div class="tag-group">
-                                    <label class="tag-radio">
-                                        <input type="radio" name="designCategoryId" value="">
-                                        <span>— не вказано</span>
-                                    </label>
-                                    <label class="tag-radio" th:each="dc : ${designCategories}">
-                                        <input type="radio" name="designCategoryId" th:value="${dc.id}">
-                                        <span th:text="${dc.name}"></span>
-                                    </label>
-                                </div>
-                            </div>
+                                    <div class="form-field">
+                                        <label>Основа смаку</label>
+                                        <select name="flavorBase">
+                                            <option value="">— оберіть —</option>
+                                            <option th:each="fb : ${flavorBases}"
+                                                    th:value="${fb.name()}"
+                                                    th:text="${fb.label}"></option>
+                                        </select>
+                                    </div>
 
-                            <!-- 4. ДІЄТИЧНІ ОСОБЛИВОСТІ (чекбокси — можна кілька) -->
-                            <div class="form-field">
-                                <label class="category-label">Дієтичні особливості</label>
-                                <div class="tag-group">
-                                    <label class="tag-check" th:each="dt : ${dietaryTags}">
-                                        <input type="checkbox" name="dietaryTagIds" th:value="${dt.id}">
-                                        <span th:text="${dt.name}"></span>
-                                    </label>
-                                </div>
-                            </div>
+                                    <div class="form-field">
+                                        <label>Дієтичні особливості</label>
+                                        <div class="tags-wrap">
+                                            <label class="tag-label">
+                                                <input type="checkbox" name="dietaryTags" value="NO_SUGAR">Без цукру
+                                            </label>
+                                            <label class="tag-label">
+                                                <input type="checkbox" name="dietaryTags" value="NO_GLUTEN">Без глютену
+                                            </label>
+                                            <label class="tag-label">
+                                                <input type="checkbox" name="dietaryTags" value="NO_LACTOSE">Без лактози
+                                            </label>
+                                            <label class="tag-label">
+                                                <input type="checkbox" name="dietaryTags" value="VEGAN">Веган
+                                            </label>
+                                        </div>
+                                    </div>
+                                </th:block>
 
-                            <!-- 5. ТЕРМІНОВІСТЬ -->
-                            <div class="form-field">
-                                <label class="category-label">Терміновість</label>
-                                <div class="tag-group">
-                                    <label class="tag-radio" th:each="u : ${urgencyOptions}">
-                                        <input type="radio" name="urgencyId" th:value="${u.id}">
-                                        <span th:text="${u.name}"></span>
-                                    </label>
+                                <!-- ====== КАТАЛОГ ДИЗАЙНІВ ====== -->
+                                <th:block th:if="${currentCatalog.name() == 'DESIGN'}">
+                                    <div class="form-section-label">Каталог дизайнів</div>
+
+                                    <div class="form-field full">
+                                        <label>Подія / Привід</label>
+                                        <select name="designEvent">
+                                            <option value="">— оберіть —</option>
+                                            <option th:each="de : ${designEvents}"
+                                                    th:value="${de.name()}"
+                                                    th:text="${de.label}"></option>
+                                        </select>
+                                    </div>
+                                </th:block>
+
+                                <!-- ====== ЛІНІЙКА ВИРОБІВ ====== -->
+                                <th:block th:if="${currentCatalog.name() == 'LINE'}">
+                                    <div class="form-section-label">Лінійка виробів</div>
+
+                                    <div class="form-field full">
+                                        <label>Тип виробу</label>
+                                        <select name="productLine">
+                                            <option value="">— оберіть —</option>
+                                            <option th:each="pl : ${productLines}"
+                                                    th:value="${pl.name()}"
+                                                    th:text="${pl.label}"></option>
+                                        </select>
+                                    </div>
+                                </th:block>
+
+                                <!-- ОПИС — завжди -->
+                                <div class="form-section-label">Опис</div>
+
+                                <div class="form-field full">
+                                    <textarea name="description" rows="3"
+                                              placeholder="Смак, склад, особливості виробу..."></textarea>
                                 </div>
-                            </div>
-                        </div>
+
+                            </div><!-- /form-grid -->
+
+                            <button type="submit" class="btn-add">Додати до каталогу</button>
+
+                        </form>
                     </div>
 
-                    <button type="submit" class="btn-add-assort">Додати до каталогу</button>
-                </form>
-            </div>
+                    <!-- ТАБЛИЦЯ ІСНУЮЧИХ ТОВАРІВ -->
+                    <div class="products-table-wrap">
+                        <table class="products-table">
+                            <thead>
+                                <tr>
+                                    <th>Фото</th>
+                                    <th>Назва</th>
+                                    <th>Категорія</th>
+                                    <th>Ціна</th>
+                                    <th>Терміновість</th>
+                                    <th>Стан</th>
+                                    <th>Дії</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${products.empty}">
+                                    <td colspan="7" class="empty-row">
+                                        Поки немає товарів — додайте перший!
+                                    </td>
+                                </tr>
+                                <tr th:each="p : ${products}"
+                                    th:classappend="${!p.available} ? ' row-dim'"
+                                    th:data-name="${p.name}">
 
-            <!-- СПИСОК ІСНУЮЧИХ ТОВАРІВ -->
-            <h2 class="form-section-title" style="margin-top:32px;">Поточний каталог</h2>
+                                    <td>
+                                        <img th:if="${p.imagePath != null}"
+                                             th:src="${p.imagePath}"
+                                             class="product-thumb" alt="фото">
+                                        <div th:if="${p.imagePath == null}" class="no-thumb">📷</div>
+                                    </td>
 
-            <!-- Фільтр -->
-            <div class="assort-filter-row">
-                <a th:href="@{/admin/assortment}" class="assort-filter-btn"
-                   th:classappend="${currentFilter == null or currentFilter == 'all'} ? ' active'">Всі</a>
-                <a th:each="pl : ${productLines}"
-                   th:href="@{/admin/assortment(line=${pl.id})}"
-                   th:text="${pl.name}"
-                   class="assort-filter-btn"
-                   th:classappend="${currentFilter == pl.id.toString()} ? ' active'"></a>
-            </div>
+                                    <td>
+                                        <strong th:text="${p.name}"></strong>
+                                        <div class="muted"
+                                             th:if="${p.description != null and !p.description.isEmpty()}"
+                                             th:text="${#strings.abbreviate(p.description, 55)}"></div>
+                                    </td>
 
-            <div class="admin-table-wrap">
-                <table class="admin-table">
-                    <thead>
-                    <tr>
-                        <th>Фото</th>
-                        <th>Назва</th>
-                        <th>Лінійка</th>
-                        <th>Смак</th>
-                        <th>Подія</th>
-                        <th>Ціна</th>
-                        <th>Стан</th>
-                        <th>Дії</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:if="${products.empty}">
-                        <td colspan="8" class="empty-row">Каталог порожній — додайте перший виріб!</td>
-                    </tr>
-                    <tr th:each="p : ${products}"
-                        th:classappend="${!p.available} ? ' row-dim'">
-                        <td>
-                            <img th:if="${p.imagePath != null}"
-                                 th:src="${p.imagePath}"
-                                 class="product-thumb-sm" alt="фото">
-                            <div th:if="${p.imagePath == null}" class="no-thumb">—</div>
-                        </td>
-                        <td>
-                            <strong th:text="${p.name}"></strong>
-                            <div class="text-muted"
-                                 th:if="${p.description != null}"
-                                 th:text="${#strings.abbreviate(p.description, 50)}"></div>
-                        </td>
-                        <td th:text="${p.productLine != null ? p.productLine.name : '—'}"></td>
-                        <td th:text="${p.flavorCategory != null ? p.flavorCategory.name : '—'}"></td>
-                        <td th:text="${p.designCategory != null ? p.designCategory.name : '—'}"></td>
-                        <td th:text="${p.price} + ' грн / ' + ${p.priceUnit}"></td>
-                        <td>
-                            <span th:if="${p.available}" class="status-available">Активний</span>
-                            <span th:if="${!p.available}" class="status-hidden">Прихований</span>
-                        </td>
-                        <td>
-                            <div style="display:flex; flex-direction:column; gap:4px;">
-                                <form th:action="@{/admin/assortment/{id}/toggle(id=${p.id})}" method="post">
-                                    <button th:text="${p.available} ? 'Приховати' : 'Показати'"
-                                            class="btn-sm btn-blue"></button>
-                                </form>
-                                <form th:action="@{/admin/assortment/{id}/delete(id=${p.id})}" method="post"
-                                      th:onsubmit="'return confirm(\'Видалити ' + ${p.name} + '?\')'">
-                                    <button class="btn-sm btn-red">Видалити</button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+                                    <td>
+                                        <span th:if="${p.flavorBase != null}" class="tag-pill" th:text="${p.flavorBase.label}"></span>
+                                        <span th:if="${p.designEvent != null}" class="tag-pill" th:text="${p.designEvent.label}"></span>
+                                        <span th:if="${p.productLine != null}" class="tag-pill" th:text="${p.productLine.label}"></span>
+                                        <th:block th:if="${p.dietaryTags != null}">
+                                            <span th:if="${p.hasDietaryTag('NO_SUGAR')}"   class="tag-pill">Без цукру</span>
+                                            <span th:if="${p.hasDietaryTag('NO_GLUTEN')}"  class="tag-pill">Без глютену</span>
+                                            <span th:if="${p.hasDietaryTag('NO_LACTOSE')}" class="tag-pill">Без лактози</span>
+                                            <span th:if="${p.hasDietaryTag('VEGAN')}"      class="tag-pill">Веган</span>
+                                        </th:block>
+                                    </td>
+
+                                    <td>
+                                        <strong th:text="${p.price}"></strong>
+                                        <span class="muted" th:text="' ' + ${p.priceUnit}"></span>
+                                    </td>
+
+                                    <td>
+                                        <span th:if="${p.urgency != null}"
+                                              class="urgency-pill"
+                                              th:classappend="${p.urgency.name() == 'TODAY' ? ' u-today' :
+                                                               p.urgency.name() == 'HOURS_24' ? ' u-24' : ' u-48'}"
+                                              th:text="${p.urgency.label}"></span>
+                                        <span th:if="${p.urgency == null}" class="muted">—</span>
+                                    </td>
+
+                                    <td>
+                                        <span th:if="${p.available}" class="status-on">Активний</span>
+                                        <span th:if="${!p.available}" class="status-off">Прихований</span>
+                                    </td>
+
+                                    <td>
+                                        <!-- Приховати / Показати -->
+                                        <form th:action="@{/admin/assortment/{id}/toggle(id=${p.id})}"
+                                              method="post">
+                                            <input type="hidden" name="catalog" th:value="${currentCatalog.name()}">
+                                            <button th:text="${p.available} ? 'Приховати' : 'Показати'"
+                                                    class="btn-sm btn-blue"></button>
+                                        </form>
+                                        <!-- Видалити — БЕЗ th:onsubmit! -->
+                                        <form th:action="@{/admin/assortment/{id}/delete(id=${p.id})}"
+                                              method="post"
+                                              class="delete-form">
+                                            <input type="hidden" name="catalog" th:value="${currentCatalog.name()}">
+                                            <button type="button"
+                                                    class="btn-sm btn-red"
+                                                    th:attr="data-name=${p.name}"
+                                                    onclick="confirmDelete(this)">Видалити</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div><!-- /assort-center -->
+            </div><!-- /assort-body -->
+        </div><!-- /admin-card -->
     </main>
 </div>
+
+<script>
+// Ціна +/-
+function changePrice(delta) {
+    var input = document.getElementById('priceInput');
+    var val = parseInt(input.value) || 0;
+    input.value = Math.max(1, val + delta);
+}
+
+// Видалення без th:onsubmit
+function confirmDelete(btn) {
+    var name = btn.getAttribute('data-name');
+    if (confirm('Видалити "' + name + '"?')) {
+        btn.closest('form').submit();
+    }
+}
+</script>
+
 </body>
 </html>
