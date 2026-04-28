@@ -219,6 +219,54 @@
                                 <textarea name="description" rows="3"
                                           placeholder="Смак, склад, особливості виробу..."></textarea>
                             </div>
+                            <!-- ЗНИЖКА ДЛЯ ЗАХИСНИКІВ -->
+                            <div class="form-section-label">Пільга для ЗСУ/ДСНС/ДПСУ</div>
+                            <div class="form-field">
+                                <label>Знижка (%)</label>
+                                <div class="price-wrap">
+                                    <button type="button" class="price-btn"
+                                            onclick="changeDiscount(-5)">−</button>
+                                    <input type="number" name="discountPercent"
+                                           id="discountInput" class="price-input"
+                                           value="0" min="0" max="100">
+                                    <button type="button" class="price-btn"
+                                            onclick="changeDiscount(5)">+</button>
+                                </div>
+                                <small style="color:#aaa; margin-top:4px; display:block;">
+                                    0 = без знижки. Наприклад: 20 = ціна -20% для верифікованих
+                                </small>
+                            </div>
+
+                            <!-- ХАРАКТЕРИСТИКИ -->
+                            <div class="form-section-label">Характеристики</div>
+                            <div class="form-field">
+                                <label>Калорійність</label>
+                                <input type="text" name="calories"
+                                       placeholder="Наприклад: 320 ккал/100 г">
+                            </div>
+                            <div class="form-field">
+                                <label>Алергени / Склад</label>
+                                <input type="text" name="allergens"
+                                       placeholder="Наприклад: містить лактозу, глютен">
+                            </div>
+                            <div class="form-field">
+                                <label>Мінімальна вага (кг)</label>
+                                <input type="number" name="minWeightKg"
+                                       value="1.0" min="0.5" step="0.5">
+                            </div>
+
+                            <!-- ПРО СМАК -->
+                            <div class="form-section-label">Текстові блоки на сторінці товару</div>
+                            <div class="form-field full">
+                                <label>Про смак</label>
+                                <textarea name="flavorDescription" rows="3"
+                                          placeholder="Детальний опис смаку, аромату, текстури..."></textarea>
+                            </div>
+                            <div class="form-field full">
+                                <label>Склад (інгредієнти)</label>
+                                <textarea name="ingredients" rows="3"
+                                          placeholder="Борошно, яйця, масло вершкове, цукор..."></textarea>
+                            </div>
 
                         </div>
                         <div style="text-align:center;">
@@ -384,6 +432,11 @@
     function clearSearch() {
         var input = document.getElementById('productSearch');
         if (input) { input.value = ''; filterProducts(); input.focus(); }
+    }
+
+    function changeDiscount(delta) {
+        var input = document.getElementById('discountInput');
+        if (input) input.value = Math.max(0, Math.min(100, (parseInt(input.value) || 0) + delta));
     }
 </script>
 

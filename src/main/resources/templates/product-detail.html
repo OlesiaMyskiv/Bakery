@@ -1,124 +1,155 @@
 <!DOCTYPE html>
-<html lang="uk" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="uk" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title th:text="${product.name} + ' — Cake House'">Виріб — Cake House</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Love+Light&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Love+Light&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/globals.css}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
-    <link rel="stylesheet" th:href="@{/css/product.css}">
 </head>
 <body>
 
-<!-- ТОЙ САМИЙ ХЕДЕР -->
 <header th:replace="~{header :: header}"></header>
 
-<main class="product-page">
+<main class="product-detail-page">
 
-    <div class="product-breadcrumb">
+    <!-- ── Breadcrumb ─────────────────────────────────────────────────────── -->
+    <div class="breadcrumb">
         <a th:href="@{/assortment}">Асортимент</a>
-        <span>/</span>
-        <span th:if="${product.productLine != null}" th:text="${product.productLine.name}"></span>
-        <span>/</span>
+        <span>›</span>
+        <a th:href="@{/assortment(catalog=${catalogParam})}" th:text="${catalogLabel}">Каталог</a>
+        <span>›</span>
         <span th:text="${product.name}"></span>
     </div>
 
-    <div class="product-detail-wrap">
+    <!-- ── Головний блок ──────────────────────────────────────────────────── -->
+    <div class="product-main-block">
 
-        <!-- ФОТО -->
-        <div class="product-photo-col">
+        <!-- Фото -->
+        <div class="product-photo-wrap">
             <img th:if="${product.imagePath != null}"
                  th:src="${product.imagePath}"
-                 class="product-main-photo"
-                 th:alt="${product.name}">
-            <div th:if="${product.imagePath == null}" class="product-no-photo">
+                 th:alt="${product.name}"
+                 class="product-main-img">
+            <div th:unless="${product.imagePath != null}" class="product-no-photo">
                 Фото скоро з'явиться
             </div>
         </div>
 
-        <!-- ІНФОРМАЦІЯ -->
-        <div class="product-info-col">
+        <!-- Інформація -->
+        <div class="product-info-wrap">
 
-            <!-- Лінійка та категорія -->
-            <div class="product-tags-row">
-                <span class="product-tag-line"
-                      th:if="${product.productLine != null}"
-                      th:text="${product.productLine.name}"></span>
-                <span class="product-tag-flavor"
-                      th:if="${product.flavorCategory != null}"
-                      th:text="${product.flavorCategory.name}"></span>
-                <span class="product-tag-event"
-                      th:if="${product.designCategory != null}"
-                      th:text="${product.designCategory.name}"></span>
-            </div>
-
-            <!-- Назва -->
-            <h1 class="product-title" th:text="${product.name}">Назва виробу</h1>
-
-            <!-- Дієтичні теги -->
-            <div class="dietary-tags" th:if="${product.dietaryTags != null and !product.dietaryTags.empty}">
-                <span class="dietary-tag" th:each="tag : ${product.dietaryTags}"
-                      th:text="${tag.name}"></span>
-            </div>
-
-            <!-- Опис -->
-            <p class="product-description" th:if="${product.description != null}"
-               th:text="${product.description}"></p>
-
-            <!-- Терміновість -->
-            <div class="product-urgency" th:if="${product.urgency != null}">
-                <span class="urgency-label">Готовність:</span>
-                <span class="urgency-value" th:text="${product.urgency.name}"></span>
-            </div>
+            <h1 class="product-detail-title">«<span th:text="${product.name}"></span>»</h1>
 
             <!-- Ціна -->
-            <div class="product-price-block">
-                <span class="product-price"
-                      th:text="${product.price} + ' грн'"></span>
-                <span class="product-price-unit"
-                      th:text="'/ ' + ${product.priceUnit}"></span>
+            <div class="product-price-section">
+                <div class="product-price-main"
+                     th:text="'Ціна : ' + ${product.price} + ' ' + ${product.priceUnit}">
+                </div>
+
+                <!-- Пільгова ціна для верифікованих -->
+                <div class="product-price-discount"
+                     th:if="${isVerified and product.hasDiscount()}">
+                    Для ЗСУ та ДСНС:
+                    <strong th:text="${product.discountedPrice} + ' ' + ${product.priceUnit}"></strong>
+                </div>
+
+                <!-- Підказка для невірифікованих якщо є знижка -->
+                <div class="product-discount-hint"
+                     th:if="${!isVerified and product.hasDiscount()}"
+                     sec:authorize="isAuthenticated()">
+                    💙 Для ЗСУ/ДСНС/ДПСУ діє знижка <span th:text="${product.discountPercent}">20</span>%
+                </div>
             </div>
 
-            <!-- КНОПКИ ДІЇ -->
-            <div class="product-actions">
-                <button class="btn-order-product"
-                        onclick="addToCart()">Замовити</button>
-                <button class="btn-wishlist"
-                        th:onclick="'toggleWishlist(' + ${product.id} + ')'">
-                    &#9825; До бажань
-                </button>
+            <!-- Характеристики -->
+            <div class="product-chars">
+                <h2 class="product-chars-title">Характеристики</h2>
+
+                <div class="char-row" th:if="${product.calories != null and !product.calories.empty}">
+                    <span class="char-label">Калорійність:</span>
+                    <span class="char-val" th:text="${product.calories}"></span>
+                </div>
+                <div class="char-row" th:if="${product.allergens != null and !product.allergens.empty}">
+                    <span class="char-label">Склад:</span>
+                    <span class="char-val" th:text="${product.allergens}"></span>
+                </div>
+                <div class="char-row" th:if="${product.urgency != null}">
+                    <span class="char-label">Готовність:</span>
+                    <span class="char-val" th:text="${product.urgency.label}"></span>
+                </div>
+
+                <!-- Лічильник ваги -->
+                <div class="char-row">
+                    <span class="char-label">Вага:</span>
+                    <div class="weight-counter">
+                        <button type="button" class="weight-btn" onclick="changeWeight(-0.5)">−</button>
+                        <span class="weight-val" id="weightVal"
+                              th:text="${product.minWeightKg}">1</span>
+                        <button type="button" class="weight-btn" onclick="changeWeight(0.5)">+</button>
+                        <span class="weight-unit">кг</span>
+                    </div>
+                </div>
+
+                <!-- Ціна перераховується -->
+                <div class="char-row">
+                    <span class="char-label">Ціна:</span>
+                    <span class="char-val" id="totalPrice"
+                          th:text="${product.price} + ' грн'"></span>
+                </div>
             </div>
 
-            <!-- Повідомлення якщо недоступне -->
-            <div th:unless="${product.available}" class="product-unavailable">
-                Тимчасово недоступно — уточніть у нас
-            </div>
+            <!-- Кнопка додати в корзину -->
+            <button class="btn-add-cart" onclick="addToCart()">Додати в корзину</button>
+
         </div>
     </div>
 
-    <!-- ВІДГУКИ НА ЦЕЙ ВИРІБ -->
-    <section class="product-reviews-section" th:if="${reviews != null and !reviews.empty}">
-        <h2 class="reviews-section-title">Відгуки</h2>
-        <div class="reviews-row">
-            <div class="review-card-public" th:each="r : ${reviews}">
-                <div class="review-public-header">
-                    <div class="review-pub-avatar"
+    <!-- ── Про смак / Склад ────────────────────────────────────────────────── -->
+    <div class="product-tabs-section"
+         th:if="${(product.flavorDescription != null and !product.flavorDescription.empty)
+              or (product.ingredients != null and !product.ingredients.empty)}">
+        <div class="product-tab-block">
+            <h2 class="product-tab-title">Про смак</h2>
+            <p class="product-tab-text"
+               th:if="${product.flavorDescription != null}"
+               th:text="${product.flavorDescription}"></p>
+            <p class="product-tab-text" th:unless="${product.flavorDescription != null}">—</p>
+        </div>
+        <div class="product-tab-block">
+            <h2 class="product-tab-title">Склад</h2>
+            <p class="product-tab-text"
+               th:if="${product.ingredients != null}"
+               th:text="${product.ingredients}"></p>
+            <p class="product-tab-text" th:unless="${product.ingredients != null}">—</p>
+        </div>
+    </div>
+
+    <!-- ── Відгуки ─────────────────────────────────────────────────────────── -->
+    <section class="product-reviews-section"
+             th:if="${reviews != null and !reviews.empty}">
+        <h2 class="reviews-title">Відгуки</h2>
+        <div class="reviews-list">
+            <div class="review-card" th:each="r : ${reviews}">
+                <div class="review-header">
+                    <div class="review-avatar"
                          th:text="${r.user != null ? #strings.substring(r.user.username,0,1) : '?'}">К</div>
                     <div>
-                        <div class="review-pub-name"
+                        <div class="review-username"
                              th:text="${r.user != null ? r.user.username : 'Анонім'}"></div>
-                        <div class="review-pub-stars">
+                        <div class="review-stars">
                             <th:block th:each="i : ${#numbers.sequence(1,5)}">
-                                <span th:if="${i <= r.rating}">★</span>
-                                <span th:if="${i > r.rating}" style="color:#ddd;">☆</span>
+                                <span th:if="${i <= r.rating}" style="color:#f4a020;">★</span>
+                                <span th:unless="${i <= r.rating}" style="color:#ddd;">☆</span>
                             </th:block>
                         </div>
                     </div>
                 </div>
-                <p class="review-pub-text" th:text="${r.text}"></p>
-                <div class="review-pub-reply" th:if="${r.adminReply != null}">
+                <p class="review-text" th:text="${r.text}"></p>
+                <div class="review-reply" th:if="${r.adminReply != null}">
                     <strong>Відповідь кондитерської:</strong>
                     <span th:text="${r.adminReply}"></span>
                 </div>
@@ -126,20 +157,147 @@
         </div>
     </section>
 
+    <!-- ── Рекомендовані дизайни ───────────────────────────────────────────── -->
+    <section class="recommended-section"
+             th:if="${recommendedDesigns != null and !recommendedDesigns.empty}">
+        <h2 class="recommended-title">Рекомендовані дизайни для цього смаку</h2>
+        <div class="recommended-grid">
+            <div class="recommended-card" th:each="d : ${recommendedDesigns}">
+                <img th:if="${d.imagePath != null}"
+                     th:src="${d.imagePath}" th:alt="${d.name}"
+                     class="recommended-img">
+                <div th:unless="${d.imagePath != null}" class="recommended-img-placeholder">🎂</div>
+                <a th:href="@{/product/{id}(id=${d.id})}" class="recommended-btn">Обрати</a>
+            </div>
+        </div>
+    </section>
+
 </main>
 
-<footer class="footer">
-    <p>&copy; 2026 Cake House. Всі права захищені.</p>
-</footer>
+<style>
+    /* ── Page layout ────────────────────────────────────────────────────── */
+    .product-detail-page { max-width: 980px; margin: 0 auto; padding: 1.5rem 1.5rem 4rem; }
 
-<script>
-    function addToCart() {
-        // Тут буде логіка кошика
-        alert('Додано до кошика!');
+    /* Breadcrumb */
+    .breadcrumb { font-family: 'Cormorant Garamond', serif; font-size: 0.95rem;
+        color: #888; margin-bottom: 1.5rem; display: flex; gap: 0.4rem; align-items: center; }
+    .breadcrumb a { color: #5a9aaa; text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+
+    /* Main block */
+    .product-main-block { display: flex; gap: 2.5rem; background: #fdf6f0;
+        border-radius: 16px; padding: 2rem; margin-bottom: 2rem; }
+
+    /* Photo */
+    .product-photo-wrap { flex: 0 0 340px; }
+    .product-main-img { width: 100%; border-radius: 12px; object-fit: cover; max-height: 320px; }
+    .product-no-photo { width: 100%; height: 240px; background: #f0e8e0; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'Cormorant Garamond', serif; color: #aaa; }
+
+    /* Info */
+    .product-info-wrap { flex: 1; display: flex; flex-direction: column; gap: 1rem; }
+    .product-detail-title { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem;
+        font-weight: 700; color: #3a2a1a; }
+
+    /* Price */
+    .product-price-section { display: flex; flex-direction: column; gap: 0.5rem; }
+    .product-price-main { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; color: #3a2a1a; }
+    .product-price-discount { border: 1.5px solid #5a9aaa; border-radius: 8px; padding: 0.6rem 1rem;
+        font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: #2d6b7a;
+        background: #f0fafc; }
+    .product-discount-hint { font-family: 'Cormorant Garamond', serif; font-size: 0.95rem; color: #5a9aaa; }
+
+    /* Characteristics */
+    .product-chars { display: flex; flex-direction: column; gap: 0.4rem; }
+    .product-chars-title { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem;
+        font-weight: 700; color: #3a2a1a; margin-bottom: 0.3rem; }
+    .char-row { display: flex; align-items: center; gap: 0.5rem;
+        font-family: 'Cormorant Garamond', serif; font-size: 1rem; }
+    .char-label { color: #888; min-width: 110px; }
+    .char-val { color: #3a2a1a; }
+
+    /* Weight counter */
+    .weight-counter { display: flex; align-items: center; gap: 0.4rem; }
+    .weight-btn { width: 28px; height: 28px; border-radius: 50%; border: 1px solid #5a9aaa;
+        background: #f0fafc; color: #2d6b7a; font-size: 1.1rem; cursor: pointer;
+        display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+    .weight-btn:hover { background: #5a9aaa; color: white; }
+    .weight-val { font-weight: 700; font-size: 1.1rem; min-width: 24px; text-align: center; }
+    .weight-unit { color: #888; }
+
+    /* Add to cart */
+    .btn-add-cart { width: 100%; padding: 0.9rem; background: #5a9aaa; color: white;
+        border: none; border-radius: 8px; font-family: 'Cormorant Garamond', serif;
+        font-size: 1.1rem; cursor: pointer; transition: background 0.2s; margin-top: 0.5rem; }
+    .btn-add-cart:hover { background: #3a7a8a; }
+
+    /* Tabs: про смак / склад */
+    .product-tabs-section { display: flex; gap: 1rem; margin-bottom: 2rem; }
+    .product-tab-block { flex: 1; background: #fdf6f0; border-radius: 12px; padding: 1.5rem; }
+    .product-tab-title { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem;
+        font-weight: 700; color: #3a2a1a; margin-bottom: 0.8rem; text-align: center; }
+    .product-tab-text { font-family: 'Cormorant Garamond', serif; color: #5a3a2a;
+        font-size: 1rem; line-height: 1.6; }
+
+    /* Reviews */
+    .product-reviews-section { margin-bottom: 2rem; }
+    .reviews-title { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem;
+        font-weight: 700; color: #3a2a1a; margin-bottom: 1rem; }
+    .reviews-list { display: flex; flex-direction: column; gap: 1rem; }
+    .review-card { background: #fdf6f0; border-radius: 10px; padding: 1rem 1.2rem; }
+    .review-header { display: flex; gap: 0.8rem; align-items: center; margin-bottom: 0.5rem; }
+    .review-avatar { width: 36px; height: 36px; border-radius: 50%; background: #5a9aaa;
+        color: white; display: flex; align-items: center; justify-content: center;
+        font-family: 'Cormorant Garamond', serif; font-weight: 700; }
+    .review-username { font-family: 'Cormorant Garamond', serif; font-weight: 600; color: #3a2a1a; }
+    .review-text { font-family: 'Cormorant Garamond', serif; color: #5a3a2a; margin-bottom: 0.5rem; }
+    .review-reply { font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; color: #888;
+        border-left: 3px solid #5a9aaa; padding-left: 0.8rem; margin-top: 0.5rem; }
+
+    /* Recommended */
+    .recommended-section { margin-top: 2rem; }
+    .recommended-title { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem;
+        font-weight: 700; color: #3a2a1a; text-align: center; margin-bottom: 1.2rem; }
+    .recommended-grid { display: flex; gap: 0.8rem; overflow-x: auto; padding-bottom: 0.5rem; }
+    .recommended-card { display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+        min-width: 160px; background: #f0fafc; border-radius: 10px; padding: 0.5rem; }
+    .recommended-img { width: 140px; height: 120px; object-fit: cover; border-radius: 8px; }
+    .recommended-img-placeholder { width: 140px; height: 120px; background: #ddd;
+        border-radius: 8px; display: flex; align-items: center;
+        justify-content: center; font-size: 2rem; }
+    .recommended-btn { display: block; width: 100%; padding: 0.4rem;
+        background: #5a9aaa; color: white; border-radius: 6px;
+        text-align: center; text-decoration: none;
+        font-family: 'Cormorant Garamond', serif; font-size: 0.9rem;
+        transition: background 0.2s; }
+    .recommended-btn:hover { background: #3a7a8a; }
+
+    /* Responsive */
+    @media (max-width: 680px) {
+        .product-main-block { flex-direction: column; }
+        .product-photo-wrap { flex: none; }
+        .product-tabs-section { flex-direction: column; }
     }
-    function toggleWishlist(id) {
-        // Тут буде логіка списку бажань
+</style>
+
+<script th:inline="javascript">
+    const basePrice = /*[[${product.price}]]*/ 700;
+    const minWeight = /*[[${product.minWeightKg}]]*/ 1.0;
+    let currentWeight = minWeight;
+
+    function changeWeight(delta) {
+        currentWeight = Math.max(minWeight, Math.round((currentWeight + delta) * 10) / 10);
+        document.getElementById('weightVal').textContent = currentWeight;
+        document.getElementById('totalPrice').textContent =
+            Math.round(basePrice * currentWeight) + ' грн';
+    }
+
+    function addToCart() {
+        // Логіка кошика — буде пізніше
+        alert('Додано до кошика: ' + currentWeight + ' кг');
     }
 </script>
+
 </body>
 </html>

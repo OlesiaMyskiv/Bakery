@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Асортимент — Cake House</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Love+Light&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/globals.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<header th:replace="~{header :: header}"></header>
+
+<div class="assort-page">
+
+    <!-- ══ ВКЛАДКИ КАТАЛОГІВ ══════════════════════════════════════════════════ -->
+    <div class="assort-tabs-bar">
+        <th:block th:each="ct : ${catalogTypes}">
+            <a th:href="@{/assortment(catalog=${ct.name()})}"
+               th:text="${ct.label}"
+               th:classappend="${currentCatalog == ct} ? ' active'"
+               class="assort-tab"></a>
+        </th:block>
+    </div>
+
+    <div class="assort-body">
+
+        <!-- ══ ЛІВА ПАНЕЛЬ — ФІЛЬТРИ ══════════════════════════════════════════ -->
+        <aside class="assort-sidebar" id="filterPanel">
+
+            <form th:action="@{/assortment}" method="get" id="filterForm">
+                <input type="hidden" name="catalog" th:value="${catalog}">
+                <input type="hidden" name="sort"    th:value="${currentSort}">
+
+                <div class="filter-reset-wrap">
+                    <a th:href="@{/assortment(catalog=${catalog})}" class="filter-reset-link">СКИНУТИ</a>
+                </div>
+
+                <!-- ── КАТАЛОГ СМАКІВ ──────────────────────────────────────── -->
+                <th:block th:if="${currentCatalog.name() == 'FLAVOR'}">
+
+                    <div class="filter-section">
+                        <div class="filter-section-title">ОСНОВА СМАКУ</div>
+                        <th:block th:each="fb : ${flavorBases}">
+                            <label class="filter-check-label">
+                                <input type="checkbox" name="flavors"
+                                       th:value="${fb.name()}"
+                                       th:checked="${selectedFlavors.contains(fb.name())}">
+                                <span th:text="${fb.label}"></span>
+                            </label>
+                        </th:block>
+                    </div>
+
+                    <div class="filter-section">
+                        <div class="filter-section-title">ДІЄТИЧНІ ОСОБЛИВОСТІ</div>
+                        <label class="filter-check-label">
+                            <input type="checkbox" name="dietary" value="NO_SUGAR"
+                                   th:checked="${selectedDietary.contains('NO_SUGAR')}">Без цукру
+                        </label>
+                        <label class="filter-check-label">
+                            <input type="checkbox" name="dietary" value="NO_GLUTEN"
+                                   th:checked="${selectedDietary.contains('NO_GLUTEN')}">Без глютену
+                        </label>
+                        <label class="filter-check-label">
+                            <input type="checkbox" name="dietary" value="NO_LACTOSE"
+                                   th:checked="${selectedDietary.contains('NO_LACTOSE')}">Без лактози
+                        </label>
+                        <label class="filter-check-label">
+                            <input type="checkbox" name="dietary" value="VEGAN"
+                                   th:checked="${selectedDietary.contains('VEGAN')}">Веган
+                        </label>
+                    </div>
+
+                </th:block>
+
+                <!-- ── КАТАЛОГ ДИЗАЙНІВ ────────────────────────────────────── -->
+                <th:block th:if="${currentCatalog.name() == 'DESIGN'}">
+
+                    <div class="filter-section">
+                        <div class="filter-section-title">ПОДІЯ</div>
+                        <th:block th:each="ev : ${designEvents}">
+                            <label class="filter-check-label">
+                                <input type="checkbox" name="events"
+                                       th:value="${ev.name()}"
+                                       th:checked="${selectedEvents.contains(ev.name())}">
+                                <span th:text="${ev.label}"></span>
+                            </label>
+                        </th:block>
+                    </div>
+
+                    <div class="filter-section">
+                        <div class="filter-section-title">ДЛЯ КОГО</div>
+                        <th:block th:each="df : ${designFors}">
+                            <label class="filter-check-label">
+                                <input type="checkbox" name="designFor"
+                                       th:value="${df.name()}"
+                                       th:checked="${selectedDesignFor.contains(df.name())}">
+                                <span th:text="${df.label}"></span>
+                            </label>
+                        </th:block>
+                    </div>
+
+                </th:block>
+
+                <!-- ── ЛІНІЙКА ВИРОБІВ ─────────────────────────────────────── -->
+                <th:block th:if="${currentCatalog.name() == 'LINE'}">
+
+                    <div class="filter-section">
+                        <div class="filter-section-title">ЛІНІЙКА ВИРОБІВ</div>
+                        <th:block th:each="pl : ${productLines}">
+                            <label class="filter-check-label">
+                                <input type="checkbox" name="lines"
+                                       th:value="${pl.name()}"
+                                       th:checked="${selectedLines.contains(pl.name())}">
+                                <span th:text="${pl.label}"></span>
+                            </label>
+                        </th:block>
+                    </div>
+
+                </th:block>
+
+                <!-- ── ТЕРМІНОВІСТЬ (всі каталоги) ────────────────────────── -->
+                <div class="filter-section">
+                    <div class="filter-section-title">ТЕРМІНОВІСТЬ</div>
+                    <th:block th:each="u : ${urgencies}">
+                        <label class="filter-check-label">
+                            <input type="checkbox" name="urgency"
+                                   th:value="${u.name()}"
+                                   th:checked="${selectedUrgency.contains(u.name())}">
+                            <span th:text="${u.label}"></span>
+                        </label>
+                    </th:block>
+                </div>
+
+                <!-- ── ВАРТІСТЬ — слайдер ─────────────────────────────────── -->
+                <div class="filter-section">
+                    <div class="filter-section-title">ВАРТІСТЬ</div>
+                    <div class="price-slider-wrap">
+                        <input type="range" id="priceRange" min="0" max="5000" step="50"
+                               th:value="${maxPrice != null ? maxPrice : 5000}"
+                               oninput="updatePriceDisplay(this.value)">
+                        <div class="price-range-labels">
+                            <span>0 грн</span>
+                            <span>5000 грн</span>
+                        </div>
+                        <div class="price-inputs-row">
+                            <label>Від: <input type="number" name="minPrice" id="minPriceInput"
+                                               th:value="${minPrice}" placeholder="0" min="0"></label>
+                            <label>До: <input type="number" name="maxPrice" id="maxPriceInput"
+                                              th:value="${maxPrice}" placeholder="5000" min="0"
+                                              oninput="syncSlider(this.value)"></label>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="filter-apply-btn">ЗАСТОСУВАТИ</button>
+            </form>
+        </aside>
+
+        <!-- ══ ПРАВА ЧАСТИНА ══════════════════════════════════════════════════ -->
+        <div class="assort-right">
+
+            <!-- Пошук + кнопка фільтрів (мобайл) + сортування -->
+            <div class="assort-top-bar">
+                <form th:action="@{/assortment}" method="get" class="search-form-inline">
+                    <input type="hidden" name="catalog" th:value="${catalog}">
+                    <input type="text" name="q" class="search-input-inline"
+                           placeholder="🔍 Пошук..."
+                           th:value="${searchQuery}">
+                </form>
+
+                <div class="sort-wrap">
+                    <span class="sort-label">Сортування:</span>
+                    <a th:href="@{/assortment(catalog=${catalog},sort='price_asc',page=1)}"
+                       th:classappend="${currentSort == 'price_asc'} ? ' sort-active'"
+                       class="sort-btn">За ціною ↑</a>
+                    <a th:href="@{/assortment(catalog=${catalog},sort='price_desc',page=1)}"
+                       th:classappend="${currentSort == 'price_desc'} ? ' sort-active'"
+                       class="sort-btn">За ціною ↓</a>
+                    <a th:href="@{/assortment(catalog=${catalog},sort='name_asc',page=1)}"
+                       th:classappend="${currentSort == 'name_asc'} ? ' sort-active'"
+                       class="sort-btn">А→Я</a>
+                    <a th:href="@{/assortment(catalog=${catalog},sort='name_desc',page=1)}"
+                       th:classappend="${currentSort == 'name_desc'} ? ' sort-active'"
+                       class="sort-btn">Я→А</a>
+                </div>
+            </div>
+
+            <!-- Кількість результатів -->
+            <div class="assort-count" th:if="${totalItems != null}">
+                Знайдено: <strong th:text="${totalItems}"></strong> товарів
+            </div>
+
+            <!-- ══ СІТКА ТОВАРІВ ═════════════════════════════════════════════ -->
+            <div th:if="${products.empty}" class="assort-empty">
+                😔 Нічого не знайдено. Спробуйте змінити фільтри.
+            </div>
+
+            <div class="products-grid" th:unless="${products.empty}">
+                <th:block th:each="p : ${products}">
+                    <a th:href="@{/product/{id}(id=${p.id})}" class="product-card">
+
+                        <div class="product-card-img-wrap">
+                            <img th:if="${p.imagePath != null}"
+                                 th:src="${p.imagePath}"
+                                 th:alt="${p.name}"
+                                 class="product-card-img">
+                            <div th:unless="${p.imagePath != null}"
+                                 class="product-card-img-placeholder">🎂</div>
+
+                            <!-- Бейдж знижки -->
+                            <div th:if="${p.hasDiscount()}" class="discount-badge">
+                                <div class="discount-badge-top">Пільга</div>
+                                <div class="discount-badge-bottom">ЗСУ/ДСНС</div>
+                            </div>
+                        </div>
+
+                        <div class="product-card-body">
+                            <h3 class="product-card-name" th:text="${p.name}">Назва</h3>
+
+                            <div class="product-card-prices">
+                                <!-- Вага -->
+                                <div class="price-row">
+                                    <span class="price-label"
+                                          th:text="${p.minWeightKg} + ' кг'">1 кг</span>
+                                    <span class="price-value"
+                                          th:text="${p.price} + ' ' + ${p.priceUnit}">700 грн</span>
+                                </div>
+
+                                <!-- Пільгова ціна для верифікованих -->
+                                <div class="price-row discount-row" th:if="${isVerified and p.hasDiscount()}">
+                                    <span class="price-label discount-label">Захисникам</span>
+                                    <span class="price-value discount-price"
+                                          th:text="${p.discountedPrice} + ' грн'">560 грн</span>
+                                </div>
+                            </div>
+
+                            <div class="product-card-btn">додати в корзину →</div>
+                        </div>
+                    </a>
+                </th:block>
+            </div>
+
+            <!-- ══ ПАГІНАЦІЯ ════════════════════════════════════════════════ -->
+            <div class="pagination" th:if="${totalPages > 1}">
+                <a th:if="${currentPage > 1}"
+                   th:href="@{/assortment(catalog=${catalog},sort=${currentSort},page=${currentPage - 1})}"
+                   class="page-btn">‹</a>
+
+                <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+                    <a th:href="@{/assortment(catalog=${catalog},sort=${currentSort},page=${i})}"
+                       th:text="${i}"
+                       th:classappend="${i == currentPage} ? ' active'"
+                       class="page-btn"></a>
+                </th:block>
+
+                <a th:if="${currentPage < totalPages}"
+                   th:href="@{/assortment(catalog=${catalog},sort=${currentSort},page=${currentPage + 1})}"
+                   class="page-btn">›</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    /* ── Assortment Layout ─────────────────────────────────────────────── */
+    .assort-page { max-width: 1200px; margin: 0 auto; padding: 0 1rem 4rem; }
+
+    .assort-tabs-bar { display: flex; margin-bottom: 0; }
+    .assort-tab { flex: 1; text-align: center; padding: 0.8rem 1rem;
+        background: #4a8a9a; color: white; text-decoration: none;
+        font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-weight: 600;
+        border: 1px solid #3a7a8a; transition: background 0.2s; }
+    .assort-tab.active, .assort-tab:hover { background: #2d6b7a; }
+
+    .assort-body { display: flex; gap: 0; min-height: 600px; }
+
+    /* ── Sidebar ───────────────────────────────────────────────────────── */
+    .assort-sidebar { width: 280px; min-width: 280px; background: #5a9aaa;
+        padding: 1rem; color: white; }
+    .filter-reset-wrap { text-align: right; margin-bottom: 0.5rem; }
+    .filter-reset-link { color: #cef; font-family: 'Cormorant Garamond', serif;
+        font-size: 0.9rem; text-decoration: underline; }
+    .filter-section { margin-bottom: 1.5rem; }
+    .filter-section-title { font-family: 'Cormorant Garamond', serif; font-weight: 700;
+        font-size: 1rem; letter-spacing: 0.05em; margin-bottom: 0.5rem;
+        color: white; }
+    .filter-check-label { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.3rem;
+        font-family: 'Cormorant Garamond', serif; font-size: 0.95rem;
+        cursor: pointer; color: white; }
+    .filter-check-label input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
+
+    /* Слайдер ціни */
+    .price-slider-wrap { display: flex; flex-direction: column; gap: 0.5rem; }
+    .price-slider-wrap input[type="range"] { width: 100%; accent-color: #2d6b7a; }
+    .price-range-labels { display: flex; justify-content: space-between;
+        font-size: 0.85rem; color: #cef; }
+    .price-inputs-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .price-inputs-row label { font-size: 0.85rem; color: white;
+        font-family: 'Cormorant Garamond', serif; }
+    .price-inputs-row input[type="number"] { width: 70px; padding: 0.2rem 0.4rem;
+        border: 1px solid #acd; border-radius: 4px;
+        background: rgba(255,255,255,0.2); color: white; }
+
+    .filter-apply-btn { width: 100%; padding: 0.7rem; background: #2d4a5a; color: white;
+        border: none; border-radius: 6px; font-family: 'Cormorant Garamond', serif;
+        font-size: 1rem; font-weight: 700; letter-spacing: 0.1em;
+        cursor: pointer; margin-top: 0.5rem; transition: background 0.2s; }
+    .filter-apply-btn:hover { background: #1a3040; }
+
+    /* ── Right panel ───────────────────────────────────────────────────── */
+    .assort-right { flex: 1; padding: 1rem 1.5rem; background: #faf3ee; }
+
+    .assort-top-bar { display: flex; align-items: center; gap: 1rem;
+        flex-wrap: wrap; margin-bottom: 1rem; }
+    .search-form-inline { flex: 1; min-width: 200px; }
+    .search-input-inline { width: 100%; padding: 0.5rem 1rem; border: 1px solid #d4b8a0;
+        border-radius: 20px; font-family: 'Cormorant Garamond', serif;
+        font-size: 1rem; background: white; }
+
+    .sort-wrap { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+    .sort-label { font-family: 'Cormorant Garamond', serif; color: #5a3a2a; font-size: 0.95rem; }
+    .sort-btn { padding: 0.3rem 0.8rem; border: 1px solid #4a8a9a; border-radius: 16px;
+        font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; color: #4a8a9a;
+        text-decoration: none; transition: all 0.2s; white-space: nowrap; }
+    .sort-btn:hover, .sort-btn.sort-active { background: #4a8a9a; color: white; }
+
+    .assort-count { font-family: 'Cormorant Garamond', serif; color: #888;
+        font-size: 0.95rem; margin-bottom: 1rem; }
+    .assort-empty { text-align: center; padding: 4rem;
+        font-family: 'Cormorant Garamond', serif; color: #888; font-size: 1.2rem; }
+
+    /* ── Product grid ──────────────────────────────────────────────────── */
+    .products-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem; }
+
+    .product-card { display: flex; flex-direction: column; background: white;
+        border-radius: 12px; overflow: hidden; text-decoration: none;
+        color: inherit; border: 1px solid #f0e0d0;
+        transition: transform 0.2s, box-shadow 0.2s; }
+    .product-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+
+    .product-card-img-wrap { position: relative; height: 200px; overflow: hidden;
+        background: #faf3ee; }
+    .product-card-img { width: 100%; height: 100%; object-fit: cover; }
+    .product-card-img-placeholder { width: 100%; height: 100%; display: flex;
+        align-items: center; justify-content: center; font-size: 3rem; }
+
+    /* Бейдж знижки */
+    .discount-badge { position: absolute; top: 10px; right: 10px; display: flex;
+        flex-direction: column; align-items: center; }
+    .discount-badge-top { background: #c0665a; color: white; font-size: 0.7rem;
+        padding: 2px 8px; border-radius: 4px 4px 0 0;
+        font-family: 'Cormorant Garamond', serif; font-weight: 700; }
+    .discount-badge-bottom { background: #e8a020; color: white; font-size: 0.65rem;
+        padding: 2px 6px; border-radius: 0 0 4px 4px;
+        font-family: 'Cormorant Garamond', serif; font-weight: 600; }
+
+    .product-card-body { padding: 0.8rem 1rem 1rem; flex: 1; display: flex;
+        flex-direction: column; gap: 0.5rem; }
+    .product-card-name { font-family: 'Cormorant Garamond', serif; font-weight: 700;
+        font-size: 1rem; color: #3a2a1a; text-transform: uppercase;
+        letter-spacing: 0.03em; text-align: center; }
+
+    .product-card-prices { display: flex; flex-direction: column; gap: 0.2rem; }
+    .price-row { display: flex; justify-content: space-between; align-items: center;
+        font-family: 'Cormorant Garamond', serif; }
+    .price-label { color: #888; font-size: 0.9rem; }
+    .price-value { font-weight: 600; color: #3a2a1a; font-size: 0.95rem; }
+    .discount-row .price-label { color: #888; }
+    .discount-price { color: #c0665a; font-weight: 700; }
+
+    .product-card-btn { margin-top: auto; padding: 0.5rem;
+        border: 1px solid #4a8a9a; border-radius: 6px;
+        text-align: center; font-family: 'Cormorant Garamond', serif;
+        font-size: 0.9rem; color: #4a8a9a; transition: all 0.2s; }
+    .product-card:hover .product-card-btn { background: #4a8a9a; color: white; }
+
+    /* ── Pagination ────────────────────────────────────────────────────── */
+    .pagination { display: flex; justify-content: center; align-items: center;
+        gap: 0.4rem; margin-top: 2rem; }
+    .page-btn { padding: 0.4rem 0.8rem; border: 1px solid #4a8a9a; border-radius: 6px;
+        font-family: 'Cormorant Garamond', serif; font-size: 1rem; color: #4a8a9a;
+        text-decoration: none; transition: all 0.2s; }
+    .page-btn:hover, .page-btn.active { background: #4a8a9a; color: white; }
+</style>
+
+<script>
+    function updatePriceDisplay(val) {
+        document.getElementById('maxPriceInput').value = val;
+    }
+    function syncSlider(val) {
+        document.getElementById('priceRange').value = val;
+    }
+</script>
+
+</body>
+</html>

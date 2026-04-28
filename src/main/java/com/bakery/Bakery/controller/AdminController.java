@@ -141,6 +141,14 @@ public class AdminController {
             @RequestParam Integer price,
             @RequestParam String priceUnit,
             @RequestParam(required = false) String description,
+            // ── НОВІ ПАРАМЕТРИ ────────────────────────────────────────────────
+            @RequestParam(required = false, defaultValue = "0") Integer discountPercent,
+            @RequestParam(required = false) String flavorDescription,
+            @RequestParam(required = false) String ingredients,
+            @RequestParam(required = false) String calories,
+            @RequestParam(required = false) String allergens,
+            @RequestParam(required = false, defaultValue = "1.0") Double minWeightKg,
+            // ─────────────────────────────────────────────────────────────────
             @RequestParam(required = false) MultipartFile image,
             RedirectAttributes redirectAttributes) throws IOException {
 
@@ -150,6 +158,14 @@ public class AdminController {
         p.setPriceUnit(priceUnit);
         p.setDescription(description);
         p.setCatalogType(Product.CatalogType.valueOf(catalogType));
+
+        // Нові поля
+        p.setDiscountPercent(discountPercent != null ? discountPercent : 0);
+        p.setFlavorDescription(flavorDescription);
+        p.setIngredients(ingredients);
+        p.setCalories(calories);
+        p.setAllergens(allergens);
+        p.setMinWeightKg(minWeightKg != null ? minWeightKg : 1.0);
 
         if (flavorBase  != null && !flavorBase.isEmpty())
             p.setFlavorBase(Product.FlavorBase.valueOf(flavorBase));

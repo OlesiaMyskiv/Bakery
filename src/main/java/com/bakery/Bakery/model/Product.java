@@ -28,6 +28,34 @@ public class Product {
     @Column(name = "available")
     private boolean available = true;
 
+    // ── НОВІ ПОЛЯ ─────────────────────────────────────────────────────────────
+
+    /** Знижка у відсотках для ЗСУ/ДСНС/ДПСУ. 0 = без знижки. Адмін задає. */
+    @Column(name = "discount_percent")
+    private Integer discountPercent = 0;
+
+    /** "Про смак" — окремий текстовий блок на сторінці товару */
+    @Column(name = "flavor_description", columnDefinition = "TEXT")
+    private String flavorDescription;
+
+    /** "Склад" — інгредієнти */
+    @Column(name = "ingredients", columnDefinition = "TEXT")
+    private String ingredients;
+
+    /** Калорійність, наприклад "320 ккал/100 г" */
+    @Column(name = "calories")
+    private String calories;
+
+    /** Алергени, наприклад "містить лактозу, глютен" */
+    @Column(name = "allergens")
+    private String allergens;
+
+    /** Мінімальна вага в кг (для лічильника на сторінці товару) */
+    @Column(name = "min_weight_kg")
+    private Double minWeightKg = 1.0;
+
+    // ── ІСНУЮЧІ ПОЛЯ ──────────────────────────────────────────────────────────
+
     @Enumerated(EnumType.STRING)
     @Column(name = "catalog_type", nullable = false)
     private CatalogType catalogType;
@@ -69,7 +97,6 @@ public class Product {
         public String getLabel() { return label; }
     }
 
-    // ЗМІНЕНО: тепер String через кому, бо можна обрати кілька
     @Column(name = "design_for")
     private String designFor;
 
@@ -107,39 +134,89 @@ public class Product {
         public String getLabel() { return label; }
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-    public Integer getPrice() { return price; }
-    public void setPrice(Integer price) { this.price = price; }
-    public String getPriceUnit() { return priceUnit; }
-    public void setPriceUnit(String priceUnit) { this.priceUnit = priceUnit; }
-    public String getImagePath() { return imagePath; }
-    public void setImagePath(String imagePath) { this.imagePath = imagePath; }
-    public boolean isAvailable() { return available; }
-    public void setAvailable(boolean available) { this.available = available; }
-    public CatalogType getCatalogType() { return catalogType; }
-    public void setCatalogType(CatalogType catalogType) { this.catalogType = catalogType; }
-    public FlavorBase getFlavorBase() { return flavorBase; }
-    public void setFlavorBase(FlavorBase flavorBase) { this.flavorBase = flavorBase; }
-    public String getDietaryTags() { return dietaryTags; }
-    public void setDietaryTags(String dietaryTags) { this.dietaryTags = dietaryTags; }
-    public DesignEvent getDesignEvent() { return designEvent; }
-    public void setDesignEvent(DesignEvent designEvent) { this.designEvent = designEvent; }
-    public String getDesignFor() { return designFor; }           // тепер String
-    public void setDesignFor(String designFor) { this.designFor = designFor; }
-    public ProductLine getProductLine() { return productLine; }
-    public void setProductLine(ProductLine productLine) { this.productLine = productLine; }
-    public Urgency getUrgency() { return urgency; }
-    public void setUrgency(Urgency urgency) { this.urgency = urgency; }
+    // ── РОЗРАХУНКОВІ МЕТОДИ ───────────────────────────────────────────────────
+
+    /**
+     * Розраховує пільгову ціну для ЗСУ/ДСНС/ДПСУ.
+     * Якщо знижка 0 — повертає звичайну ціну.
+     */
+    public Integer getDiscountedPrice() {
+        if (discountPercent == null || discountPercent == 0) return price;
+        return (int) Math.round(price * (1.0 - discountPercent / 100.0));
+    }
+
+    /** Чи є знижка для захисників? */
+    public boolean hasDiscount() {
+        return discountPercent != null && discountPercent > 0;
+    }
 
     public boolean hasDietaryTag(String tag) {
         return dietaryTags != null && dietaryTags.contains(tag);
     }
+
     public boolean hasDesignFor(String tag) {
         return designFor != null && designFor.contains(tag);
     }
+
+    // ── Getters & Setters ─────────────────────────────────────────────────────
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
+    public Integer getPrice() { return price; }
+    public void setPrice(Integer price) { this.price = price; }
+
+    public String getPriceUnit() { return priceUnit; }
+    public void setPriceUnit(String priceUnit) { this.priceUnit = priceUnit; }
+
+    public String getImagePath() { return imagePath; }
+    public void setImagePath(String imagePath) { this.imagePath = imagePath; }
+
+    public boolean isAvailable() { return available; }
+    public void setAvailable(boolean available) { this.available = available; }
+
+    public Integer getDiscountPercent() { return discountPercent; }
+    public void setDiscountPercent(Integer discountPercent) { this.discountPercent = discountPercent; }
+
+    public String getFlavorDescription() { return flavorDescription; }
+    public void setFlavorDescription(String flavorDescription) { this.flavorDescription = flavorDescription; }
+
+    public String getIngredients() { return ingredients; }
+    public void setIngredients(String ingredients) { this.ingredients = ingredients; }
+
+    public String getCalories() { return calories; }
+    public void setCalories(String calories) { this.calories = calories; }
+
+    public String getAllergens() { return allergens; }
+    public void setAllergens(String allergens) { this.allergens = allergens; }
+
+    public Double getMinWeightKg() { return minWeightKg != null ? minWeightKg : 1.0; }
+    public void setMinWeightKg(Double minWeightKg) { this.minWeightKg = minWeightKg; }
+
+    public CatalogType getCatalogType() { return catalogType; }
+    public void setCatalogType(CatalogType catalogType) { this.catalogType = catalogType; }
+
+    public FlavorBase getFlavorBase() { return flavorBase; }
+    public void setFlavorBase(FlavorBase flavorBase) { this.flavorBase = flavorBase; }
+
+    public String getDietaryTags() { return dietaryTags; }
+    public void setDietaryTags(String dietaryTags) { this.dietaryTags = dietaryTags; }
+
+    public DesignEvent getDesignEvent() { return designEvent; }
+    public void setDesignEvent(DesignEvent designEvent) { this.designEvent = designEvent; }
+
+    public String getDesignFor() { return designFor; }
+    public void setDesignFor(String designFor) { this.designFor = designFor; }
+
+    public ProductLine getProductLine() { return productLine; }
+    public void setProductLine(ProductLine productLine) { this.productLine = productLine; }
+
+    public Urgency getUrgency() { return urgency; }
+    public void setUrgency(Urgency urgency) { this.urgency = urgency; }
 }
