@@ -69,7 +69,7 @@
             <div class="product-chars">
                 <h2 class="product-chars-title">Характеристики</h2>
 
-                <div class="char-row" th:if="${product.calories != null and !product.calories.empty}">
+                <div class="char-row" th:if="${product.calories != null and !#strings.isEmpty(product.calories)}">
                     <span class="char-label">Калорійність:</span>
                     <span class="char-val" th:text="${product.calories}"></span>
                 </div>
