@@ -72,11 +72,18 @@ public class AuthController {
     @PostMapping("/forgot-password")
     public String forgotPasswordSubmit(@RequestParam("email") String email,
                                        RedirectAttributes redirectAttributes) {
-        // Запускаємо процес (навіть якщо email не знайдено — не кажемо юзеру)
-        passwordResetService.sendResetLink(email);
+        String tempPassword = passwordResetService.generateTempPassword(email);
 
-        redirectAttributes.addFlashAttribute("successMsg",
-                "Якщо цей email зареєстрований — посилання для скидання пароля надіслано. Перевірте пошту.");
+        if (tempPassword != null) {
+            // Показуємо пароль прямо на сторінці
+            redirectAttributes.addFlashAttribute("tempPassword", tempPassword);
+            redirectAttributes.addFlashAttribute("successMsg",
+                    "Тимчасовий пароль згенеровано. Увійдіть і змініть його в профілі.");
+        } else {
+            // Email не знайдено — не кажемо прямо (безпека)
+            redirectAttributes.addFlashAttribute("successMsg",
+                    "Якщо цей email зареєстрований — перевірте відповідь.");
+        }
         return "redirect:/forgot-password";
     }
 

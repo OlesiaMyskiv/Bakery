@@ -5,6 +5,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.mail.MailException;
 
 /**
  * Централізована обробка виключень для всього додатку.
@@ -59,6 +60,15 @@ public class GlobalExceptionHandler {
         ex.printStackTrace();
         model.addAttribute("errorCode", 500);
         model.addAttribute("errorMessage", "Внутрішня помилка сервера. Спробуйте пізніше.");
+        return "error";
+    }
+
+    @ExceptionHandler(MailException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public String handleMailError(MailException ex, Model model) {
+        model.addAttribute("errorCode", 500);
+        model.addAttribute("errorMessage",
+                "Помилка надсилання листа. Перевірте налаштування пошти.");
         return "error";
     }
 }

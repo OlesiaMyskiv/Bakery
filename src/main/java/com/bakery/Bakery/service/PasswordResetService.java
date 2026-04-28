@@ -33,19 +33,27 @@ public class PasswordResetService {
      * Завжди повертає true (безпека — не розкривати наявність email).
      */
     @Transactional
-    public void sendResetLink(String email) {
-        userRepository.findByEmail(email.trim().toLowerCase()).ifPresent(user -> {
-            // Генеруємо унікальний токен
-            String token = UUID.randomUUID().toString();
+    public String generateTempPassword(String email) {
+        User user = userRepository.findByEmail(email.trim().toLowerCase()).orElse(null);
+        if (user == null) return null; // email не знайдено
 
-            // Зберігаємо в юзера
-            user.setResetToken(token);
-            user.setResetTokenExp(LocalDateTime.now().plusMinutes(TOKEN_VALID_MINUTES));
-            userRepository.save(user);
+        // Генеруємо тимчасовий пароль
+        String tempPassword = generateRandom();
+        user.setPassword(passwordEncoder.encode(tempPassword));
+        // Очищаємо токени якщо були
+        user.setResetToken(null);
+        user.setResetTokenExp(null);
+        userRepository.save(user);
 
-            // Надсилаємо посилання на пошту
-            emailService.sendResetLink(email, token);
-        });
+        return tempPassword; // повертаємо відкритий пароль для показу на екрані
+    }
+
+    private String generateRandom() {
+        String chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+        var random = new java.security.SecureRandom();
+        var sb = new StringBuilder(8);
+        for (int i = 0; i < 8; i++) sb.append(chars.charAt(random.nextInt(chars.length())));
+        return sb.toString();
     }
 
     // ── КРОК 2: Перевірка токена ──────────────────────────────────────────────

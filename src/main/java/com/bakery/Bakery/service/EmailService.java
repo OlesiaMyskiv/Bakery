@@ -13,7 +13,6 @@ public class EmailService {
     @Value("${app.mail.from}")
     private String from;
 
-    // Базовий URL додатку (для посилань в листах)
     @Value("${app.base-url:http://localhost:8080}")
     private String baseUrl;
 
@@ -21,10 +20,8 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
-    /**
-     * Надсилає посилання для скидання пароля.
-     * Посилання дійсне 5 хвилин.
-     */
+    // ── 1. Посилання для скидання пароля ─────────────────────────────────────
+
     public void sendResetLink(String toEmail, String token) {
         String resetLink = baseUrl + "/reset-password?token=" + token;
 
@@ -34,26 +31,24 @@ public class EmailService {
         msg.setSubject("Відновлення пароля — CakeHouse 🍰");
         msg.setText("""
                 Вітаємо!
-                
+
                 Ми отримали запит на відновлення пароля для вашого акаунту.
-                
+
                 Натисніть на посилання нижче, щоб створити новий пароль:
                 %s
-                
+
                 ⚠️ Посилання дійсне лише 5 хвилин.
-                
+
                 Якщо ви не робили цього запиту — просто проігноруйте цей лист.
-                
+
                 З повагою,
                 Команда CakeHouse 🍰
                 """.formatted(resetLink));
-
         mailSender.send(msg);
     }
 
-    /**
-     * Підтвердження успішної зміни пароля.
-     */
+    // ── 2. Підтвердження зміни пароля ────────────────────────────────────────
+
     public void sendPasswordChangedConfirmation(String toEmail) {
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setFrom(from);
@@ -61,20 +56,40 @@ public class EmailService {
         msg.setSubject("Пароль змінено — CakeHouse 🍰");
         msg.setText("""
                 Вітаємо!
-                
+
                 Ваш пароль було успішно змінено.
-                
+
                 Якщо це були не ви — негайно зверніться до нас.
-                
+
                 З повагою,
                 Команда CakeHouse 🍰
                 """);
         mailSender.send(msg);
     }
 
-    /**
-     * Загальний метод.
-     */
+    // ── 3. Підтвердження замовлення ───────────────────────────────────────────
+    // ← саме цей метод викликав помилку компіляції в OrderController
+
+    public void sendOrderConfirmation(String toEmail, Long orderId) {
+        SimpleMailMessage msg = new SimpleMailMessage();
+        msg.setFrom(from);
+        msg.setTo(toEmail);
+        msg.setSubject("Замовлення #" + orderId + " прийнято — CakeHouse 🍰");
+        msg.setText("""
+                Дякуємо за замовлення!
+
+                Ваше замовлення #%d успішно прийнято і вже опрацьовується.
+                Відстежувати статус можна у своєму профілі:
+                %s/profile
+
+                З повагою,
+                Команда CakeHouse 🍰
+                """.formatted(orderId, baseUrl));
+        mailSender.send(msg);
+    }
+
+    // ── 4. Загальний метод ────────────────────────────────────────────────────
+
     public void send(String to, String subject, String body) {
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setFrom(from);

@@ -1,7 +1,6 @@
 package com.bakery.Bakery.controller;
 
 import com.bakery.Bakery.dto.CreateOrderDTO;
-import com.bakery.Bakery.model.Order;
 import com.bakery.Bakery.model.User;
 import com.bakery.Bakery.service.EmailService;
 import com.bakery.Bakery.service.OrderService;
@@ -13,10 +12,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-/**
- * Контролер для дій клієнта з замовленнями.
- * Логіка — в OrderService; тут лише HTTP + redirect.
- */
 @Controller
 @RequestMapping("/orders")
 public class OrderController {
@@ -33,21 +28,17 @@ public class OrderController {
         this.emailService = emailService;
     }
 
-    /**
-     * GET /orders/new — форма нового замовлення.
-     */
+    // GET /orders/new — форма нового замовлення
     @GetMapping("/new")
     public String newOrderForm(Model model) {
         User user = userService.getCurrentUser();
         if (user == null) return "redirect:/login";
 
         model.addAttribute("orderDto", new CreateOrderDTO());
-        return "order-form"; // templates/order-form.html
+        return "order-form";
     }
 
-    /**
-     * POST /orders/new — зберегти замовлення.
-     */
+    // POST /orders/new — зберегти замовлення
     @PostMapping("/new")
     public String submitOrder(@Valid @ModelAttribute("orderDto") CreateOrderDTO dto,
                               BindingResult bindingResult,
@@ -60,24 +51,21 @@ public class OrderController {
             return "order-form";
         }
 
-        Order saved = orderService.createOrder(dto, user);
+        var saved = orderService.createOrder(dto, user);
 
-        // Надіслати підтвердження на пошту (не обривати flow якщо mail впав)
+        // Підтвердження на пошту — не обривати flow якщо mail впав
         try {
             if (user.getEmail() != null) {
                 emailService.sendOrderConfirmation(user.getEmail(), saved.getId());
             }
-        } catch (Exception ignored) { }
+        } catch (Exception ignored) {}
 
         redirectAttributes.addFlashAttribute("successMsg",
                 "Замовлення #" + saved.getId() + " успішно оформлено!");
         return "redirect:/profile";
     }
 
-    /**
-     * POST /orders/{id}/cancel — скасувати замовлення клієнтом.
-     * (Перенесено сюди з ProfileController для чистоти.)
-     */
+    // POST /orders/{id}/cancel — скасувати замовлення клієнтом
     @PostMapping("/{id}/cancel")
     public String cancelOrder(@PathVariable Long id,
                               RedirectAttributes redirectAttributes) {
