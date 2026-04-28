@@ -9,6 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @Controller
 public class HomeController {
@@ -61,5 +62,12 @@ public class HomeController {
     @GetMapping("/constructor")
     public String constructorPage() {
         return "constructor";
+    }
+
+    @GetMapping("/product/{id}")
+    public String productPage(@PathVariable Long id, Model model) {
+        model.addAttribute("product", productRepository.findById(id).orElseThrow());
+        model.addAttribute("reviews", reviewRepository.findByProductIdAndHiddenFalse(id));
+        return "product-detail";
     }
 }

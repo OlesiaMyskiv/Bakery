@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Cake House — Клієнти</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Love+Light&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/globals.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+
+<header th:replace="~{header :: header}"></header>
+
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <div class="sidebar-avatar-wrap">
+            <div class="sidebar-avatar-circle">
+                <img th:if="${adminUser != null and adminUser.profilePicturePath != null}"
+                     th:src="${adminUser.profilePicturePath}" alt="Фото">
+                <svg th:unless="${adminUser != null and adminUser.profilePicturePath != null}"
+                     viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.2">
+                    <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                </svg>
+            </div>
+            <div class="sidebar-name" th:text="${adminUser != null ? adminUser.username : 'Адмін'}">Анна</div>
+            <div class="sidebar-role">СУПЕРАДМІН</div>
+        </div>
+        <nav class="sidebar-nav">
+            <a th:href="@{/admin/orders}"       class="sidebar-link">Замовлення</a>
+            <a th:href="@{/admin/users}"         class="sidebar-link active">Клієнти</a>
+            <a th:href="@{/admin/verification}"  class="sidebar-link">Верифікація</a>
+            <a th:href="@{/admin/assortment}"    class="sidebar-link">Асортимент</a>
+            <a th:href="@{/admin/reviews}"       class="sidebar-link">Відгуки</a>
+            <a th:href="@{/logout}"              class="sidebar-link sidebar-exit">Вихід</a>
+        </nav>
+    </aside>
+
+    <main class="admin-content">
+        <div class="admin-card">
+            <h1 class="admin-page-title">Список клієнтів</h1>
+
+            <!-- ПОШУК -->
+            <div class="search-wrap">
+                <input type="text" id="clientSearch"
+                       placeholder="Пошук за іменем або номером телефону"
+                       class="search-input"
+                       oninput="filterClients()">
+                <span class="search-icon">&#128269;</span>
+            </div>
+
+            <!-- ТАБЛИЦЯ -->
+            <div class="admin-table-wrap">
+                <table class="admin-table" id="clientsTable">
+                    <thead>
+                    <tr>
+                        <th>Ім'я та прізвище</th>
+                        <th>Контакти</th>
+                        <th>Кількість замовлень</th>
+                        <th>Активні замовлення</th>
+                        <th>Загальна сума покупок</th>
+                        <th>Історія</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${users.empty}">
+                        <td colspan="6" class="empty-row">Клієнтів ще немає</td>
+                    </tr>
+                    <tr th:each="u : ${users}"
+                        th:data-name="${u.username}"
+                        th:data-phone="${u.phone}">
+                        <td th:text="${u.username}"></td>
+                        <td>
+                            <span th:text="${u.phone}"></span><br>
+                            <span class="text-muted" th:text="${u.email}"></span>
+                        </td>
+                        <td style="text-align:center;"
+                            th:text="${orderCountMap != null and orderCountMap[u.id] != null ? orderCountMap[u.id] : 0}">0</td>
+                        <td style="text-align:center;"
+                            th:text="${activeCountMap != null and activeCountMap[u.id] != null ? activeCountMap[u.id] : 0}">0</td>
+                        <td th:text="${totalSpentMap != null and totalSpentMap[u.id] != null ? totalSpentMap[u.id] + ' грн' : '0 грн'}">0 грн</td>
+                        <td>
+                            <a th:href="@{/admin/users/{id}/history(id=${u.id})}"
+                               class="btn-history">Історія</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    function filterClients() {
+        var q = document.getElementById('clientSearch').value.toLowerCase();
+        var rows = document.querySelectorAll('#clientsTable tbody tr[data-name]');
+        rows.forEach(function(row) {
+            var name  = (row.getAttribute('data-name')  || '').toLowerCase();
+            var phone = (row.getAttribute('data-phone') || '').toLowerCase();
+            row.style.display = (name.includes(q) || phone.includes(q)) ? '' : 'none';
+        });
+    }
+</script>
+</body>
+</html>

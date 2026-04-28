@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${product.name} + ' — Cake House'">Виріб — Cake House</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Love+Light&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/globals.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/product.css}">
+</head>
+<body>
+
+<!-- ТОЙ САМИЙ ХЕДЕР -->
+<header th:replace="~{header :: header}"></header>
+
+<main class="product-page">
+
+    <div class="product-breadcrumb">
+        <a th:href="@{/assortment}">Асортимент</a>
+        <span>/</span>
+        <span th:if="${product.productLine != null}" th:text="${product.productLine.name}"></span>
+        <span>/</span>
+        <span th:text="${product.name}"></span>
+    </div>
+
+    <div class="product-detail-wrap">
+
+        <!-- ФОТО -->
+        <div class="product-photo-col">
+            <img th:if="${product.imagePath != null}"
+                 th:src="${product.imagePath}"
+                 class="product-main-photo"
+                 th:alt="${product.name}">
+            <div th:if="${product.imagePath == null}" class="product-no-photo">
+                Фото скоро з'явиться
+            </div>
+        </div>
+
+        <!-- ІНФОРМАЦІЯ -->
+        <div class="product-info-col">
+
+            <!-- Лінійка та категорія -->
+            <div class="product-tags-row">
+                <span class="product-tag-line"
+                      th:if="${product.productLine != null}"
+                      th:text="${product.productLine.name}"></span>
+                <span class="product-tag-flavor"
+                      th:if="${product.flavorCategory != null}"
+                      th:text="${product.flavorCategory.name}"></span>
+                <span class="product-tag-event"
+                      th:if="${product.designCategory != null}"
+                      th:text="${product.designCategory.name}"></span>
+            </div>
+
+            <!-- Назва -->
+            <h1 class="product-title" th:text="${product.name}">Назва виробу</h1>
+
+            <!-- Дієтичні теги -->
+            <div class="dietary-tags" th:if="${product.dietaryTags != null and !product.dietaryTags.empty}">
+                <span class="dietary-tag" th:each="tag : ${product.dietaryTags}"
+                      th:text="${tag.name}"></span>
+            </div>
+
+            <!-- Опис -->
+            <p class="product-description" th:if="${product.description != null}"
+               th:text="${product.description}"></p>
+
+            <!-- Терміновість -->
+            <div class="product-urgency" th:if="${product.urgency != null}">
+                <span class="urgency-label">Готовність:</span>
+                <span class="urgency-value" th:text="${product.urgency.name}"></span>
+            </div>
+
+            <!-- Ціна -->
+            <div class="product-price-block">
+                <span class="product-price"
+                      th:text="${product.price} + ' грн'"></span>
+                <span class="product-price-unit"
+                      th:text="'/ ' + ${product.priceUnit}"></span>
+            </div>
+
+            <!-- КНОПКИ ДІЇ -->
+            <div class="product-actions">
+                <button class="btn-order-product"
+                        onclick="addToCart()">Замовити</button>
+                <button class="btn-wishlist"
+                        th:onclick="'toggleWishlist(' + ${product.id} + ')'">
+                    &#9825; До бажань
+                </button>
+            </div>
+
+            <!-- Повідомлення якщо недоступне -->
+            <div th:unless="${product.available}" class="product-unavailable">
+                Тимчасово недоступно — уточніть у нас
+            </div>
+        </div>
+    </div>
+
+    <!-- ВІДГУКИ НА ЦЕЙ ВИРІБ -->
+    <section class="product-reviews-section" th:if="${reviews != null and !reviews.empty}">
+        <h2 class="reviews-section-title">Відгуки</h2>
+        <div class="reviews-row">
+            <div class="review-card-public" th:each="r : ${reviews}">
+                <div class="review-public-header">
+                    <div class="review-pub-avatar"
+                         th:text="${r.user != null ? #strings.substring(r.user.username,0,1) : '?'}">К</div>
+                    <div>
+                        <div class="review-pub-name"
+                             th:text="${r.user != null ? r.user.username : 'Анонім'}"></div>
+                        <div class="review-pub-stars">
+                            <th:block th:each="i : ${#numbers.sequence(1,5)}">
+                                <span th:if="${i <= r.rating}">★</span>
+                                <span th:if="${i > r.rating}" style="color:#ddd;">☆</span>
+                            </th:block>
+                        </div>
+                    </div>
+                </div>
+                <p class="review-pub-text" th:text="${r.text}"></p>
+                <div class="review-pub-reply" th:if="${r.adminReply != null}">
+                    <strong>Відповідь кондитерської:</strong>
+                    <span th:text="${r.adminReply}"></span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<footer class="footer">
+    <p>&copy; 2026 Cake House. Всі права захищені.</p>
+</footer>
+
+<script>
+    function addToCart() {
+        // Тут буде логіка кошика
+        alert('Додано до кошика!');
+    }
+    function toggleWishlist(id) {
+        // Тут буде логіка списку бажань
+    }
+</script>
+</body>
+</html>

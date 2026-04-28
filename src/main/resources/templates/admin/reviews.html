@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Cake House — Відгуки</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Love+Light&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/globals.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+
+<header th:replace="~{header :: header}"></header>
+
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <div class="sidebar-avatar-wrap">
+            <div class="sidebar-avatar-circle">
+                <img th:if="${adminUser != null and adminUser.profilePicturePath != null}"
+                     th:src="${adminUser.profilePicturePath}" alt="Фото">
+                <svg th:unless="${adminUser != null and adminUser.profilePicturePath != null}"
+                     viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.2">
+                    <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                </svg>
+            </div>
+            <div class="sidebar-name" th:text="${adminUser != null ? adminUser.username : 'Адмін'}">Анна</div>
+            <div class="sidebar-role">СУПЕРАДМІН</div>
+        </div>
+        <nav class="sidebar-nav">
+            <a th:href="@{/admin/orders}"      class="sidebar-link">Замовлення</a>
+            <a th:href="@{/admin/users}"       class="sidebar-link">Клієнти</a>
+            <a th:href="@{/admin/verification}" class="sidebar-link">Верифікація</a>
+            <a th:href="@{/admin/assortment}"  class="sidebar-link">Асортимент</a>
+            <a th:href="@{/admin/reviews}"     class="sidebar-link active">Відгуки</a>
+            <a th:href="@{/logout}"            class="sidebar-link sidebar-exit">Вихід</a>
+        </nav>
+    </aside>
+
+    <main class="admin-content">
+        <div class="admin-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h1 class="admin-page-title" style="margin:0;">Відгуки</h1>
+                <!-- Кнопка Редагувати/Зберегти -->
+                <button id="editToggle" class="btn-edit-mode" onclick="toggleEditMode()">Редагувати</button>
+            </div>
+
+            <!-- СІТКА ВІДГУКІВ — як на скріншоті 3 колонки -->
+            <div class="reviews-grid">
+
+                <div th:if="${reviews.empty}" style="grid-column:1/-1; text-align:center; color:#aaa; padding:40px;">
+                    Відгуків ще немає
+                </div>
+
+                <div class="review-card-admin" th:each="r : ${reviews}"
+                     th:classappend="${r.hidden} ? ' review-hidden-card'">
+
+                    <!-- Кнопки управління (видно тільки в режимі редагування) -->
+                    <div class="review-controls edit-only" style="display:none;">
+                        <!-- Підняти вище -->
+                        <form th:action="@{/admin/reviews/{id}/moveup(id=${r.id})}" method="post" style="display:inline">
+                            <button class="btn-move" title="Вгору">&#8679;</button>
+                        </form>
+                        <!-- Приховати/Показати -->
+                        <form th:action="@{/admin/reviews/{id}/hide(id=${r.id})}" method="post" style="display:inline">
+                            <button class="btn-delete" title="${r.hidden ? 'Показати' : 'Видалити'}">&#128465;</button>
+                        </form>
+                    </div>
+
+                    <!-- Фото клієнта (аватар) -->
+                    <div class="review-avatar-wrap">
+                        <img th:if="${r.user != null and r.user.profilePicturePath != null}"
+                             th:src="${r.user.profilePicturePath}"
+                             class="review-avatar" alt="Фото">
+                        <div th:unless="${r.user != null and r.user.profilePicturePath != null}"
+                             class="review-avatar-placeholder"
+                             th:text="${r.user != null ? #strings.substring(r.user.username,0,1) : '?'}">К</div>
+                    </div>
+
+                    <!-- Ім'я -->
+                    <div class="review-author-name"
+                         th:text="${r.user != null ? r.user.username : 'Анонім'}">Катерина</div>
+
+                    <!-- Текст відгуку -->
+                    <div class="review-text-block" th:text="${r.text}"></div>
+
+                    <!-- Фото від клієнта (якщо є) -->
+                    <img th:if="${r.photoPath != null}"
+                         th:src="${r.photoPath}"
+                         class="review-photo" alt="Фото торта">
+
+                    <!-- Поле відповіді адміна -->
+                    <div class="review-reply-area">
+                        <form th:action="@{/admin/reviews/{id}/reply(id=${r.id})}" method="post">
+                            <input type="hidden" name="filter" th:value="${filter}">
+                            <input th:if="${r.adminReply != null}"
+                                   type="text" name="reply"
+                                   class="reply-input"
+                                   th:value="${r.adminReply}"
+                                   placeholder="Відповісти...">
+                            <input th:if="${r.adminReply == null}"
+                                   type="text" name="reply"
+                                   class="reply-input"
+                                   placeholder="Відповісти...">
+                            <button type="submit" class="reply-submit-btn" style="display:none;"
+                                    th:id="'submit-' + ${r.id}">&#10003;</button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    var editMode = false;
+    function toggleEditMode() {
+        editMode = !editMode;
+        var btn = document.getElementById('editToggle');
+        var controls = document.querySelectorAll('.edit-only');
+        var submitBtns = document.querySelectorAll('.reply-submit-btn');
+
+        if (editMode) {
+            btn.textContent = 'Зберегти';
+            btn.style.color = '#3AA6B9';
+            controls.forEach(function(el) { el.style.display = 'flex'; });
+            submitBtns.forEach(function(el) { el.style.display = 'inline-block'; });
+        } else {
+            btn.textContent = 'Редагувати';
+            btn.style.color = '';
+            controls.forEach(function(el) { el.style.display = 'none'; });
+            submitBtns.forEach(function(el) { el.style.display = 'none'; });
+        }
+    }
+</script>
+</body>
+</html>

@@ -2,36 +2,96 @@
 <html lang="uk" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Адмін - Верифікація</title>
+    <title>Cake House — Верифікація</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Love+Light&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/globals.css}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
 </head>
 <body>
-<div class="admin-container">
-    <aside class="admin-sidebar" th:insert="~{admin/assortment :: aside}"></aside> <main class="admin-main">
-    <h1 class="admin-title">Верифікація пільгових статусів</h1>
 
-    <table class="admin-table">
-        <thead>
-        <tr>
-            <th>Клієнт</th>
-            <th>Статус</th>
-            <th>Документ</th>
-            <th>Дії</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td>Максим Петренко</td>
-            <td><span style="color: #2e7d32; font-weight: bold;">ДПСУ</span></td>
-            <td><a href="#" style="color: #277B8A;">📄 Відкрити фото</a></td>
-            <td>
-                <button class="btn-admin-add" style="padding: 8px 15px; font-size: 14px;">Підтвердити</button>
-                <button style="background: #ffebee; color: #c62828; border: none; padding: 8px 15px; border-radius: 20px; margin-left: 10px;">Відхилити</button>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-</main>
+<header th:replace="~{header :: header}"></header>
+
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <div class="sidebar-avatar-wrap">
+            <div class="sidebar-avatar-circle">
+                <img th:if="${adminUser != null and adminUser.profilePicturePath != null}"
+                     th:src="${adminUser.profilePicturePath}" alt="Фото">
+                <svg th:unless="${adminUser != null and adminUser.profilePicturePath != null}"
+                     viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.2">
+                    <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                </svg>
+            </div>
+            <div class="sidebar-name" th:text="${adminUser != null ? adminUser.username : 'Адмін'}">Анна</div>
+            <div class="sidebar-role">СУПЕРАДМІН</div>
+        </div>
+        <nav class="sidebar-nav">
+            <a th:href="@{/admin/orders}"      class="sidebar-link">Замовлення</a>
+            <a th:href="@{/admin/users}"       class="sidebar-link">Клієнти</a>
+            <a th:href="@{/admin/verification}" class="sidebar-link active">Верифікація</a>
+            <a th:href="@{/admin/assortment}"  class="sidebar-link">Асортимент</a>
+            <a th:href="@{/admin/reviews}"     class="sidebar-link">Відгуки</a>
+            <a th:href="@{/logout}"            class="sidebar-link sidebar-exit">Вихід</a>
+        </nav>
+    </aside>
+
+    <main class="admin-content">
+        <div class="admin-card">
+            <h1 class="admin-page-title">Верифікація</h1>
+
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                    <tr>
+                        <th>Клієнт</th>
+                        <th>Статус</th>
+                        <th>Документ</th>
+                        <th>Дія</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${pendingUsers.empty}">
+                        <td colspan="4" class="empty-row">Нових заявок немає ✓</td>
+                    </tr>
+                    <tr th:each="u : ${pendingUsers}">
+                        <td>
+                            <strong th:text="${u.username}"></strong><br>
+                            <span class="text-muted" th:text="${u.phone}"></span>
+                        </td>
+                        <td>
+                            <!-- Читабельна назва ролі -->
+                            <span class="role-label"
+                                  th:text="${u.role.name() == 'ZSU'  ? 'Військовослужбовець' :
+                                                 u.role.name() == 'DPSU' ? 'Співробітник ДПСУ' :
+                                                 u.role.name() == 'DSNS' ? 'Співробітник ДСНС' :
+                                                 u.role.name()}"></span>
+                        </td>
+                        <td>
+                            <a th:if="${u.documentPath != null}"
+                               th:href="${u.documentPath}"
+                               target="_blank"
+                               class="btn-view-doc">Переглянути фото</a>
+                            <span th:if="${u.documentPath == null}" class="text-muted">Немає документа</span>
+                        </td>
+                        <td>
+                            <div style="display:flex; flex-direction:column; gap:6px;">
+                                <form th:action="@{/admin/verification/{id}/approve(id=${u.id})}" method="post">
+                                    <button class="btn-approve">Підтвердити</button>
+                                </form>
+                                <form th:action="@{/admin/verification/{id}/reject(id=${u.id})}" method="post">
+                                    <button class="btn-reject">Відхилити</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
 </div>
 </body>
 </html>
