@@ -42,22 +42,6 @@ public class HomeController {
         return "login";
     }
 
-    // ---- Профіль ----
-    @GetMapping("/profile")
-    public String showProfilePage(Model model) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
-            String email = auth.getName();
-            User user = userRepository.findByEmail(email).orElse(null);
-
-            if (user != null) {
-                model.addAttribute("user", user);
-                return "profile";
-            }
-        }
-        return "redirect:/login";
-    }
 
     // ---- Відновлення пароля ----
     @GetMapping("/forgot-password")
@@ -86,7 +70,6 @@ public class HomeController {
                     reviewRepository.findByProductIdAndHiddenFalse(id));
         });
 
-        // Якщо товар не знайдено — повертаємо на асортимент
         if (!model.containsAttribute("product") ||
                 model.getAttribute("product") == null) {
             return "redirect:/assortment";
@@ -94,6 +77,7 @@ public class HomeController {
 
         return "product-detail";
     }
+
     @GetMapping("/gen-password")
     @ResponseBody
     public String genPass() {

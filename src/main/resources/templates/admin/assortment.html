@@ -42,6 +42,7 @@
         <div class="admin-card">
             <h1 class="page-title">Асортимент</h1>
 
+            <!-- 3 КНОПКИ КАТАЛОГІВ -->
             <div class="catalog-tabs">
                 <a th:each="ct : ${catalogTypes}"
                    th:href="@{/admin/assortment(catalog=${ct.name()})}"
@@ -52,47 +53,61 @@
 
             <div class="assort-center">
 
+                <!-- ФОРМА ДОДАВАННЯ -->
                 <div class="add-form-card">
                     <div class="add-form-title">
                         + Додати до «<span th:text="${currentCatalog.label}"></span>»
                     </div>
 
-                    <form th:action="@{/admin/assortment/add}" method="post" enctype="multipart/form-data">
+                    <form th:action="@{/admin/assortment/add}" method="post"
+                          enctype="multipart/form-data">
                         <input type="hidden" name="catalogType" th:value="${currentCatalog.name()}">
 
                         <div class="form-grid">
 
+                            <!-- ОСНОВНА ІНФОРМАЦІЯ -->
                             <div class="form-section-label">Основна інформація</div>
                             <div class="form-field">
                                 <label>Назва виробу *</label>
-                                <input type="text" name="name" placeholder="Наприклад: Шоколадне бенто" required>
+                                <input type="text" name="name"
+                                       placeholder="Наприклад: Шоколадне бенто" required>
                             </div>
                             <div class="form-field">
                                 <label>Фото виробу</label>
                                 <input type="file" name="image" accept="image/*">
                             </div>
 
+                            <!-- ЦІНА -->
                             <div class="form-section-label">Ціна</div>
                             <div class="form-field">
                                 <label>Сума (грн) *</label>
                                 <div class="price-wrap">
-                                    <button type="button" class="price-btn" onclick="changePrice(-50)">−</button>
+                                    <button type="button" class="price-btn"
+                                            onclick="changePrice(-50)">−</button>
                                     <input type="number" name="price" id="priceInput"
                                            class="price-input" value="100" min="1" required>
-                                    <button type="button" class="price-btn" onclick="changePrice(50)">+</button>
+                                    <button type="button" class="price-btn"
+                                            onclick="changePrice(50)">+</button>
                                 </div>
                             </div>
                             <div class="form-field">
                                 <label>Одиниця виміру *</label>
 
-                                <select th:if="${currentCatalog.name() != 'LINE'}" name="priceUnit">
+                                <!-- Каталог Смаків -->
+                                <select th:if="${currentCatalog.name() == 'FLAVOR'}" name="priceUnit">
                                     <option value="грн/шт">грн / шт</option>
                                     <option value="грн/кг">грн / кг</option>
-                                    <option value="грн/пачку">грн / пачку</option>
                                     <option value="грн/порцію">грн / порцію</option>
+                                    <option value="грн/пачку">грн / пачку</option>
                                     <option value="грн/набір">грн / набір</option>
                                 </select>
 
+                                <!-- Каталог Дизайнів — тільки декор -->
+                                <select th:if="${currentCatalog.name() == 'DESIGN'}" name="priceUnit">
+                                    <option value="грн/декор" selected>грн / декор</option>
+                                </select>
+
+                                <!-- Лінійка виробів -->
                                 <select th:if="${currentCatalog.name() == 'LINE'}" name="priceUnit">
                                     <option value="грн/шт">грн / шт</option>
                                     <option value="грн/набір">грн / набір</option>
@@ -106,6 +121,7 @@
                                 </select>
                             </div>
 
+                            <!-- ТЕРМІНОВІСТЬ -->
                             <div class="form-section-label">Терміновість</div>
                             <div class="form-field full">
                                 <div class="tags-wrap">
@@ -116,6 +132,7 @@
                                 </div>
                             </div>
 
+                            <!-- ====== КАТАЛОГ СМАКІВ ====== -->
                             <th:block th:if="${currentCatalog.name() == 'FLAVOR'}">
                                 <div class="form-section-label">Каталог смаків</div>
                                 <div class="form-field">
@@ -123,47 +140,66 @@
                                     <select name="flavorBase">
                                         <option value="">— оберіть —</option>
                                         <option th:each="fb : ${flavorBases}"
-                                                th:value="${fb.name()}" th:text="${fb.label}"></option>
+                                                th:value="${fb.name()}"
+                                                th:text="${fb.label}"></option>
                                     </select>
                                 </div>
                                 <div class="form-field">
                                     <label>Дієтичні особливості</label>
                                     <div class="tags-wrap">
-                                        <label class="tag-label"><input type="checkbox" name="dietaryTags" value="NO_SUGAR">Без цукру</label>
-                                        <label class="tag-label"><input type="checkbox" name="dietaryTags" value="NO_GLUTEN">Без глютену</label>
-                                        <label class="tag-label"><input type="checkbox" name="dietaryTags" value="NO_LACTOSE">Без лактози</label>
-                                        <label class="tag-label"><input type="checkbox" name="dietaryTags" value="VEGAN">Веган</label>
+                                        <label class="tag-label">
+                                            <input type="checkbox" name="dietaryTags" value="NO_SUGAR">Без цукру</label>
+                                        <label class="tag-label">
+                                            <input type="checkbox" name="dietaryTags" value="NO_GLUTEN">Без глютену</label>
+                                        <label class="tag-label">
+                                            <input type="checkbox" name="dietaryTags" value="NO_LACTOSE">Без лактози</label>
+                                        <label class="tag-label">
+                                            <input type="checkbox" name="dietaryTags" value="VEGAN">Веган</label>
                                     </div>
                                 </div>
                             </th:block>
 
+                            <!-- ====== КАТАЛОГ ДИЗАЙНІВ ====== -->
                             <th:block th:if="${currentCatalog.name() == 'DESIGN'}">
                                 <div class="form-section-label">Каталог дизайнів</div>
 
-                                <div class="form-field">
-                                    <label>Подія / Привід *</label>
-                                    <select name="designEvent" id="designEventSelect" onchange="showDesignFor()">
+                                <!-- Головна подія -->
+                                <div class="form-field full">
+                                    <label>Подія / Привід</label>
+                                    <select name="designEvent" id="designEventSelect"
+                                            onchange="showDesignFor()">
                                         <option value="">— оберіть подію —</option>
                                         <option th:each="de : ${designEvents}"
-                                                th:value="${de.name()}" th:text="${de.label}"></option>
+                                                th:value="${de.name()}"
+                                                th:text="${de.label}"></option>
                                     </select>
                                 </div>
 
-                                <div class="form-field design-for-block" id="designForBlock" style="display:none;">
+                                <!-- Уточнення: для кого — з'являється після вибору події -->
+                                <div class="design-for-block" id="designForBlock"
+                                     style="display:none;">
                                     <span class="design-for-label">Уточнення — для кого?</span>
                                     <div class="tags-wrap">
-                                        <label class="tag-label">
-                                            <input type="radio" name="designFor" value="">
-                                            <span>Не вказано</span>
-                                        </label>
+                                        <!-- Чекбокси — можна обрати кілька -->
                                         <label class="tag-label" th:each="df : ${designFors}">
-                                            <input type="radio" name="designFor" th:value="${df.name()}">
+                                            <input type="checkbox" name="designFor"
+                                                   th:value="${df.name()}">
                                             <span th:text="${df.label}"></span>
                                         </label>
+                                        <!-- Запасний варіант якщо designFors порожній -->
+                                        <th:block th:if="${designFors == null or #lists.isEmpty(designFors)}">
+                                            <label class="tag-label"><input type="checkbox" name="designFor" value="FOR_GIRL"><span>Для дівчинки</span></label>
+                                            <label class="tag-label"><input type="checkbox" name="designFor" value="FOR_BOY"><span>Для хлопчика</span></label>
+                                            <label class="tag-label"><input type="checkbox" name="designFor" value="FOR_WOMAN"><span>Для жінки</span></label>
+                                            <label class="tag-label"><input type="checkbox" name="designFor" value="FOR_MAN"><span>Для чоловіка</span></label>
+                                            <label class="tag-label"><input type="checkbox" name="designFor" value="FOR_COUPLE"><span>Для пари</span></label>
+                                            <label class="tag-label"><input type="checkbox" name="designFor" value="UNISEX"><span>Універсальний</span></label>
+                                        </th:block>
                                     </div>
                                 </div>
                             </th:block>
 
+                            <!-- ====== ЛІНІЙКА ВИРОБІВ ====== -->
                             <th:block th:if="${currentCatalog.name() == 'LINE'}">
                                 <div class="form-section-label">Лінійка виробів</div>
                                 <div class="form-field full">
@@ -171,11 +207,13 @@
                                     <select name="productLine">
                                         <option value="">— оберіть —</option>
                                         <option th:each="pl : ${productLines}"
-                                                th:value="${pl.name()}" th:text="${pl.label}"></option>
+                                                th:value="${pl.name()}"
+                                                th:text="${pl.label}"></option>
                                     </select>
                                 </div>
                             </th:block>
 
+                            <!-- ОПИС -->
                             <div class="form-section-label">Опис</div>
                             <div class="form-field full">
                                 <textarea name="description" rows="3"
@@ -183,16 +221,18 @@
                             </div>
 
                         </div>
-                        <div style="text-align: center;">
+                        <div style="text-align:center;">
                             <button type="submit" class="btn-add">Додати до каталогу</button>
                         </div>
                     </form>
                 </div>
 
+                <!-- ПОШУК -->
                 <div class="search-bar-wrap">
                     <div class="search-bar-inner">
                         <svg width="22" height="22" viewBox="0 0 24 24"
-                             fill="none" stroke="#3AA6B9" stroke-width="2.2" stroke-linecap="round">
+                             fill="none" stroke="#3AA6B9" stroke-width="2.2"
+                             stroke-linecap="round">
                             <circle cx="11" cy="11" r="7"/>
                             <line x1="16.5" y1="16.5" x2="22" y2="22"/>
                         </svg>
@@ -200,11 +240,13 @@
                                placeholder="Пошук за назвою товару..."
                                oninput="filterProducts()" autocomplete="off">
                         <button class="search-clear" id="clearBtn"
-                                onclick="clearSearch()" style="display:none;" title="Очистити">✕</button>
+                                onclick="clearSearch()" style="display:none;"
+                                title="Очистити">✕</button>
                     </div>
                     <span id="searchCount" class="search-count"></span>
                 </div>
 
+                <!-- ТАБЛИЦЯ ТОВАРІВ -->
                 <div class="products-table-wrap">
                     <table class="products-table" id="productsTable">
                         <thead>
@@ -220,7 +262,8 @@
                         </thead>
                         <tbody>
                         <tr th:if="${products.empty}">
-                            <td colspan="7" style="text-align:center;padding:50px;color:#999;font-size:17px;">
+                            <td colspan="7"
+                                style="text-align:center;padding:50px;color:#999;font-size:17px;">
                                 Товарів поки немає — додайте перший!
                             </td>
                         </tr>
@@ -228,31 +271,60 @@
                             th:classappend="${!p.available} ? ' row-dim'"
                             th:attr="data-name=${p.name}">
                             <td>
-                                <img th:if="${p.imagePath != null}" th:src="${p.imagePath}" class="product-thumb">
+                                <img th:if="${p.imagePath != null}"
+                                     th:src="${p.imagePath}"
+                                     class="product-thumb"
+                                     alt="фото">
                                 <div th:unless="${p.imagePath != null}"
-                                     style="width:64px;height:64px;background:#eee;border-radius:10px;
-                                            display:flex;align-items:center;justify-content:center;color:#ccc;font-size:22px;">📷</div>
+                                     style="width:64px;height:64px;background:#eee;
+                                            border-radius:10px;display:flex;
+                                            align-items:center;justify-content:center;
+                                            color:#ccc;font-size:22px;">📷</div>
                             </td>
                             <td><strong th:text="${p.name}"></strong></td>
                             <td>
-                                <span th:if="${p.flavorBase != null}" class="tag-pill" th:text="${p.flavorBase.label}"></span>
-                                <span th:if="${p.designEvent != null}" class="tag-pill" th:text="${p.designEvent.label}"></span>
-                                <span th:if="${p.designFor != null}" class="tag-pill"
+                                <span th:if="${p.flavorBase != null}"
+                                      class="tag-pill"
+                                      th:text="${p.flavorBase.label}"></span>
+                                <span th:if="${p.designEvent != null}"
+                                      class="tag-pill"
+                                      th:text="${p.designEvent.label}"></span>
+                                <span th:if="${p.designFor != null}"
+                                      class="tag-pill"
                                       style="background:#f0e8f5;color:#6b3fa0;"
-                                      th:text="${p.designFor.label}"></span>
-                                <span th:if="${p.productLine != null}" class="tag-pill" th:text="${p.productLine.label}"></span>
+                                      th:text="${p.designFor.replace(',', ' · ')}"></span>
+                                <span th:if="${p.productLine != null}"
+                                      class="tag-pill"
+                                      th:text="${p.productLine.label}"></span>
+                                <!-- Дієтичні теги -->
+                                <th:block th:if="${p.dietaryTags != null}">
+                                    <span th:if="${p.hasDietaryTag('NO_SUGAR')}"   class="tag-pill">Без цукру</span>
+                                    <span th:if="${p.hasDietaryTag('NO_GLUTEN')}"  class="tag-pill">Без глютену</span>
+                                    <span th:if="${p.hasDietaryTag('NO_LACTOSE')}" class="tag-pill">Без лактози</span>
+                                    <span th:if="${p.hasDietaryTag('VEGAN')}"      class="tag-pill">Веган</span>
+                                </th:block>
                             </td>
-                            <td><strong th:text="${p.price}"></strong> <span th:text="${p.priceUnit}"></span></td>
-                            <td><span th:text="${p.urgency != null ? p.urgency.label : '—'}"></span></td>
-                            <td><span th:text="${p.available ? 'Активний' : 'Прихований'}"></span></td>
                             <td>
-                                <form th:action="@{/admin/assortment/{id}/toggle(id=${p.id})}" method="post">
-                                    <input type="hidden" name="catalog" th:value="${currentCatalog.name()}">
+                                <strong th:text="${p.price}"></strong>
+                                <span th:text="' ' + ${p.priceUnit}"></span>
+                            </td>
+                            <td>
+                                <span th:text="${p.urgency != null ? p.urgency.label : '—'}"></span>
+                            </td>
+                            <td>
+                                <span th:text="${p.available ? 'Активний' : 'Прихований'}"></span>
+                            </td>
+                            <td>
+                                <form th:action="@{/admin/assortment/{id}/toggle(id=${p.id})}"
+                                      method="post">
+                                    <input type="hidden" name="catalog"
+                                           th:value="${currentCatalog.name()}">
                                     <button class="btn-sm btn-blue">Сховати/Показати</button>
                                 </form>
                                 <form th:action="@{/admin/assortment/{id}/delete(id=${p.id})}"
                                       method="post" style="display:inline;">
-                                    <input type="hidden" name="catalog" th:value="${currentCatalog.name()}">
+                                    <input type="hidden" name="catalog"
+                                           th:value="${currentCatalog.name()}">
                                     <button type="button" class="btn-sm btn-red"
                                             th:attr="data-name=${p.name}"
                                             onclick="confirmDelete(this)">Видалити</button>
@@ -270,6 +342,50 @@
 </div>
 
 <script th:src="@{/js/admin.js}"></script>
+<script>
+    function showDesignFor() {
+        var select = document.getElementById('designEventSelect');
+        var block  = document.getElementById('designForBlock');
+        if (select && block) {
+            block.style.display = select.value ? 'block' : 'none';
+        }
+    }
+
+    function changePrice(delta) {
+        var input = document.getElementById('priceInput');
+        if (input) input.value = Math.max(1, (parseInt(input.value) || 0) + delta);
+    }
+
+    function confirmDelete(btn) {
+        var name = btn.getAttribute('data-name');
+        if (confirm('Видалити "' + name + '"?')) {
+            btn.closest('form').submit();
+        }
+    }
+
+    function filterProducts() {
+        var q         = document.getElementById('productSearch').value.toLowerCase().trim();
+        var rows      = document.querySelectorAll('#productsTable tbody tr[data-name]');
+        var clearBtn  = document.getElementById('clearBtn');
+        var countEl   = document.getElementById('searchCount');
+        var noResults = document.getElementById('noResults');
+        var visible   = 0;
+
+        if (clearBtn) clearBtn.style.display = q ? 'block' : 'none';
+        rows.forEach(function(row) {
+            var name = (row.getAttribute('data-name') || '').toLowerCase();
+            if (name.includes(q)) { row.style.display = ''; visible++; }
+            else row.style.display = 'none';
+        });
+        if (countEl)   countEl.textContent = q ? 'Знайдено: ' + visible : '';
+        if (noResults) noResults.style.display = (q && visible === 0) ? 'block' : 'none';
+    }
+
+    function clearSearch() {
+        var input = document.getElementById('productSearch');
+        if (input) { input.value = ''; filterProducts(); input.focus(); }
+    }
+</script>
 
 </body>
 </html>

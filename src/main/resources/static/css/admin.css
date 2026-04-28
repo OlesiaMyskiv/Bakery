@@ -996,6 +996,22 @@ body {
     box-shadow: 0 0 0 3px rgba(58,166,185,0.12);
 }
 .search-bar-inner svg { flex-shrink: 0; }
+
+
+
+
+
+.search-bar-wrap {
+    width: 100%; display: flex; align-items: center;
+    gap: 14px; margin-bottom: 8px;
+}
+.search-bar-inner {
+    flex: 1; display: flex; align-items: center;
+    background: white; border: 2px solid #e0e0d8;
+    border-radius: 30px; padding: 10px 20px; gap: 12px;
+    transition: border-color 0.2s;
+}
+.search-bar-inner:focus-within { border-color: #3AA6B9; }
 .search-bar-inner input {
     flex: 1; border: none; background: transparent;
     font-family: 'Cormorant Garamond', Georgia, serif;
@@ -1004,24 +1020,29 @@ body {
 .search-bar-inner input::placeholder { color: #bbb; }
 .search-clear {
     background: none; border: none; color: #bbb;
-    font-size: 17px; cursor: pointer; padding: 0; line-height: 1; transition: color 0.15s;
+    font-size: 17px; cursor: pointer; padding: 0;
 }
 .search-clear:hover { color: #e74c3c; }
 .search-count {
     font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: 16px; color: #888; white-space: nowrap; min-width: 100px;
+    font-size: 16px; color: #888; white-space: nowrap;
 }
 #noResults {
-    text-align: center; padding: 40px; color: #aaa;
+    text-align: center; padding: 36px; color: #aaa;
     font-size: 18px; font-family: 'Cormorant Garamond', Georgia, serif;
     display: none;
 }
-/* Підзаголовок у блоці дизайнів */
 .design-for-block {
-    margin-top: 10px;
+    grid-column: 1 / -1;
+    background: #f0f8fb;
+    border: 1.5px solid #c8e8f2;
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-top: 4px;
 }
 .design-for-label {
-    font-size: 13px; color: #aaa; font-weight: 600;
+    display: block;
+    font-size: 13px; font-weight: 700; color: #3AA6B9;
     text-transform: uppercase; letter-spacing: 1px;
-    margin-bottom: 8px; display: block;
+    margin-bottom: 10px;
 }

@@ -41,8 +41,14 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/register", "/login", "/assortment", "/constructor", "/css/**", "/img/**", "/js/**").permitAll()
+                        .requestMatchers(
+                                "/", "/register", "/login",
+                                "/assortment", "/constructor", "/ai-design",
+                                "/css/**", "/img/**", "/js/**", "/uploads/**"
+                        ).permitAll()
                         .requestMatchers("/admin/**").hasAuthority("SUPER_ADMIN")
+                        // Чат і API доступні для авторизованих
+                        .requestMatchers("/chat/**", "/api/**", "/orders/**").authenticated()
                         .requestMatchers("/profile/**").authenticated()
                         .anyRequest().authenticated()
                 )
@@ -53,7 +59,7 @@ public class SecurityConfig {
                         .successHandler((request, response, authentication) -> {
                             String role = authentication.getAuthorities().iterator().next().getAuthority();
                             if (role.equals("SUPER_ADMIN") || role.equals("ROLE_SUPER_ADMIN")) {
-                                response.sendRedirect("/admin/admin");
+                                response.sendRedirect("/admin/orders");
                             } else {
                                 response.sendRedirect("/profile");
                             }

@@ -2,6 +2,12 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Love+Light&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/css/globals.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
 
@@ -24,20 +30,16 @@
                     <li><a th:href="@{/ai-design}">ШІ-дизайн</a></li>
                 </ul>
             </nav>
-
             <div class="header-icons">
                 <a th:href="@{/login}" sec:authorize="isAnonymous()" class="icon-link">
                     <img th:src="@{/img/user-icon.svg}" alt="Увійти">
                 </a>
-
-                <a th:href="@{/admin/admin}" sec:authorize="hasAuthority('SUPER_ADMIN')" class="icon-link">
+                <a th:href="@{/admin/orders}" sec:authorize="hasAuthority('SUPER_ADMIN')" class="icon-link">
                     <img th:src="@{/img/user-icon.svg}" alt="Адмін-панель">
                 </a>
-
                 <a th:href="@{/profile}" sec:authorize="isAuthenticated() and !hasAuthority('SUPER_ADMIN')" class="icon-link">
                     <img th:src="@{/img/user-icon.svg}" alt="Профіль">
                 </a>
-
                 <a th:href="@{/cart}" class="icon-link">
                     <img th:src="@{/img/cart-icon.svg}" alt="Кошик">
                 </a>
@@ -45,6 +47,308 @@
         </div>
     </div>
 </header>
+
+<!-- ПЛАВАЮЧИЙ ЧАТ — тільки для клієнтів -->
+<div sec:authorize="isAuthenticated() and !hasAuthority('SUPER_ADMIN')">
+
+    <!-- Кнопка-бабл -->
+    <button class="global-chat-bubble" id="gcBubble" onclick="gcOpen()" title="Чат з менеджером">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8"
+             stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            <circle cx="9"  cy="10" r="1" fill="white" stroke="none"/>
+            <circle cx="12" cy="10" r="1" fill="white" stroke="none"/>
+            <circle cx="15" cy="10" r="1" fill="white" stroke="none"/>
+        </svg>
+        <span class="chat-unread-badge" id="gcUnreadBadge" style="display:none;"></span>
+    </button>
+
+    <!-- Панель чату (перетягувана + змінювана) -->
+    <div class="global-chat-panel" id="gcPanel">
+
+        <!-- Хедер — за нього тягнемо -->
+        <div class="gc-header" id="gcDragHandle">
+            <div>
+                <div class="gc-header-title">💬 Чат з менеджером</div>
+                <div class="gc-header-sub">Ми відповімо найближчим часом</div>
+            </div>
+            <button class="gc-close" onclick="gcClose()">✕</button>
+        </div>
+
+        <!-- Ручки для зміни розміру -->
+        <div class="gc-resize-handle"        id="gcResizeBottom"></div>
+        <div class="gc-resize-handle-right"  id="gcResizeLeft"></div>
+        <div class="gc-resize-handle-corner" id="gcResizeCorner"></div>
+
+        <!-- Вибір замовлення -->
+        <div class="gc-order-select-wrap">
+            <label>Оберіть замовлення:</label>
+            <select class="gc-order-select" id="gcOrderSelect" onchange="gcLoadMessages()">
+                <option value="">— оберіть замовлення —</option>
+            </select>
+        </div>
+
+        <!-- Повідомлення -->
+        <div class="gc-messages" id="gcMessages">
+            <div class="gc-empty">Оберіть замовлення вище щоб переглянути чат</div>
+        </div>
+
+        <!-- Поле вводу -->
+        <div class="gc-input-area">
+            <textarea class="gc-textarea" id="gcInput"
+                      placeholder="Напишіть повідомлення..."
+                      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();gcSend();}"></textarea>
+            <button class="gc-send" onclick="gcSend()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round">
+                    <line x1="22" y1="2" x2="11" y2="13"/>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        var gcOrderId  = null;
+        var gcInterval = null;
+        var gcLoaded   = false;
+        var panel      = null;
+
+        // ============================================================
+        // ВІДКРИТИ / ЗАКРИТИ
+        // ============================================================
+        window.gcOpen = function() {
+            panel = document.getElementById('gcPanel');
+            if (!panel) return;
+            panel.classList.add('open');
+            document.getElementById('gcBubble').style.display = 'none';
+            if (!gcLoaded) { gcLoaded = true; gcLoadOrders(); }
+        };
+
+        window.gcClose = function() {
+            var p = document.getElementById('gcPanel');
+            if (p) p.classList.remove('open');
+            document.getElementById('gcBubble').style.display = 'flex';
+            if (gcInterval) clearInterval(gcInterval);
+            gcInterval = null;
+        };
+
+        // ============================================================
+        // ПЕРЕТЯГУВАННЯ (drag)
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            panel = document.getElementById('gcPanel');
+            var handle = document.getElementById('gcDragHandle');
+            if (!panel || !handle) return;
+
+            var dragging = false;
+            var startX, startY, startLeft, startTop;
+
+            handle.addEventListener('mousedown', function(e) {
+                // не реагуємо на кнопку закриття
+                if (e.target.classList.contains('gc-close') ||
+                    e.target.closest('.gc-close')) return;
+
+                dragging = true;
+                var rect = panel.getBoundingClientRect();
+                startX    = e.clientX;
+                startY    = e.clientY;
+                startLeft = rect.left;
+                startTop  = rect.top;
+
+                // Переключаємо на абсолютне позиціонування від top/left
+                panel.style.right  = 'auto';
+                panel.style.bottom = 'auto';
+                panel.style.left   = startLeft + 'px';
+                panel.style.top    = startTop  + 'px';
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (!dragging) return;
+                var dx = e.clientX - startX;
+                var dy = e.clientY - startY;
+                var newLeft = startLeft + dx;
+                var newTop  = startTop  + dy;
+
+                // Не виходимо за межі екрану
+                newLeft = Math.max(0, Math.min(window.innerWidth  - panel.offsetWidth,  newLeft));
+                newTop  = Math.max(0, Math.min(window.innerHeight - panel.offsetHeight, newTop));
+
+                panel.style.left = newLeft + 'px';
+                panel.style.top  = newTop  + 'px';
+            });
+
+            document.addEventListener('mouseup', function() { dragging = false; });
+
+            // ============================================================
+            // ЗМІНА РОЗМІРУ (resize) — знизу, зліва, і кут
+            // Шрифт НЕ масштабується — тільки розмір контейнера
+            // ============================================================
+            function makeResizable(handleEl, direction) {
+                if (!handleEl) return;
+                var resizing = false;
+                var startW, startH, startLeft, startTop, startMouseX, startMouseY;
+
+                handleEl.addEventListener('mousedown', function(e) {
+                    resizing   = true;
+                    var rect   = panel.getBoundingClientRect();
+                    startW     = rect.width;
+                    startH     = rect.height;
+                    startLeft  = rect.left;
+                    startTop   = rect.top;
+                    startMouseX = e.clientX;
+                    startMouseY = e.clientY;
+
+                    panel.style.right  = 'auto';
+                    panel.style.bottom = 'auto';
+                    panel.style.left   = startLeft + 'px';
+                    panel.style.top    = startTop  + 'px';
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
+
+                document.addEventListener('mousemove', function(e) {
+                    if (!resizing) return;
+                    var dx = e.clientX - startMouseX;
+                    var dy = e.clientY - startMouseY;
+
+                    if (direction === 'bottom' || direction === 'corner') {
+                        var newH = Math.max(320, Math.min(window.innerHeight - startTop, startH + dy));
+                        panel.style.height = newH + 'px';
+                    }
+                    if (direction === 'left' || direction === 'corner') {
+                        // Тягнемо ліву межу — збільшуємо вліво
+                        var newW = Math.max(260, Math.min(window.innerWidth - startLeft, startW - dx));
+                        var newL = startLeft + dx;
+                        if (newL >= 0 && newW >= 260) {
+                            panel.style.width = newW + 'px';
+                            panel.style.left  = newL + 'px';
+                        }
+                    }
+                });
+
+                document.addEventListener('mouseup', function() { resizing = false; });
+            }
+
+            makeResizable(document.getElementById('gcResizeBottom'), 'bottom');
+            makeResizable(document.getElementById('gcResizeLeft'),   'left');
+            makeResizable(document.getElementById('gcResizeCorner'), 'corner');
+        });
+
+        // ============================================================
+        // ЗАВАНТАЖИТИ ЗАМОВЛЕННЯ
+        // ============================================================
+        function gcLoadOrders() {
+            fetch('/api/my-orders')
+                .then(function(r) {
+                    if (!r.ok) throw new Error('not ok');
+                    return r.json();
+                })
+                .then(function(orders) {
+                    var select = document.getElementById('gcOrderSelect');
+                    if (!select) return;
+                    select.innerHTML = '<option value="">— оберіть замовлення —</option>';
+                    if (!orders || orders.length === 0) {
+                        document.getElementById('gcMessages').innerHTML =
+                            '<div class="gc-no-orders">У вас ще немає замовлень 🎂<br><br>' +
+                            'Після оформлення замовлення ви зможете написати менеджеру.</div>';
+                        return;
+                    }
+                    orders.forEach(function(o) {
+                        var opt = document.createElement('option');
+                        opt.value = o.id;
+                        opt.textContent = '№' + o.id + ' — ' + (o.composition || 'Замовлення');
+                        select.appendChild(opt);
+                    });
+                    if (orders.length === 1) {
+                        select.value = orders[0].id;
+                        window.gcLoadMessages();
+                    }
+                })
+                .catch(function(e) {
+                    console.error('Chat orders error:', e);
+                    var msgs = document.getElementById('gcMessages');
+                    if (msgs) msgs.innerHTML =
+                        '<div class="gc-empty">Не вдалось завантажити замовлення</div>';
+                });
+        }
+
+        // ============================================================
+        // ЗАВАНТАЖИТИ ПОВІДОМЛЕННЯ
+        // ============================================================
+        window.gcLoadMessages = function() {
+            var select = document.getElementById('gcOrderSelect');
+            if (!select) return;
+            gcOrderId = select.value;
+            if (gcInterval) clearInterval(gcInterval);
+
+            if (!gcOrderId) {
+                document.getElementById('gcMessages').innerHTML =
+                    '<div class="gc-empty">Оберіть замовлення вище щоб переглянути чат</div>';
+                return;
+            }
+            gcFetchMessages();
+            gcInterval = setInterval(gcFetchMessages, 5000);
+        };
+
+        function gcFetchMessages() {
+            if (!gcOrderId) return;
+            fetch('/chat/' + gcOrderId + '/messages')
+                .then(function(r) { return r.json(); })
+                .then(function(messages) {
+                    var container = document.getElementById('gcMessages');
+                    if (!container) return;
+                    if (!messages || messages.length === 0) {
+                        container.innerHTML =
+                            '<div class="gc-empty">Напишіть перше повідомлення 🎂</div>';
+                        return;
+                    }
+                    var html = messages.map(function(m) {
+                        var cls  = m.isAdmin ? 'theirs' : 'mine';
+                        var time = m.sentAt ? m.sentAt.substring(11, 16) : '';
+                        return '<div class="gc-bubble ' + cls + '">' +
+                            (m.isAdmin
+                                ? '<div class="gc-sender">' + esc(m.senderName) + '</div>'
+                                : '') +
+                            '<div>' + esc(m.text) + '</div>' +
+                            '<div class="gc-time">' + time + '</div>' +
+                            '</div>';
+                    }).join('');
+                    container.innerHTML = html;
+                    container.scrollTop = container.scrollHeight;
+                })
+                .catch(function(e) { console.error('Messages error:', e); });
+        }
+
+        // ============================================================
+        // НАДІСЛАТИ
+        // ============================================================
+        window.gcSend = function() {
+            if (!gcOrderId) return;
+            var input = document.getElementById('gcInput');
+            var text  = (input.value || '').trim();
+            if (!text) return;
+
+            fetch('/chat/' + gcOrderId + '/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: text })
+            })
+                .then(function(r) { return r.json(); })
+                .then(function() { input.value = ''; gcFetchMessages(); })
+                .catch(function(e) { console.error('Send error:', e); });
+        };
+
+        function esc(s) {
+            return String(s)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+    })();
+</script>
 
 </body>
 </html>

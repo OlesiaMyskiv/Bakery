@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -131,19 +130,16 @@ public class AdminController {
             catalogType = Product.CatalogType.FLAVOR;
         }
 
-        // Товари поточного каталогу (для адміна — всі, включно з прихованими)
         model.addAttribute("products",
                 productRepository.findByCatalogTypeOrderByNameAsc(catalogType));
         model.addAttribute("currentCatalog", catalogType);
-        model.addAttribute("catalogTypes", Product.CatalogType.values());
-
-        // Enum-и для форми
+        model.addAttribute("catalogTypes",  Product.CatalogType.values());
         model.addAttribute("flavorBases",   Product.FlavorBase.values());
         model.addAttribute("designEvents",  Product.DesignEvent.values());
+        model.addAttribute("designFors",    Product.DesignFor.values()); // ← обов'язково!
         model.addAttribute("productLines",  Product.ProductLine.values());
         model.addAttribute("urgencies",     Product.Urgency.values());
-
-        model.addAttribute("adminUser", getCurrentAdmin());
+        model.addAttribute("adminUser",     getCurrentAdmin());
         return "admin/assortment";
     }
 
@@ -154,6 +150,7 @@ public class AdminController {
             @RequestParam(required = false) String flavorBase,
             @RequestParam(required = false) List<String> dietaryTags,
             @RequestParam(required = false) String designEvent,
+            @RequestParam(required = false) List<String> designFor,
             @RequestParam(required = false) String productLine,
             @RequestParam(required = false) String urgency,
             @RequestParam Integer price,
@@ -179,35 +176,47 @@ public class AdminController {
         if (designEvent != null && !designEvent.isEmpty())
             product.setDesignEvent(Product.DesignEvent.valueOf(designEvent));
 
+        if (designFor != null && !designFor.isEmpty())
+            product.setDesignFor(String.join(",", designFor));
+
         if (productLine != null && !productLine.isEmpty())
             product.setProductLine(Product.ProductLine.valueOf(productLine));
 
         if (urgency != null && !urgency.isEmpty())
             product.setUrgency(Product.Urgency.valueOf(urgency));
 
-        // ============================================================
-        // ЗБЕРЕЖЕННЯ ФОТО В ОКРЕМУ ПАПКУ ЗАЛЕЖНО ВІД КАТАЛОГУ
-        // Структура: uploads/assortment/flavor/   ← Каталог Смаків
-        //            uploads/assortment/design/   ← Каталог Дизайнів
-        //            uploads/assortment/line/     ← Лінійка виробів
-        // ============================================================
+        // =====================================================
+        // ЗБЕРЕЖЕННЯ ФОТО
+        // Шлях: /Users/olesa/Desktop/Bakery/uploads/assortment/flavor/ (або design/line/)
+        // В БД зберігається: /uploads/assortment/flavor/uuid_назва.jpg
+        // =====================================================
         if (image != null && !image.isEmpty()) {
-            // Визначаємо підпапку
             String subFolder = switch (catalog) {
                 case FLAVOR -> "flavor";
                 case DESIGN -> "design";
                 case LINE   -> "line";
             };
 
-            String uploadDir = System.getProperty("user.dir")
-                    + "/uploads/assortment/" + subFolder;
-            Path uploadPath = Paths.get(uploadDir);
-            if (!Files.exists(uploadPath)) Files.createDirectories(uploadPath);
+            // Абсолютний шлях до папки збереження
+            Path uploadDir = Paths.get(System.getProperty("user.dir"))
+                    .resolve("uploads")
+                    .resolve("assortment")
+                    .resolve(subFolder);
 
-            String fileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
-            Files.write(uploadPath.resolve(fileName), image.getBytes());
+            // Створюємо папки якщо не існують
+            Files.createDirectories(uploadDir);
 
-            // Шлях який збережеться в БД і використовується в <img src="...">
+            // Унікальне ім'я файлу
+            String originalName = image.getOriginalFilename();
+            String extension = (originalName != null && originalName.contains("."))
+                    ? originalName.substring(originalName.lastIndexOf("."))
+                    : ".jpg";
+            String fileName = UUID.randomUUID().toString() + extension;
+
+            // Зберігаємо файл на диск
+            Files.write(uploadDir.resolve(fileName), image.getBytes());
+
+            // Шлях що збережеться в БД (відносний, для <img src="...">)
             product.setImagePath("/uploads/assortment/" + subFolder + "/" + fileName);
         }
 
@@ -218,6 +227,16 @@ public class AdminController {
     @PostMapping("/assortment/{id}/delete")
     public String deleteProduct(@PathVariable Long id,
                                 @RequestParam(defaultValue = "FLAVOR") String catalog) {
+        // Видаляємо фото з диску якщо є
+        productRepository.findById(id).ifPresent(p -> {
+            if (p.getImagePath() != null) {
+                try {
+                    Path filePath = Paths.get(System.getProperty("user.dir"))
+                            .resolve(p.getImagePath().replaceFirst("^/", ""));
+                    Files.deleteIfExists(filePath);
+                } catch (IOException ignored) {}
+            }
+        });
         productRepository.deleteById(id);
         return "redirect:/admin/assortment?catalog=" + catalog;
     }
