@@ -166,41 +166,49 @@ public class AdminController {
         product.setPrice(price);
         product.setPriceUnit(priceUnit);
         product.setDescription(description);
-        product.setCatalogType(Product.CatalogType.valueOf(catalogType));
 
-        // Смак
-        if (flavorBase != null && !flavorBase.isEmpty()) {
+        Product.CatalogType catalog = Product.CatalogType.valueOf(catalogType);
+        product.setCatalogType(catalog);
+
+        if (flavorBase != null && !flavorBase.isEmpty())
             product.setFlavorBase(Product.FlavorBase.valueOf(flavorBase));
-        }
 
-        // Дієтичні теги — зберігаємо через кому
-        if (dietaryTags != null && !dietaryTags.isEmpty()) {
+        if (dietaryTags != null && !dietaryTags.isEmpty())
             product.setDietaryTags(String.join(",", dietaryTags));
-        }
 
-        // Дизайн
-        if (designEvent != null && !designEvent.isEmpty()) {
+        if (designEvent != null && !designEvent.isEmpty())
             product.setDesignEvent(Product.DesignEvent.valueOf(designEvent));
-        }
 
-        // Лінійка
-        if (productLine != null && !productLine.isEmpty()) {
+        if (productLine != null && !productLine.isEmpty())
             product.setProductLine(Product.ProductLine.valueOf(productLine));
-        }
 
-        // Терміновість
-        if (urgency != null && !urgency.isEmpty()) {
+        if (urgency != null && !urgency.isEmpty())
             product.setUrgency(Product.Urgency.valueOf(urgency));
-        }
 
-        // Фото
+        // ============================================================
+        // ЗБЕРЕЖЕННЯ ФОТО В ОКРЕМУ ПАПКУ ЗАЛЕЖНО ВІД КАТАЛОГУ
+        // Структура: uploads/assortment/flavor/   ← Каталог Смаків
+        //            uploads/assortment/design/   ← Каталог Дизайнів
+        //            uploads/assortment/line/     ← Лінійка виробів
+        // ============================================================
         if (image != null && !image.isEmpty()) {
-            String uploadDir = System.getProperty("user.dir") + "/uploads/products";
+            // Визначаємо підпапку
+            String subFolder = switch (catalog) {
+                case FLAVOR -> "flavor";
+                case DESIGN -> "design";
+                case LINE   -> "line";
+            };
+
+            String uploadDir = System.getProperty("user.dir")
+                    + "/uploads/assortment/" + subFolder;
             Path uploadPath = Paths.get(uploadDir);
             if (!Files.exists(uploadPath)) Files.createDirectories(uploadPath);
+
             String fileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
             Files.write(uploadPath.resolve(fileName), image.getBytes());
-            product.setImagePath("/uploads/products/" + fileName);
+
+            // Шлях який збережеться в БД і використовується в <img src="...">
+            product.setImagePath("/uploads/assortment/" + subFolder + "/" + fileName);
         }
 
         productRepository.save(product);

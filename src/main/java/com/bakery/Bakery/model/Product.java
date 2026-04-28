@@ -10,35 +10,42 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Назва виробу
     @Column(nullable = false)
     private String name;
 
-    // Опис
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    // Ціна
     @Column(nullable = false)
     private Integer price;
 
-    // Одиниця ціни: "грн/шт", "грн/кг", "грн/пачку", "грн/порцію"
     @Column(name = "price_unit")
     private String priceUnit = "грн/шт";
 
-    // Фото
     @Column(name = "image_path")
     private String imagePath;
 
-    // Доступний чи прихований
     @Column(name = "available")
     private boolean available = true;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "catalog_type", nullable = false)
+    private CatalogType catalogType;
+
+    public enum CatalogType {
+        FLAVOR("Каталог Смаків"),
+        DESIGN("Каталог Дизайнів"),
+        LINE("Лінійка виробів");
+
+        private final String label;
+        CatalogType(String label) { this.label = label; }
+        public String getLabel() { return label; }
+    }
+
     // ============================================================
-    // КАТАЛОГ 1 — Каталог Смаків
+    // КАТАЛОГ СМАКІВ
     // ============================================================
 
-    // Основа смаку
     @Enumerated(EnumType.STRING)
     @Column(name = "flavor_base")
     private FlavorBase flavorBase;
@@ -55,7 +62,6 @@ public class Product {
         public String getLabel() { return label; }
     }
 
-    // Дієтичні особливості (зберігаємо як рядок через кому: "NO_SUGAR,VEGAN")
     @Column(name = "dietary_tags")
     private String dietaryTags;
 
@@ -65,7 +71,8 @@ public class Product {
     public static final String DIET_VEGAN      = "VEGAN";
 
     // ============================================================
-    // КАТАЛОГ 2 — Каталог Дизайнів
+    // КАТАЛОГ ДИЗАЙНІВ
+    // Головна подія + уточнення (підкатегорія)
     // ============================================================
 
     @Enumerated(EnumType.STRING)
@@ -74,10 +81,6 @@ public class Product {
 
     public enum DesignEvent {
         BIRTHDAY("День народження"),
-        FOR_GIRL("Для дівчинки"),
-        FOR_BOY("Для хлопчика"),
-        FOR_WOMAN("Для жінки"),
-        FOR_MAN("Для чоловіка"),
         WEDDING("Весілля / Дівич-вечір"),
         CHRISTENING("Хрестини / Baby Shower"),
         COMMUNION("Перше причастя"),
@@ -90,8 +93,26 @@ public class Product {
         public String getLabel() { return label; }
     }
 
+    // Уточнення — для кого (підкатегорія)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "design_for")
+    private DesignFor designFor;
+
+    public enum DesignFor {
+        FOR_GIRL("Для дівчинки"),
+        FOR_BOY("Для хлопчика"),
+        FOR_WOMAN("Для жінки"),
+        FOR_MAN("Для чоловіка"),
+        FOR_COUPLE("Для пари"),
+        UNISEX("Універсальний");
+
+        private final String label;
+        DesignFor(String label) { this.label = label; }
+        public String getLabel() { return label; }
+    }
+
     // ============================================================
-    // КАТАЛОГ 3 — Лінійка виробів
+    // ЛІНІЙКА ВИРОБІВ
     // ============================================================
 
     @Enumerated(EnumType.STRING)
@@ -117,7 +138,7 @@ public class Product {
     }
 
     // ============================================================
-    // ТЕРМІНОВІСТЬ — спільна для всіх каталогів
+    // ТЕРМІНОВІСТЬ — спільна
     // ============================================================
 
     @Enumerated(EnumType.STRING)
@@ -131,23 +152,6 @@ public class Product {
 
         private final String label;
         Urgency(String label) { this.label = label; }
-        public String getLabel() { return label; }
-    }
-
-    // ============================================================
-    // Який каталог: FLAVOR / DESIGN / LINE
-    // ============================================================
-    @Enumerated(EnumType.STRING)
-    @Column(name = "catalog_type", nullable = false)
-    private CatalogType catalogType;
-
-    public enum CatalogType {
-        FLAVOR("Каталог Смаків"),
-        DESIGN("Каталог Дизайнів"),
-        LINE("Лінійка виробів");
-
-        private final String label;
-        CatalogType(String label) { this.label = label; }
         public String getLabel() { return label; }
     }
 
@@ -176,6 +180,9 @@ public class Product {
     public boolean isAvailable() { return available; }
     public void setAvailable(boolean available) { this.available = available; }
 
+    public CatalogType getCatalogType() { return catalogType; }
+    public void setCatalogType(CatalogType catalogType) { this.catalogType = catalogType; }
+
     public FlavorBase getFlavorBase() { return flavorBase; }
     public void setFlavorBase(FlavorBase flavorBase) { this.flavorBase = flavorBase; }
 
@@ -185,16 +192,15 @@ public class Product {
     public DesignEvent getDesignEvent() { return designEvent; }
     public void setDesignEvent(DesignEvent designEvent) { this.designEvent = designEvent; }
 
+    public DesignFor getDesignFor() { return designFor; }
+    public void setDesignFor(DesignFor designFor) { this.designFor = designFor; }
+
     public ProductLine getProductLine() { return productLine; }
     public void setProductLine(ProductLine productLine) { this.productLine = productLine; }
 
     public Urgency getUrgency() { return urgency; }
     public void setUrgency(Urgency urgency) { this.urgency = urgency; }
 
-    public CatalogType getCatalogType() { return catalogType; }
-    public void setCatalogType(CatalogType catalogType) { this.catalogType = catalogType; }
-
-    // Зручний метод для перевірки дієтичного тегу в Thymeleaf
     public boolean hasDietaryTag(String tag) {
         return dietaryTags != null && dietaryTags.contains(tag);
     }
