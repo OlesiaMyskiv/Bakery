@@ -4,174 +4,264 @@
    Бірюзовий: #3AA6B9  Фон: #f2f2ec
    ============================================ */
 
-/* ---- LAYOUT ---- */
+/* =========================================
+   ОСНОВНИЙ ЛЕЙАУТ АДМІН-ПАНЕЛІ
+   ========================================= */
 .admin-layout {
     display: flex;
-    min-height: calc(100vh - 80px); /* під хедер сайту */
+    min-height: calc(100vh - 80px);
+    background-color: #ffffff; /* ФОН СТОРІНКИ БІЛИЙ */
+    font-size: 21px;
 }
 
 .admin-content {
-    flex: 1;
-    padding: 32px 36px;
-    background: #f2f2ec;
+    flex-grow: 1;
+    padding: 40px;
+    overflow-y: auto;
 }
 
+/* Картка з м'ятною рамочкою (C1ECE4) */
 .admin-card {
-    background: #dff0ec;
-    border-radius: 20px;
-    padding: 32px 36px;
-    min-height: 500px;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 35px;
+    border: 3px solid #C1ECE4; /* КОЛІР РАМОЧКИ ПРАВОРУЧ */
+    box-shadow: 0 10px 30px rgba(193, 236, 228, 0.2);
 }
 
 .admin-page-title {
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: 32px;
+    font-size: 2.7rem;
+    color: #333;
+    margin-bottom: 30px;
+    font-family: 'Cormorant Garamond', serif;
     font-weight: 700;
-    text-align: center;
-    color: #1a1a1a;
-    margin-bottom: 24px;
+    text-align: center; /* Додаємо цей рядок для центрування */
+    width: 100%;       /* Щоб заголовок займав усю ширину і міг центруватися */
 }
 
-/* ---- SIDEBAR ---- */
+/* =========================================
+   БОКОВА ПАНЕЛЬ (САЙДБАР) — ВСЯ БІРЮЗОВА (3AA6B9)
+   ========================================= */
 .admin-sidebar {
-    width: 230px;
-    min-width: 230px;
-    background: #3AA6B9;
-    min-height: calc(100vh - 80px);
+    width: 300px;
+    background-color: #3AA6B9; /* ЛІВА ЧАСТИНА ВСЯ ЦЬОГО КОЛЬОРУ */
+    color: #ffffff;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    padding: 28px 0 24px;
+    padding: 40px 0;
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+    z-index: 10;
 }
 
+/* Блок профілю */
 .sidebar-avatar-wrap {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 28px;
-    padding: 0 16px;
-}
-
-.sidebar-avatar-circle {
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-    overflow: hidden;
-    background: #a8d8e0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 10px;
-    border: 3px solid rgba(255,255,255,0.35);
-}
-
-.sidebar-avatar-circle img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.sidebar-avatar-circle svg {
-    width: 46px;
-    height: 46px;
-    opacity: 0.75;
-}
-
-.sidebar-name {
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: 22px;
-    font-weight: 700;
-    color: white;
+    margin-bottom: 40px;
+    padding: 0 20px;
     text-align: center;
 }
 
-.sidebar-role {
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: 11px;
-    letter-spacing: 2.5px;
-    color: rgba(255,255,255,0.7);
-    text-transform: uppercase;
-    margin-top: 2px;
+.sidebar-avatar-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    margin-bottom: 15px;
+    border: 3px solid #ffffff;
 }
 
+.sidebar-role {
+    font-size: 1rem; /* Збільшено */
+    color: #ffffff;
+    letter-spacing: 2px;
+    font-weight: bold;
+    text-transform: uppercase;
+    opacity: 0.9;
+}
+
+.sidebar-role {
+    font-size: 0.75rem;
+    color: #ffffff;
+    letter-spacing: 2px;
+    font-weight: bold;
+    text-transform: uppercase;
+    opacity: 0.9;
+}
+
+/* =========================================
+   НАВІГАЦІЯ ТА СВІТЛЯНА РИСКА
+   ========================================= */
 .sidebar-nav {
-    width: 100%;
-    padding: 0;
     display: flex;
     flex-direction: column;
+    flex-grow: 1;
 }
 
 .sidebar-link {
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: 18px;
-    color: rgba(255,255,255,0.8);
+    color: rgba(255, 255, 255, 0.75); /* Неактивні пункти — напівпрозорі */
     text-decoration: none;
-    padding: 9px 28px;
+    padding: 18px 30px;
+    font-size: 1.1rem;
+    position: relative;
+    transition: all 0.3s ease;
     display: block;
-    transition: background 0.15s, color 0.15s;
+    font-weight: 400;
 }
 
-.sidebar-link:hover    { color: white; background: rgba(255,255,255,0.12); }
-.sidebar-link.active   { color: white; font-weight: 700; }
-.sidebar-exit          { color: rgba(255,255,255,0.45) !important; margin-top: 16px; }
+/* ТА САМА РИСКА, ЩО СВІТИТЬСЯ */
+.sidebar-link::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 6px;
+    background-color: #ffffff; /* Біла риска на бірюзовому фоні */
+    border-radius: 0 4px 4px 0;
+    transform: scaleY(0);
+    transform-origin: center;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+}
+
+.sidebar-link:hover {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* АКТИВНА СТОРІНКА */
+.sidebar-link.active {
+    color: #ffffff;
+    font-weight: 700; /* ШРИФТ ЖИРНІШИЙ */
+    background-color: rgba(0, 0, 0, 0.1); /* Трохи затемнюємо фон активного пункту */
+}
+
+.sidebar-link.active::before {
+    transform: scaleY(1);
+    /* Ефект світіння білої риски */
+    box-shadow: 0 0 15px #ffffff, 0 0 25px rgba(255, 255, 255, 0.6);
+}
+
+.sidebar-exit {
+    margin-top: auto;
+    padding-bottom: 30px;
+    color: #ffffff;
+    opacity: 0.8;
+}
+
+/* =========================================
+   ТАБЛИЦЯ (РОЖЕВІ ЗАГОЛОВКИ ТА БЕЖЕВИЙ ФОН)
+   ========================================= */
+.admin-table-wrap {
+    overflow-x: auto;
+    border-radius: 12px;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* Заголовки (FFD0D0) */
+.admin-table thead th {
+    background-color: #FFD0D0 !important; /* КОЛІР З ТВОГО ОПИСУ */
+    color: #333;
+    padding: 16px;
+    text-align: left;
+    font-size: 0.95rem;
+    font-weight: 700;
+    border: none;
+}
+
+/* Сама таблиця (EAEAE5) */
+.admin-table tbody tr {
+    background-color: #EAEAE5; /* КОЛІР З ТВОГО ОПИСУ */
+    border-bottom: 3px solid #ffffff; /* Ширші білі розділювачі для стилю */
+    transition: background 0.2s;
+}
+
+.admin-table tbody tr:hover {
+    background-color: #e1e1db;
+}
+
+.admin-table td {
+    padding: 16px;
+    vertical-align: middle;
+    color: #333;
+}
+
+.sidebar-exit {
+    margin-top: auto;
+    color: #e74c3c;
+    padding-bottom: 40px;
+}
 
 /* ---- ORDER TABS ---- */
 .order-tabs {
     display: flex;
+    width: 100%; /* Розтягуємо контейнер на всю доступну ширину */
     gap: 0;
     border-bottom: 2px solid rgba(0,0,0,0.12);
-    margin-bottom: 20px;
-    flex-wrap: wrap;
+    margin-bottom: 25px;
 }
 
 .order-tab {
+    flex: 1; /* Кожна вкладка займає рівну частину ширини (розтягування) */
+    text-align: center; /* Центруємо текст всередині вкладки */
     font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: 16px;
+    font-size: 21px; /* Було 16px, стало 21px (збільшено на 5) */
     color: #888;
     text-decoration: none;
-    padding: 8px 20px;
+    padding: 12px 10px; /* Трохи збільшив вертикальний відступ для кращого вигляду */
     position: relative;
     white-space: nowrap;
-    transition: color 0.15s;
+    transition: all 0.2s ease;
 }
 
-.order-tab:hover { color: #3AA6B9; }
+.order-tab:hover {
+    color: #3AA6B9;
+    background-color: rgba(58, 166, 185, 0.05); /* Легка підсвітка при наведенні */
+}
 
 .order-tab.active {
     color: #1a1a1a;
     font-weight: 700;
 }
 
+/* Лінія під активною вкладкою, яка тепер теж на всю ширину секції */
 .order-tab.active::after {
     content: '';
     position: absolute;
-    bottom: -2px; left: 0; right: 0;
-    height: 2px;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 3px; /* Зробив лінію трохи виразнішою для великого шрифту */
     background: #1a1a1a;
 }
 
 /* ---- TABLE ---- */
 .admin-table-wrap {
-    background: white;
-    border-radius: 14px;
-    overflow: hidden;
+    overflow-x: auto;
 }
 
 .admin-table {
     width: 100%;
     border-collapse: collapse;
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: 15px;
 }
 
-.admin-table thead tr { background: #f9c9c9; }
-
-.admin-table thead th {
+/* ОБ'ЄДНАНО: admin-table th та admin-table thead th */
+.admin-table th {
+    text-align: left;
     padding: 12px 14px;
+    color: #3AA6B9;
     font-size: 14px;
     font-weight: 700;
-    color: #3AA6B9;
-    text-align: left;
+    border-bottom: 2px solid #eee;
     white-space: nowrap;
 }
 
@@ -182,17 +272,25 @@
 }
 .admin-table tbody tr:hover { background: #fafaf8; }
 .admin-table tbody tr:last-child { border-bottom: none; }
-.admin-table td { padding: 12px 14px; vertical-align: middle; }
+
+.admin-table td {
+    padding: 15px;
+    vertical-align: middle;
+    color: #444;
+}
 
 .empty-row {
     text-align: center;
-    color: #bbb;
-    padding: 36px !important;
-    font-size: 16px;
+    padding: 40px !important;
+    color: #aaa;
+    font-style: italic;
 }
 
 .row-dim { opacity: 0.45; }
-.text-muted { color: #aaa; font-size: 13px; }
+.text-muted {
+    color: #888;
+    font-size: 0.9rem;
+}
 
 /* ---- PILLS & BADGES ---- */
 .deadline-pill {
@@ -215,7 +313,7 @@
     flex-shrink: 0;
 }
 
-.pay-pill {
+.pay-pill, .status-pill {
     display: inline-block;
     padding: 4px 12px;
     border-radius: 20px;
@@ -223,54 +321,97 @@
     font-weight: 700;
 }
 .pay-pill.paid    { background: #2ecc71; color: #0a4a24; }
-.pay-pill.pending { background: #f9c9c9; color: #7a2020; }
+.pay-pill.pending, .status-pill { background: #f9c9c9; color: #7a2020; }
 
-.status-pill {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 700;
-    background: #f9c9c9;
-    color: #7a2020;
-}
-
+/* =========================================
+   КНОПКИ ТА БЕЙДЖІ У ТАБЛИЦІ
+   ========================================= */
 .role-label {
-    font-size: 14px;
-    color: #555;
+    background-color: #ffffff; /* Білі бейджі на бежевій таблиці */
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 700;
+    color: #3AA6B9;
 }
 
 /* ---- BUTTONS ---- */
-.btn-take   { background: #e8a630; color: white; border: none; border-radius: 20px; padding: 6px 14px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap; }
-.btn-ready  { background: #3AA6B9; color: white; border: none; border-radius: 20px; padding: 6px 14px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap; }
-.btn-done   { background: #27ae60; color: white; border: none; border-radius: 20px; padding: 6px 14px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap; }
-.btn-cancel { background: #e74c3c; color: white; border: none; border-radius: 20px; padding: 6px 14px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap; }
-
-.btn-approve { background: #27ae60; color: white; border: none; border-radius: 20px; padding: 7px 18px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; width: 100%; }
-.btn-reject  { background: #e74c3c; color: white; border: none; border-radius: 20px; padding: 7px 18px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; width: 100%; }
-
-.btn-view-doc {
-    background: white;
-    color: #555;
-    border: 1px solid #ccc;
+.btn-take, .btn-ready, .btn-done, .btn-cancel {
+    border: none;
     border-radius: 20px;
-    padding: 6px 16px;
-    font-size: 14px;
-    font-family: inherit;
-    text-decoration: none;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 700;
     cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+    color: white;
+}
+.btn-take   { background: #e8a630; }
+.btn-ready  { background: #3AA6B9; }
+.btn-done   { background: #27ae60; }
+.btn-cancel { background: #e74c3c; }
+
+.btn-approve, .btn-reject {
+    width: 100%;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
 }
 
-.btn-history {
+.btn-approve {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.btn-approve:hover {
+    background-color: #c8e6c9;
+}
+
+.btn-reject {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+.btn-reject:hover {
+    background-color: #ffcdd2;
+}
+
+.btn-view-doc {
+    display: inline-block;
+    color: #4a90e2;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+.btn-view-doc:hover {
+    color: #357abd;
+    text-decoration: underline;
+}
+
+.btn-history, .btn-print, .btn-check {
     background: white;
     border: 1px solid #ccc;
+    font-family: inherit;
+    color: #333;
+}
+.btn-history {
     border-radius: 20px;
     padding: 5px 16px;
     font-size: 14px;
-    color: #333;
     text-decoration: none;
-    font-family: inherit;
     display: inline-block;
+}
+.btn-print, .btn-check {
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 13px;
+    cursor: pointer;
 }
 
 .btn-details {
@@ -285,25 +426,6 @@
     margin-top: 4px;
 }
 
-.btn-print {
-    background: white;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 6px 14px;
-    font-size: 13px;
-    cursor: pointer;
-    font-family: inherit;
-}
-
-.btn-check {
-    background: white;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 6px 14px;
-    font-size: 13px;
-    cursor: pointer;
-    font-family: inherit;
-}
 
 .btn-sm { border: none; border-radius: 16px; padding: 5px 12px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; width: 100%; }
 .btn-blue { background: #3AA6B9; color: white; }
@@ -429,18 +551,17 @@
 
 .review-avatar-wrap { margin-bottom: 10px; }
 
-.review-avatar {
+.review-avatar, .review-avatar-placeholder {
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    object-fit: cover;
     border: 3px solid rgba(255,255,255,0.4);
+}
+.review-avatar {
+    object-fit: cover;
 }
 
 .review-avatar-placeholder {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
     background: rgba(255,255,255,0.3);
     display: flex;
     align-items: center;
@@ -448,7 +569,6 @@
     font-size: 32px;
     font-weight: 700;
     color: white;
-    border: 3px solid rgba(255,255,255,0.4);
 }
 
 .review-author-name {
@@ -639,17 +759,18 @@
     border-color: #3AA6B9;
 }
 
-.product-thumb-sm {
+.product-thumb-sm, .no-thumb {
     width: 55px;
     height: 55px;
-    object-fit: cover;
     border-radius: 8px;
 }
 
+.product-thumb-sm {
+    object-fit: cover;
+}
+
 .no-thumb {
-    width: 55px; height: 55px;
     background: #f0f0ec;
-    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
