@@ -4,6 +4,7 @@ import com.bakery.Bakery.model.Role;
 import com.bakery.Bakery.model.User;
 import com.bakery.Bakery.model.VerificationStatus;
 import com.bakery.Bakery.repository.UserRepository;
+import com.bakery.Bakery.service.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -34,6 +35,8 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private UserService userService;
     public static final String UPLOAD_DIRECTORY = System.getProperty("user.dir") + "/uploads/documents";
     public static final String PROFILE_PICS_DIRECTORY = System.getProperty("user.dir") + "/uploads/profiles";
 

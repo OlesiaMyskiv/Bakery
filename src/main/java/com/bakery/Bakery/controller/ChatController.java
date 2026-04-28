@@ -2,10 +2,9 @@ package com.bakery.Bakery.controller;
 
 import com.bakery.Bakery.model.*;
 import com.bakery.Bakery.repository.*;
+import com.bakery.Bakery.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -16,22 +15,19 @@ public class ChatController {
 
     @Autowired private ChatSessionRepository sessionRepo;
     @Autowired private ChatMessageRepository messageRepo;
-    @Autowired private UserRepository userRepo;
+    @Autowired private UserService userService;
 
     // ─────────────────────────────────────────────────────────────────────
     // КЛІЄНТ / ГІСТЬ — отримати або створити сесію
-    // POST /api/chat/session
-    // Body: { "guestToken": "uuid", "guestName": "Марія" }  (для гостя)
     // ─────────────────────────────────────────────────────────────────────
     @PostMapping("/api/chat/session")
     public ResponseEntity<?> getOrCreateSession(
             @RequestBody(required = false) Map<String, String> body) {
 
-        User currentUser = getCurrentUser();
+        User currentUser = userService.getCurrentUser();
         ChatSession session;
 
         if (currentUser != null && currentUser.getRole() != Role.SUPER_ADMIN) {
-            // Зареєстрований клієнт
             session = sessionRepo.findByUserId(currentUser.getId())
                     .orElseGet(() -> {
                         ChatSession s = new ChatSession();
@@ -39,7 +35,6 @@ public class ChatController {
                         return sessionRepo.save(s);
                     });
         } else {
-            // Гість — шукаємо за токеном
             String token = body != null ? body.get("guestToken") : null;
             if (token == null || token.isBlank()) {
                 return ResponseEntity.badRequest().body("guestToken required");
@@ -60,17 +55,11 @@ public class ChatController {
         return ResponseEntity.ok(result);
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    // КЛІЄНТ / ГІСТЬ — завантажити повідомлення сесії
-    // GET /api/chat/{sessionId}/messages
-    // ─────────────────────────────────────────────────────────────────────
     @GetMapping("/api/chat/{sessionId}/messages")
     public ResponseEntity<?> getMessages(@PathVariable Long sessionId,
                                          @RequestParam(required = false) String guestToken) {
-        // Перевірка доступу
         if (!hasAccess(sessionId, guestToken)) return ResponseEntity.status(403).build();
 
-        // Позначаємо повідомлення від адміна як прочитані
         sessionRepo.findById(sessionId).ifPresent(s -> {
             s.setUnreadForClient(false);
             sessionRepo.save(s);
@@ -80,11 +69,6 @@ public class ChatController {
         return ResponseEntity.ok(toJsonList(msgs));
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    // КЛІЄНТ / ГІСТЬ — надіслати повідомлення
-    // POST /api/chat/{sessionId}/send
-    // Body: { "text": "...", "guestToken": "..." }
-    // ─────────────────────────────────────────────────────────────────────
     @PostMapping("/api/chat/{sessionId}/send")
     public ResponseEntity<?> sendMessage(@PathVariable Long sessionId,
                                          @RequestBody Map<String, String> body) {
@@ -110,10 +94,6 @@ public class ChatController {
         return ResponseEntity.ok(Map.of("ok", true));
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    // АДМІН — список всіх сесій
-    // GET /api/admin/chat/sessions
-    // ─────────────────────────────────────────────────────────────────────
     @GetMapping("/api/admin/chat/sessions")
     public ResponseEntity<?> getAllSessions() {
         if (!isAdmin()) return ResponseEntity.status(403).build();
@@ -124,18 +104,13 @@ public class ChatController {
             m.put("id", s.getId());
             m.put("displayName", s.getDisplayName());
             m.put("unread", s.isUnreadForAdmin());
-            m.put("lastMessageAt", s.getLastMessageAt() != null
-                    ? s.getLastMessageAt().toString() : "");
+            m.put("lastMessageAt", s.getLastMessageAt() != null ? s.getLastMessageAt().toString() : "");
             return m;
         }).toList();
 
         return ResponseEntity.ok(result);
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    // АДМІН — повідомлення конкретної сесії
-    // GET /api/admin/chat/{sessionId}/messages
-    // ─────────────────────────────────────────────────────────────────────
     @GetMapping("/api/admin/chat/{sessionId}/messages")
     public ResponseEntity<?> getSessionMessages(@PathVariable Long sessionId) {
         if (!isAdmin()) return ResponseEntity.status(403).build();
@@ -149,11 +124,6 @@ public class ChatController {
         return ResponseEntity.ok(toJsonList(msgs));
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    // АДМІН — відповісти в сесію
-    // POST /api/admin/chat/{sessionId}/send
-    // Body: { "text": "..." }
-    // ─────────────────────────────────────────────────────────────────────
     @PostMapping("/api/admin/chat/{sessionId}/send")
     public ResponseEntity<?> adminSend(@PathVariable Long sessionId,
                                        @RequestBody Map<String, String> body) {
@@ -180,25 +150,17 @@ public class ChatController {
 
     // ─── Допоміжні ───────────────────────────────────────────────────────
 
-    private User getCurrentUser() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated() ||
-                "anonymousUser".equals(auth.getPrincipal())) return null;
-        return userRepo.findByEmail(auth.getName()).orElse(null);
-    }
-
     private boolean isAdmin() {
-        User u = getCurrentUser();
+        User u = userService.getCurrentUser();
         return u != null && u.getRole() == Role.SUPER_ADMIN;
     }
 
     private boolean hasAccess(Long sessionId, String guestToken) {
-        User user = getCurrentUser();
+        User user = userService.getCurrentUser();
         ChatSession session = sessionRepo.findById(sessionId).orElse(null);
         if (session == null) return false;
         if (isAdmin()) return true;
-        if (user != null && session.getUser() != null &&
-                session.getUser().getId().equals(user.getId())) return true;
+        if (user != null && session.getUser() != null && session.getUser().getId().equals(user.getId())) return true;
         if (guestToken != null && guestToken.equals(session.getGuestToken())) return true;
         return false;
     }

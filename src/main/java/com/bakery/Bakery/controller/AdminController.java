@@ -2,9 +2,9 @@ package com.bakery.Bakery.controller;
 
 import com.bakery.Bakery.model.*;
 import com.bakery.Bakery.repository.*;
+import com.bakery.Bakery.service.FileStorageService;
+import com.bakery.Bakery.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +15,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.UUID;
 
 @Controller
 @RequestMapping("/admin")
@@ -25,7 +24,14 @@ public class AdminController {
     @Autowired private UserRepository userRepository;
     @Autowired private ProductRepository productRepository;
     @Autowired private ReviewRepository reviewRepository;
+    @Autowired private UserService userService;
+    @Autowired private FileStorageService fileStorageService;
 
+    // Цей метод автоматично додає adminUser до кожної сторінки адмінки
+    @ModelAttribute("adminUser")
+    public User addAdminToModel() {
+        return userService.getCurrentUser();
+    }
 
     // =============================================
     // ЗАМОВЛЕННЯ
@@ -42,7 +48,7 @@ public class AdminController {
         model.addAttribute("orders",
                 orderRepository.findByOrderStatusOrderByCreatedAtDesc(orderStatus));
         model.addAttribute("currentStatus", orderStatus);
-        model.addAttribute("adminUser", getCurrentAdmin());
+
         for (Order.OrderStatus s : Order.OrderStatus.values()) {
             model.addAttribute("count_" + s.name(),
                     orderRepository.findByOrderStatusOrderByCreatedAtDesc(s).size());
@@ -71,7 +77,6 @@ public class AdminController {
         model.addAttribute("totalCount", userRepository.count());
         model.addAttribute("pendingCount",
                 userRepository.countByVerificationStatus(VerificationStatus.PENDING));
-        model.addAttribute("adminUser", getCurrentAdmin());
         return "admin/users";
     }
 
@@ -87,7 +92,6 @@ public class AdminController {
                 userRepository.findByVerificationStatusOrderByIdDesc(VerificationStatus.APPROVED));
         model.addAttribute("pendingCount",
                 userRepository.countByVerificationStatus(VerificationStatus.PENDING));
-        model.addAttribute("adminUser", getCurrentAdmin());
         return "admin/verification";
     }
 
@@ -125,16 +129,14 @@ public class AdminController {
             catalogType = Product.CatalogType.FLAVOR;
         }
 
-        model.addAttribute("products",
-                productRepository.findByCatalogTypeOrderByNameAsc(catalogType));
+        model.addAttribute("products", productRepository.findByCatalogTypeOrderByNameAsc(catalogType));
         model.addAttribute("currentCatalog", catalogType);
         model.addAttribute("catalogTypes",  Product.CatalogType.values());
         model.addAttribute("flavorBases",   Product.FlavorBase.values());
         model.addAttribute("designEvents",  Product.DesignEvent.values());
-        model.addAttribute("designFors",    Product.DesignFor.values()); // ← обов'язково!
+        model.addAttribute("designFors",    Product.DesignFor.values());
         model.addAttribute("productLines",  Product.ProductLine.values());
         model.addAttribute("urgencies",     Product.Urgency.values());
-        model.addAttribute("adminUser",     getCurrentAdmin());
         return "admin/assortment";
     }
 
@@ -162,57 +164,22 @@ public class AdminController {
         Product.CatalogType catalog = Product.CatalogType.valueOf(catalogType);
         product.setCatalogType(catalog);
 
-        if (flavorBase != null && !flavorBase.isEmpty())
-            product.setFlavorBase(Product.FlavorBase.valueOf(flavorBase));
+        if (flavorBase != null && !flavorBase.isEmpty()) product.setFlavorBase(Product.FlavorBase.valueOf(flavorBase));
+        if (dietaryTags != null && !dietaryTags.isEmpty()) product.setDietaryTags(String.join(",", dietaryTags));
+        if (designEvent != null && !designEvent.isEmpty()) product.setDesignEvent(Product.DesignEvent.valueOf(designEvent));
+        if (designFor != null && !designFor.isEmpty()) product.setDesignFor(String.join(",", designFor));
+        if (productLine != null && !productLine.isEmpty()) product.setProductLine(Product.ProductLine.valueOf(productLine));
+        if (urgency != null && !urgency.isEmpty()) product.setUrgency(Product.Urgency.valueOf(urgency));
 
-        if (dietaryTags != null && !dietaryTags.isEmpty())
-            product.setDietaryTags(String.join(",", dietaryTags));
-
-        if (designEvent != null && !designEvent.isEmpty())
-            product.setDesignEvent(Product.DesignEvent.valueOf(designEvent));
-
-        if (designFor != null && !designFor.isEmpty())
-            product.setDesignFor(String.join(",", designFor));
-
-        if (productLine != null && !productLine.isEmpty())
-            product.setProductLine(Product.ProductLine.valueOf(productLine));
-
-        if (urgency != null && !urgency.isEmpty())
-            product.setUrgency(Product.Urgency.valueOf(urgency));
-
-        // =====================================================
-        // ЗБЕРЕЖЕННЯ ФОТО
-        // Шлях: /Users/olesa/Desktop/Bakery/uploads/assortment/flavor/ (або design/line/)
-        // В БД зберігається: /uploads/assortment/flavor/uuid_назва.jpg
-        // =====================================================
+        // Збереження фото через єдиний сервіс
         if (image != null && !image.isEmpty()) {
             String subFolder = switch (catalog) {
                 case FLAVOR -> "flavor";
                 case DESIGN -> "design";
                 case LINE   -> "line";
             };
-
-            // Абсолютний шлях до папки збереження
-            Path uploadDir = Paths.get(System.getProperty("user.dir"))
-                    .resolve("uploads")
-                    .resolve("assortment")
-                    .resolve(subFolder);
-
-            // Створюємо папки якщо не існують
-            Files.createDirectories(uploadDir);
-
-            // Унікальне ім'я файлу
-            String originalName = image.getOriginalFilename();
-            String extension = (originalName != null && originalName.contains("."))
-                    ? originalName.substring(originalName.lastIndexOf("."))
-                    : ".jpg";
-            String fileName = UUID.randomUUID().toString() + extension;
-
-            // Зберігаємо файл на диск
-            Files.write(uploadDir.resolve(fileName), image.getBytes());
-
-            // Шлях що збережеться в БД (відносний, для <img src="...">)
-            product.setImagePath("/uploads/assortment/" + subFolder + "/" + fileName);
+            String savedPath = fileStorageService.saveFile(image, "uploads/assortment/" + subFolder);
+            product.setImagePath(savedPath);
         }
 
         productRepository.save(product);
@@ -222,12 +189,10 @@ public class AdminController {
     @PostMapping("/assortment/{id}/delete")
     public String deleteProduct(@PathVariable Long id,
                                 @RequestParam(defaultValue = "FLAVOR") String catalog) {
-        // Видаляємо фото з диску якщо є
         productRepository.findById(id).ifPresent(p -> {
             if (p.getImagePath() != null) {
                 try {
-                    Path filePath = Paths.get(System.getProperty("user.dir"))
-                            .resolve(p.getImagePath().replaceFirst("^/", ""));
+                    Path filePath = Paths.get(System.getProperty("user.dir")).resolve(p.getImagePath().replaceFirst("^/", ""));
                     Files.deleteIfExists(filePath);
                 } catch (IOException ignored) {}
             }
@@ -254,24 +219,17 @@ public class AdminController {
     public String reviews(@RequestParam(defaultValue = "all") String filter, Model model) {
         switch (filter) {
             case "unanswered":
-                model.addAttribute("reviews",
-                        reviewRepository.findByAdminReplyIsNullAndHiddenFalseOrderByCreatedAtDesc());
+                model.addAttribute("reviews", reviewRepository.findByAdminReplyIsNullAndHiddenFalseOrderByCreatedAtDesc());
                 break;
             case "hidden":
-                model.addAttribute("reviews",
-                        reviewRepository.findAllByOrderByCreatedAtDesc()
-                                .stream().filter(Review::isHidden).toList());
+                model.addAttribute("reviews", reviewRepository.findAllByOrderByCreatedAtDesc().stream().filter(Review::isHidden).toList());
                 break;
             default:
-                model.addAttribute("reviews",
-                        reviewRepository.findByHiddenFalseOrderByCreatedAtDesc());
+                model.addAttribute("reviews", reviewRepository.findByHiddenFalseOrderByCreatedAtDesc());
         }
         model.addAttribute("filter", filter);
-        model.addAttribute("unansweredCount",
-                reviewRepository.countByAdminReplyIsNullAndHiddenFalse());
-        model.addAttribute("totalCount",
-                reviewRepository.findByHiddenFalseOrderByCreatedAtDesc().size());
-        model.addAttribute("adminUser", getCurrentAdmin());
+        model.addAttribute("unansweredCount", reviewRepository.countByAdminReplyIsNullAndHiddenFalse());
+        model.addAttribute("totalCount", reviewRepository.findByHiddenFalseOrderByCreatedAtDesc().size());
         return "admin/reviews";
     }
 
@@ -298,8 +256,6 @@ public class AdminController {
 
     @GetMapping("/chats")
     public String chatsPage(Model model) {
-        model.addAttribute("adminUser", getCurrentAdmin());
         return "admin/chats";
     }
-
 }

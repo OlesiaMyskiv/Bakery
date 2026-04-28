@@ -2,10 +2,9 @@ package com.bakery.Bakery.controller;
 
 import com.bakery.Bakery.model.*;
 import com.bakery.Bakery.repository.*;
+import com.bakery.Bakery.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -18,21 +17,13 @@ import java.util.Map;
 @Controller
 public class ProfileController {
 
-    @Autowired private UserRepository userRepository;
     @Autowired private OrderRepository orderRepository;
-    // ChatMessageRepository тут більше НЕ потрібен — чат переїхав у ChatController
-
-    private User getCurrentUser() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated() ||
-                "anonymousUser".equals(auth.getPrincipal())) return null;
-        return userRepository.findByEmail(auth.getName()).orElse(null);
-    }
+    @Autowired private UserService userService;
 
     // ── ПРОФІЛЬ ──────────────────────────────────────────────────────────
     @GetMapping("/profile")
     public String profile(Model model) {
-        User user = getCurrentUser();
+        User user = userService.getCurrentUser();
         if (user == null) return "redirect:/login";
 
         List<Order.OrderStatus> inactive = Arrays.asList(
@@ -57,7 +48,7 @@ public class ProfileController {
     // ── СКАСУВАТИ ЗАМОВЛЕННЯ ─────────────────────────────────────────────
     @PostMapping("/orders/{id}/cancel")
     public String cancelOrder(@PathVariable Long id) {
-        User user = getCurrentUser();
+        User user = userService.getCurrentUser();
         if (user == null) return "redirect:/login";
 
         orderRepository.findById(id).ifPresent(order -> {
@@ -75,7 +66,7 @@ public class ProfileController {
     @GetMapping("/api/my-orders")
     @ResponseBody
     public ResponseEntity<?> getMyOrders() {
-        User user = getCurrentUser();
+        User user = userService.getCurrentUser();
         if (user == null) return ResponseEntity.status(401).build();
 
         List<Order> orders = orderRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
@@ -92,8 +83,4 @@ public class ProfileController {
 
         return ResponseEntity.ok(result);
     }
-
-    // УВАГА: методи /chat/{orderId}/messages і /chat/{orderId}/send
-    // видалені звідси — вони тепер у ChatController.java
-    // (/api/chat/{sessionId}/messages і /api/chat/{sessionId}/send)
 }
