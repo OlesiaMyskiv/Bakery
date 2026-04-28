@@ -14,44 +14,48 @@
 
 <header th:replace="~{header :: header}"></header>
 
-<section class="constructor-section">
-    <div class="constructor-container">
+<main class="constructor-page-wrapper">
+    <h1 class="constructor-main-title">Конструктор торта</h1>
 
-        <div class="cake-visual-box">
-            <h2 class="box-title">Конструктор торта</h2>
-            <div class="cake-stack" id="cake-visual-stack"></div>
-        </div>
+    <section class="constructor-section">
+        <div class="constructor-container">
 
-        <div class="cake-details-box">
-            <div class="info-card">
-                <h2 class="box-title">Опис</h2>
-                <ul class="description-list" id="description-list"></ul>
-
-                <button class="main-add-btn" onclick="openIngredientsModal()"><span>+</span> Додати шар</button>
+            <div class="cake-visual-box">
+                <h2 class="box-title">Конструктор торта</h2>
+                <div class="cake-stack" id="cake-visual-stack"></div>
             </div>
 
-            <div class="info-card">
-                <h2 class="box-title">Вартість</h2>
-                <div class="calc-row">Введіть кількість гостей: <div class="highlight-badge"><input type="number" id="guests-count" class="guests-input" value="5" min="1" max="100" onchange="calculatePrice()"></div><span style="margin-left: 10px;">осіб</span></div>
-                <div class="calc-row">Рекомендована вага: <span class="highlight-badge" id="recommended-weight">1.25 кг</span></div>
-                <div class="calc-row">Загальна сума: <span class="highlight-badge" id="total-price">1 000 грн</span></div>
-                <button class="add-to-cart-btn">Додати в кошик</button>
-            </div>
-        </div>
-    </div>
-    <div class="ingredients-modal-overlay" id="ingredientsModal" onclick="if(event.target===this) closeIngredientsModal()">
-        <div class="ingredients-modal-content">
-            <button class="ingredients-modal-close" onclick="closeIngredientsModal()">&times;</button>
-            <h2 class="box-title" style="margin-bottom: 10px;">Оберіть новий шар</h2>
+            <div class="cake-details-box">
+                <div class="info-card">
+                    <h2 class="box-title">Опис</h2>
+                    <ul class="description-list" id="description-list"></ul>
 
-            <div class="ingredients-grid">
-                <div class="ingredients-column" id="modal-col-sponge"></div>
-                <div class="ingredients-column" id="modal-col-cream"></div>
-                <div class="ingredients-column" id="modal-col-filling"></div>
+                    <button class="main-add-btn" onclick="openIngredientsModal()"><span>+</span> Додати шар</button>
+                </div>
+
+                <div class="info-card">
+                    <h2 class="box-title">Вартість</h2>
+                    <div class="calc-row">Введіть кількість гостей: <div class="highlight-badge"><input type="number" id="guests-count" class="guests-input" value="5" min="1" max="100" onchange="calculatePrice()"></div><span style="margin-left: 10px;">осіб</span></div>
+                    <div class="calc-row">Рекомендована вага: <span class="highlight-badge" id="recommended-weight">1.25 кг</span></div>
+                    <div class="calc-row">Загальна сума: <span class="highlight-badge" id="total-price">1 000 грн</span></div>
+                    <button class="add-to-cart-btn">Додати в кошик</button>
+                </div>
             </div>
         </div>
-    </div>
-</section>
+        <div class="ingredients-modal-overlay" id="ingredientsModal" onclick="if(event.target===this) closeIngredientsModal()">
+            <div class="ingredients-modal-content">
+                <button class="ingredients-modal-close" onclick="closeIngredientsModal()">&times;</button>
+                <h2 class="box-title" style="margin-bottom: 10px;">Оберіть новий шар</h2>
+
+                <div class="ingredients-grid">
+                    <div class="ingredients-column" id="modal-col-sponge"></div>
+                    <div class="ingredients-column" id="modal-col-cream"></div>
+                    <div class="ingredients-column" id="modal-col-filling"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
 
 <script th:src="@{/js/constructor.js}"></script>
 

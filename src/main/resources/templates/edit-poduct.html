@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Редагування товару — Cake House</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Love+Light&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/globals.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+
+</head>
+<body>
+
+<header th:replace="~{header :: header}"></header>
+
+<div class="admin-layout">
+
+    <aside class="admin-sidebar">
+        <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:20px;padding:0 16px;">
+            <div class="sidebar-avatar-circle">
+                <img th:if="${adminUser != null and adminUser.profilePicturePath != null}"
+                     th:src="${adminUser.profilePicturePath}" alt="Фото">
+                <svg th:unless="${adminUser != null and adminUser.profilePicturePath != null}"
+                     viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.2">
+                    <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                </svg>
+            </div>
+            <div class="sidebar-name" th:text="${adminUser != null ? adminUser.username : 'Адмін'}">Анна</div>
+            <div class="sidebar-role">СУПЕРАДМІН</div>
+        </div>
+        <nav class="sidebar-nav">
+            <a th:href="@{/admin/orders}"      class="sidebar-link">Замовлення</a>
+            <a th:href="@{/admin/users}"        class="sidebar-link">Клієнти</a>
+            <a th:href="@{/admin/verification}" class="sidebar-link">Верифікація</a>
+            <a th:href="@{/admin/assortment}"   class="sidebar-link active">Асортимент</a>
+            <a th:href="@{/admin/reviews}"      class="sidebar-link">Відгуки</a>
+            <a th:href="@{/logout}"             class="sidebar-link sidebar-exit">Вихід</a>
+        </nav>
+    </aside>
+
+    <main class="admin-content">
+        <div class="admin-card">
+
+            <!-- Заголовок + кнопка назад -->
+            <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem;">
+                <a th:href="@{/admin/assortment(catalog=${catalog})}"
+                   class="btn-back">← Назад</a>
+                <h1 class="page-title" style="margin:0;">
+                    Редагування: <span th:text="${product.name}"></span>
+                </h1>
+            </div>
+
+            <div class="assort-center">
+                <div class="add-form-card">
+
+                    <form th:action="@{/admin/assortment/{id}/edit(id=${product.id})}"
+                          method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="catalog" th:value="${catalog}">
+
+                        <div class="form-grid">
+
+                            <!-- ── ОСНОВНА ІНФОРМАЦІЯ ─────────────────────── -->
+                            <div class="form-section-label">Основна інформація</div>
+                            <div class="form-field">
+                                <label>Назва виробу *</label>
+                                <input type="text" name="name"
+                                       th:value="${product.name}" required>
+                            </div>
+
+                            <!-- Поточне фото -->
+                            <div class="form-field">
+                                <label>Фото виробу</label>
+                                <div th:if="${product.imagePath != null}"
+                                     style="margin-bottom:8px;">
+                                    <img th:src="${product.imagePath}"
+                                         style="width:100px; height:80px; object-fit:cover;
+                                                border-radius:8px; border:1px solid #eee;">
+                                    <div style="font-size:0.8rem; color:#aaa; margin-top:4px;">
+                                        Поточне фото
+                                    </div>
+                                </div>
+                                <input type="file" name="image" accept="image/*">
+                                <small style="color:#aaa; display:block; margin-top:4px;">
+                                    Залиш порожнім — фото не зміниться
+                                </small>
+                            </div>
+
+                            <!-- ── ЦІНА ───────────────────────────────────── -->
+                            <div class="form-section-label">Ціна</div>
+                            <div class="form-field">
+                                <label>Сума (грн) *</label>
+                                <div class="price-wrap">
+                                    <button type="button" class="price-btn"
+                                            onclick="changePrice(-50)">−</button>
+                                    <input type="number" name="price" id="priceInput"
+                                           class="price-input"
+                                           th:value="${product.price}" min="1" required>
+                                    <button type="button" class="price-btn"
+                                            onclick="changePrice(50)">+</button>
+                                </div>
+                            </div>
+
+                            <div class="form-field">
+                                <label>Одиниця виміру *</label>
+
+                                <!-- FLAVOR: тільки кг -->
+                                <th:block th:if="${product.catalogType.name() == 'FLAVOR'}">
+                                    <input type="hidden" name="priceUnit" value="грн/кг">
+                                    <div class="unit-fixed">грн / кг</div>
+                                </th:block>
+
+                                <!-- DESIGN: тільки декор -->
+                                <th:block th:if="${product.catalogType.name() == 'DESIGN'}">
+                                    <input type="hidden" name="priceUnit" value="грн/декор">
+                                    <div class="unit-fixed">грн / декор</div>
+                                </th:block>
+
+                                <!-- LINE: вільний вибір -->
+                                <select th:if="${product.catalogType.name() == 'LINE'}"
+                                        name="priceUnit">
+                                    <option value="грн/шт"      th:selected="${product.priceUnit == 'грн/шт'}">грн / шт</option>
+                                    <option value="грн/набір"   th:selected="${product.priceUnit == 'грн/набір'}">грн / набір</option>
+                                    <option value="грн/пачку"   th:selected="${product.priceUnit == 'грн/пачку'}">грн / пачку</option>
+                                    <option value="грн/порцію"  th:selected="${product.priceUnit == 'грн/порцію'}">грн / порцію</option>
+                                    <option value="грн/декор"   th:selected="${product.priceUnit == 'грн/декор'}">грн / декор</option>
+                                    <option value="грн/свічку"  th:selected="${product.priceUnit == 'грн/свічку'}">грн / свічку</option>
+                                    <option value="грн/топер"   th:selected="${product.priceUnit == 'грн/топер'}">грн / топер</option>
+                                    <option value="грн/листівку" th:selected="${product.priceUnit == 'грн/листівку'}">грн / листівку</option>
+                                    <option value="грн/бокс"    th:selected="${product.priceUnit == 'грн/бокс'}">грн / бокс</option>
+                                </select>
+                            </div>
+
+                            <!-- ── ТЕРМІНОВІСТЬ ───────────────────────────── -->
+                            <div class="form-section-label">Терміновість</div>
+                            <div class="form-field full">
+                                <div class="tags-wrap">
+                                    <label class="tag-label" th:each="u : ${urgencies}">
+                                        <input type="radio" name="urgency"
+                                               th:value="${u.name()}"
+                                               th:checked="${product.urgency != null and product.urgency == u}">
+                                        <span th:text="${u.label}"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- ══ FLAVOR ════════════════════════════════════ -->
+                            <th:block th:if="${product.catalogType.name() == 'FLAVOR'}">
+
+                                <div class="form-section-label">Каталог смаків</div>
+                                <div class="form-field">
+                                    <label>Основа смаку</label>
+                                    <select name="flavorBase">
+                                        <option value="">— оберіть —</option>
+                                        <option th:each="fb : ${flavorBases}"
+                                                th:value="${fb.name()}"
+                                                th:text="${fb.label}"
+                                                th:selected="${product.flavorBase != null and product.flavorBase == fb}">
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-field">
+                                    <label>Дієтичні особливості</label>
+                                    <div class="tags-wrap">
+                                        <label class="tag-label">
+                                            <input type="checkbox" name="dietaryTags" value="NO_SUGAR"
+                                                   th:checked="${product.hasDietaryTag('NO_SUGAR')}">Без цукру</label>
+                                        <label class="tag-label">
+                                            <input type="checkbox" name="dietaryTags" value="NO_GLUTEN"
+                                                   th:checked="${product.hasDietaryTag('NO_GLUTEN')}">Без глютену</label>
+                                        <label class="tag-label">
+                                            <input type="checkbox" name="dietaryTags" value="NO_LACTOSE"
+                                                   th:checked="${product.hasDietaryTag('NO_LACTOSE')}">Без лактози</label>
+                                        <label class="tag-label">
+                                            <input type="checkbox" name="dietaryTags" value="VEGAN"
+                                                   th:checked="${product.hasDietaryTag('VEGAN')}">Веган</label>
+                                    </div>
+                                </div>
+
+                                <div class="form-section-label">Опис</div>
+                                <div class="form-field full">
+                                    <textarea name="description" rows="3"
+                                              th:text="${product.description}"></textarea>
+                                </div>
+
+                                <div class="form-section-label">Пільга для ЗСУ/ДСНС/ДПСУ</div>
+                                <div class="form-field">
+                                    <label>Знижка (%)</label>
+                                    <div class="price-wrap">
+                                        <button type="button" class="price-btn" onclick="changeDiscount(-5)">−</button>
+                                        <input type="number" name="discountPercent" id="discountInput"
+                                               class="price-input"
+                                               th:value="${product.discountPercent != null ? product.discountPercent : 0}"
+                                               min="0" max="100">
+                                        <button type="button" class="price-btn" onclick="changeDiscount(5)">+</button>
+                                    </div>
+                                </div>
+
+                                <div class="form-section-label">Характеристики</div>
+                                <div class="form-field">
+                                    <label>Калорійність</label>
+                                    <input type="text" name="calories"
+                                           th:value="${product.calories}"
+                                           placeholder="320 ккал/100 г">
+                                </div>
+                                <div class="form-field">
+                                    <label>Мінімальна вага (кг)</label>
+                                    <input type="number" name="minWeightKg"
+                                           th:value="${product.minWeightKg}"
+                                           min="0.5" step="0.5">
+                                </div>
+
+                                <div class="form-section-label">Текстові блоки</div>
+                                <div class="form-field full">
+                                    <label>Про смак</label>
+                                    <textarea name="flavorDescription" rows="3"
+                                              th:text="${product.flavorDescription}"></textarea>
+                                </div>
+                                <div class="form-field full">
+                                    <label>Склад (інгредієнти)</label>
+                                    <textarea name="ingredients" rows="3"
+                                              th:text="${product.ingredients}"></textarea>
+                                </div>
+
+                            </th:block>
+
+                            <!-- ══ DESIGN ════════════════════════════════════ -->
+                            <th:block th:if="${product.catalogType.name() == 'DESIGN'}">
+
+                                <div class="form-section-label">Каталог дизайнів</div>
+                                <div class="form-field full">
+                                    <label>Подія / Привід</label>
+                                    <select name="designEvent" id="designEventSelect"
+                                            onchange="showDesignFor()">
+                                        <option value="">— оберіть подію —</option>
+                                        <option th:each="de : ${designEvents}"
+                                                th:value="${de.name()}"
+                                                th:text="${de.label}"
+                                                th:selected="${product.designEvent != null and product.designEvent == de}">
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="design-for-block" id="designForBlock"
+                                     th:style="${product.designEvent != null} ? 'display:block' : 'display:none'">
+                                    <span class="design-for-label">Для кого?</span>
+                                    <div class="tags-wrap">
+                                        <label class="tag-label" th:each="df : ${designFors}">
+                                            <input type="checkbox" name="designFor"
+                                                   th:value="${df.name()}"
+                                                   th:checked="${product.hasDesignFor(df.name())}">
+                                            <span th:text="${df.label}"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="form-field">
+                                    <label>Дієтичні особливості</label>
+                                    <div class="tags-wrap">
+                                        <label class="tag-label">
+                                            <input type="checkbox" name="dietaryTags" value="NO_SUGAR"
+                                                   th:checked="${product.hasDietaryTag('NO_SUGAR')}">Без цукру</label>
+                                        <label class="tag-label">
+                                            <input type="checkbox" name="dietaryTags" value="NO_GLUTEN"
+                                                   th:checked="${product.hasDietaryTag('NO_GLUTEN')}">Без глютену</label>
+                                        <label class="tag-label">
+                                            <input type="checkbox" name="dietaryTags" value="NO_LACTOSE"
+                                                   th:checked="${product.hasDietaryTag('NO_LACTOSE')}">Без лактози</label>
+                                        <label class="tag-label">
+                                            <input type="checkbox" name="dietaryTags" value="VEGAN"
+                                                   th:checked="${product.hasDietaryTag('VEGAN')}">Веган</label>
+                                    </div>
+                                </div>
+
+                                <div class="form-section-label">Опис та Склад</div>
+                                <div class="form-field full">
+                                    <label>Опис</label>
+                                    <textarea name="description" rows="3"
+                                              th:text="${product.description}"></textarea>
+                                </div>
+                                <div class="form-field full">
+                                    <label>Склад (інгредієнти)</label>
+                                    <textarea name="ingredients" rows="3"
+                                              th:text="${product.ingredients}"></textarea>
+                                </div>
+
+                                <div class="form-section-label">Пільга для ЗСУ/ДСНС/ДПСУ</div>
+                                <div class="form-field">
+                                    <label>Знижка (%)</label>
+                                    <div class="price-wrap">
+                                        <button type="button" class="price-btn" onclick="changeDiscount(-5)">−</button>
+                                        <input type="number" name="discountPercent" id="discountInput"
+                                               class="price-input"
+                                               th:value="${product.discountPercent != null ? product.discountPercent : 0}"
+                                               min="0" max="100">
+                                        <button type="button" class="price-btn" onclick="changeDiscount(5)">+</button>
+                                    </div>
+                                </div>
+
+                                <div class="form-section-label">Характеристики</div>
+                                <div class="form-field">
+                                    <label>Калорійність</label>
+                                    <input type="text" name="calories"
+                                           th:value="${product.calories}"
+                                           placeholder="320 ккал/100 г">
+                                </div>
+                                <input type="hidden" name="minWeightKg" value="">
+
+                            </th:block>
+
+                            <!-- ══ LINE ══════════════════════════════════════ -->
+                            <th:block th:if="${product.catalogType.name() == 'LINE'}">
+
+                                <div class="form-section-label">Лінійка виробів</div>
+                                <div class="form-field full">
+                                    <label>Тип виробу</label>
+                                    <select name="productLine">
+                                        <option value="">— оберіть —</option>
+                                        <option th:each="pl : ${productLines}"
+                                                th:value="${pl.name()}"
+                                                th:text="${pl.label}"
+                                                th:selected="${product.productLine != null and product.productLine == pl}">
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="form-field">
+                                    <label>Дієтичні особливості</label>
+                                    <div class="tags-wrap">
+                                        <label class="tag-label">
+                                            <input type="checkbox" name="dietaryTags" value="NO_SUGAR"
+                                                   th:checked="${product.hasDietaryTag('NO_SUGAR')}">Без цукру</label>
+                                        <label class="tag-label">
+                                            <input type="checkbox" name="dietaryTags" value="NO_GLUTEN"
+                                                   th:checked="${product.hasDietaryTag('NO_GLUTEN')}">Без глютену</label>
+                                        <label class="tag-label">
+                                            <input type="checkbox" name="dietaryTags" value="NO_LACTOSE"
+                                                   th:checked="${product.hasDietaryTag('NO_LACTOSE')}">Без лактози</label>
+                                        <label class="tag-label">
+                                            <input type="checkbox" name="dietaryTags" value="VEGAN"
+                                                   th:checked="${product.hasDietaryTag('VEGAN')}">Веган</label>
+                                    </div>
+                                </div>
+
+                                <div class="form-section-label">Опис</div>
+                                <div class="form-field full">
+                                    <textarea name="description" rows="3" required
+                                              th:text="${product.description}"></textarea>
+                                </div>
+
+                                <div class="form-section-label">Пільга для ЗСУ/ДСНС/ДПСУ</div>
+                                <div class="form-field">
+                                    <label>Знижка (%)</label>
+                                    <div class="price-wrap">
+                                        <button type="button" class="price-btn" onclick="changeDiscount(-5)">−</button>
+                                        <input type="number" name="discountPercent" id="discountInput"
+                                               class="price-input"
+                                               th:value="${product.discountPercent != null ? product.discountPercent : 0}"
+                                               min="0" max="100">
+                                        <button type="button" class="price-btn" onclick="changeDiscount(5)">+</button>
+                                    </div>
+                                </div>
+
+                                <div class="form-section-label">Характеристики</div>
+                                <div class="form-field">
+                                    <label>Калорійність</label>
+                                    <input type="text" name="calories"
+                                           th:value="${product.calories}"
+                                           placeholder="320 ккал/100 г">
+                                </div>
+                                <div class="form-field">
+                                    <label>Мінімальна вага (кг) — необов'язково</label>
+                                    <input type="number" name="minWeightKg"
+                                           th:value="${product.minWeightKg}"
+                                           placeholder="0.5" min="0.1" step="0.1">
+                                </div>
+
+                                <div class="form-section-label">Текстові блоки</div>
+                                <div class="form-field full">
+                                    <label>Про виріб</label>
+                                    <textarea name="flavorDescription" rows="3"
+                                              th:text="${product.flavorDescription}"></textarea>
+                                </div>
+                                <div class="form-field full">
+                                    <label>Склад (інгредієнти)</label>
+                                    <textarea name="ingredients" rows="3"
+                                              th:text="${product.ingredients}"></textarea>
+                                </div>
+
+                            </th:block>
+
+                        </div>
+
+                        <div style="display:flex; gap:1rem; justify-content:center; margin-top:1.5rem;">
+                            <a th:href="@{/admin/assortment(catalog=${catalog})}"
+                               class="btn-cancel">Скасувати</a>
+                            <button type="submit" class="btn-add">💾 Зберегти зміни</button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<style>
+    .btn-back {
+        display: inline-flex; align-items: center;
+        padding: 0.4rem 1rem; border: 1px solid #5a9aaa; border-radius: 6px;
+        color: #5a9aaa; text-decoration: none;
+        font-family: 'Cormorant Garamond', serif; font-size: 0.95rem;
+        transition: all 0.2s; white-space: nowrap;
+    }
+    .btn-back:hover { background: #5a9aaa; color: white; }
+
+    .btn-cancel {
+        padding: 0.7rem 1.5rem; border: 1px solid #ccc; border-radius: 8px;
+        color: #888; text-decoration: none;
+        font-family: 'Cormorant Garamond', serif; font-size: 1rem;
+        transition: all 0.2s;
+    }
+    .btn-cancel:hover { background: #f5f5f5; }
+
+    .unit-fixed {
+        display: inline-block; padding: 0.5rem 1rem;
+        background: #f0f0f0; border: 1px solid #ddd; border-radius: 6px;
+        font-family: 'Cormorant Garamond', serif; color: #555; font-size: 1rem;
+    }
+</style>
+
+<script>
+    function changePrice(delta) {
+        var input = document.getElementById('priceInput');
+        if (input) input.value = Math.max(1, (parseInt(input.value) || 0) + delta);
+    }
+    function changeDiscount(delta) {
+        var input = document.getElementById('discountInput');
+        if (input) input.value = Math.max(0, Math.min(100, (parseInt(input.value) || 0) + delta));
+    }
+    function showDesignFor() {
+        var select = document.getElementById('designEventSelect');
+        var block  = document.getElementById('designForBlock');
+        if (select && block) block.style.display = select.value ? 'block' : 'none';
+    }
+</script>
+
+</body>
+</html>

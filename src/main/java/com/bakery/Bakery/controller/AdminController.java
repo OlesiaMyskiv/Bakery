@@ -185,6 +185,8 @@ public class AdminController {
         return "redirect:/admin/assortment?catalog=" + catalogType;
     }
 
+
+
     @PostMapping("/assortment/{id}/delete")
     public String deleteProduct(@PathVariable Long id,
                                 @RequestParam(defaultValue = "FLAVOR") String catalog) {
@@ -198,6 +200,93 @@ public class AdminController {
         productService.toggleAvailability(id);
         return "redirect:/admin/assortment?catalog=" + catalog;
     }
+    /**
+     * GET /admin/assortment/{id}/edit
+     * Відкриває сторінку редагування товару з заповненими полями.
+     */
+    @GetMapping("/assortment/{id}/edit")
+    public String editProductForm(@PathVariable Long id,
+                                  @RequestParam(defaultValue = "FLAVOR") String catalog,
+                                  Model model) {
+        Product product = productService.findByIdOrThrow(id);
+
+        model.addAttribute("product",      product);
+        model.addAttribute("catalog",      catalog);
+        model.addAttribute("catalogTypes", Product.CatalogType.values());
+        model.addAttribute("flavorBases",  Product.FlavorBase.values());
+        model.addAttribute("designEvents", Product.DesignEvent.values());
+        model.addAttribute("designFors",   Product.DesignFor.values());
+        model.addAttribute("productLines", Product.ProductLine.values());
+        model.addAttribute("urgencies",    Product.Urgency.values());
+        model.addAttribute("adminUser",    userService.getCurrentUser());
+        return "admin/edit-product";
+    }
+
+    /**
+     * POST /admin/assortment/{id}/edit
+     * Зберігає зміни товару.
+     */
+    @PostMapping("/assortment/{id}/edit")
+    public String editProductSave(
+            @PathVariable Long id,
+            @RequestParam String catalog,
+            @RequestParam String name,
+            @RequestParam Integer price,
+            @RequestParam String priceUnit,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) String flavorBase,
+            @RequestParam(required = false) List<String> dietaryTags,
+            @RequestParam(required = false) String designEvent,
+            @RequestParam(required = false) List<String> designFor,
+            @RequestParam(required = false) String productLine,
+            @RequestParam(required = false) String urgency,
+            @RequestParam(required = false, defaultValue = "0") Integer discountPercent,
+            @RequestParam(required = false) String flavorDescription,
+            @RequestParam(required = false) String ingredients,
+            @RequestParam(required = false) String calories,
+            @RequestParam(required = false) String allergens,
+            @RequestParam(required = false) Double minWeightKg,
+            @RequestParam(required = false) MultipartFile image,
+            RedirectAttributes redirectAttributes) throws IOException {
+
+        Product p = productService.findByIdOrThrow(id);
+
+        // Основні поля
+        p.setName(name);
+        p.setPrice(price);
+        p.setPriceUnit(priceUnit);
+        p.setDescription(description);
+        p.setDiscountPercent(discountPercent != null ? discountPercent : 0);
+        p.setFlavorDescription(flavorDescription);
+        p.setIngredients(ingredients);
+        p.setCalories(calories);
+        p.setAllergens(allergens);
+        p.setMinWeightKg(minWeightKg);
+
+        // Enum поля
+        p.setFlavorBase(flavorBase != null && !flavorBase.isEmpty()
+                ? Product.FlavorBase.valueOf(flavorBase) : null);
+        p.setDesignEvent(designEvent != null && !designEvent.isEmpty()
+                ? Product.DesignEvent.valueOf(designEvent) : null);
+        p.setProductLine(productLine != null && !productLine.isEmpty()
+                ? Product.ProductLine.valueOf(productLine) : null);
+        p.setUrgency(urgency != null && !urgency.isEmpty()
+                ? Product.Urgency.valueOf(urgency) : null);
+
+        // Списки
+        p.setDietaryTags(dietaryTags != null && !dietaryTags.isEmpty()
+                ? String.join(",", dietaryTags) : null);
+        p.setDesignFor(designFor != null && !designFor.isEmpty()
+                ? String.join(",", designFor) : null);
+
+        // Фото — замінюємо тільки якщо нове завантажено
+        productService.save(p, (image != null && !image.isEmpty()) ? image : null);
+
+        redirectAttributes.addFlashAttribute("successMsg",
+                "Товар \"" + name + "\" успішно оновлено!");
+        return "redirect:/admin/assortment?catalog=" + catalog;
+    }
+
 
     // ── Відгуки ───────────────────────────────────────────────────────────────
 

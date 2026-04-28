@@ -1,9 +1,9 @@
 package com.bakery.Bakery.controller;
 
 import com.bakery.Bakery.model.Product;
+import com.bakery.Bakery.model.Role;
 import com.bakery.Bakery.model.User;
 import com.bakery.Bakery.model.VerificationStatus;
-import com.bakery.Bakery.model.Role;
 import com.bakery.Bakery.repository.ProductRepository;
 import com.bakery.Bakery.repository.ReviewRepository;
 import com.bakery.Bakery.service.UserService;
@@ -13,6 +13,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -20,8 +22,8 @@ import java.util.Random;
 public class HomeController {
 
     @Autowired private ProductRepository productRepository;
-    @Autowired private ReviewRepository reviewRepository;
-    @Autowired private UserService userService;
+    @Autowired private ReviewRepository  reviewRepository;
+    @Autowired private UserService       userService;
 
     @GetMapping("/")
     public String home() { return "index"; }
@@ -38,27 +40,14 @@ public class HomeController {
         model.addAttribute("product", product);
         model.addAttribute("reviews", reviewRepository.findByProductIdAndHiddenFalse(id));
 
-        // ── Чи юзер верифікований (бачить пільгову ціну) ─────────────────────
+        // ── Чи юзер верифікований ─────────────────────────────────────────────
         User currentUser = userService.getCurrentUser();
         boolean isVerified = currentUser != null
                 && currentUser.getVerificationStatus() == VerificationStatus.APPROVED
                 && currentUser.getRole() != Role.SUPER_ADMIN;
         model.addAttribute("isVerified", isVerified);
 
-        // ── Рекомендовані дизайни — 5 рандомних з DESIGN каталогу ────────────
-        List<Product> allDesigns = productRepository
-                .findByCatalogTypeAndAvailableTrueOrderByNameAsc(Product.CatalogType.DESIGN);
-
-        // Виключаємо поточний товар і беремо 5 рандомних
-        List<Product> filteredDesigns = allDesigns.stream()
-                .filter(p -> !p.getId().equals(id))
-                .collect(java.util.stream.Collectors.toCollection(java.util.ArrayList::new));
-
-        java.util.Collections.shuffle(filteredDesigns, new Random());
-        List<Product> recommended = filteredDesigns.stream().limit(5).toList();
-        model.addAttribute("recommendedDesigns", recommended);
-
-        // ── Breadcrumb — визначаємо каталог ──────────────────────────────────
+        // ── Breadcrumb ────────────────────────────────────────────────────────
         String catalogLabel = product.getCatalogType() != null
                 ? product.getCatalogType().getLabel() : "Асортимент";
         String catalogParam = product.getCatalogType() != null
@@ -66,6 +55,35 @@ public class HomeController {
         model.addAttribute("catalogLabel", catalogLabel);
         model.addAttribute("catalogParam", catalogParam);
 
+        // ── Рекомендовані — залежать від типу товару ──────────────────────────
+        List<Product> recommended = getRecommended(product, id);
+        model.addAttribute("recommendedProducts", recommended);
+
         return "product-detail";
+    }
+
+    /**
+     * FLAVOR → рекомендуємо 5 рандомних DESIGN
+     * DESIGN → рекомендуємо 5 рандомних FLAVOR
+     * LINE   → рекомендуємо 5 рандомних з тієї ж LINE (або будь-які LINE якщо мало)
+     */
+    private List<Product> getRecommended(Product product, Long excludeId) {
+        if (product.getCatalogType() == null) return List.of();
+
+        Product.CatalogType targetType = switch (product.getCatalogType()) {
+            case FLAVOR -> Product.CatalogType.DESIGN;
+            case DESIGN -> Product.CatalogType.FLAVOR;
+            case LINE   -> Product.CatalogType.LINE;
+        };
+
+        List<Product> pool = new ArrayList<>(
+                productRepository.findByCatalogTypeAndAvailableTrueOrderByNameAsc(targetType)
+        );
+
+        // Виключаємо поточний товар
+        pool.removeIf(p -> p.getId().equals(excludeId));
+
+        Collections.shuffle(pool, new Random());
+        return pool.stream().limit(5).toList();
     }
 }

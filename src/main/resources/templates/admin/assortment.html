@@ -6,12 +6,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Love+Light&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/globals.css}">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" th:href="@{/css/admin.css}">
-    <link rel="stylesheet" th:href="@{/css/header.css}">
 </head>
 <body>
-
 <header th:replace="~{header :: header}"></header>
 
 <div class="admin-layout">
@@ -54,7 +53,9 @@
 
             <div class="assort-center">
 
-                <!-- ФОРМА ДОДАВАННЯ -->
+                <!-- ══════════════════════════════════════════════════════════
+                     ФОРМА ДОДАВАННЯ
+                ══════════════════════════════════════════════════════════ -->
                 <div class="add-form-card">
                     <div class="add-form-title">
                         + Додати до «<span th:text="${currentCatalog.label}"></span>»
@@ -66,7 +67,7 @@
 
                         <div class="form-grid">
 
-                            <!-- ОСНОВНА ІНФОРМАЦІЯ -->
+                            <!-- ── ОСНОВНА ІНФОРМАЦІЯ ─────────────────────── -->
                             <div class="form-section-label">Основна інформація</div>
                             <div class="form-field">
                                 <label>Назва виробу *</label>
@@ -78,7 +79,7 @@
                                 <input type="file" name="image" accept="image/*">
                             </div>
 
-                            <!-- ЦІНА -->
+                            <!-- ── ЦІНА ───────────────────────────────────── -->
                             <div class="form-section-label">Ціна</div>
                             <div class="form-field">
                                 <label>Сума (грн) *</label>
@@ -91,24 +92,24 @@
                                             onclick="changePrice(50)">+</button>
                                 </div>
                             </div>
+
+                            <!-- Одиниця виміру — залежить від каталогу -->
                             <div class="form-field">
                                 <label>Одиниця виміру *</label>
 
-                                <!-- Каталог Смаків -->
-                                <select th:if="${currentCatalog.name() == 'FLAVOR'}" name="priceUnit">
-                                    <option value="грн/шт">грн / шт</option>
-                                    <option value="грн/кг">грн / кг</option>
-                                    <option value="грн/порцію">грн / порцію</option>
-                                    <option value="грн/пачку">грн / пачку</option>
-                                    <option value="грн/набір">грн / набір</option>
-                                </select>
+                                <!-- FLAVOR: тільки кг -->
+                                <th:block th:if="${currentCatalog.name() == 'FLAVOR'}">
+                                    <input type="hidden" name="priceUnit" value="грн/кг">
+                                    <div class="unit-fixed">грн / кг</div>
+                                </th:block>
 
-                                <!-- Каталог Дизайнів — тільки декор -->
-                                <select th:if="${currentCatalog.name() == 'DESIGN'}" name="priceUnit">
-                                    <option value="грн/декор" selected>грн / декор</option>
-                                </select>
+                                <!-- DESIGN: тільки декор -->
+                                <th:block th:if="${currentCatalog.name() == 'DESIGN'}">
+                                    <input type="hidden" name="priceUnit" value="грн/декор">
+                                    <div class="unit-fixed">грн / декор</div>
+                                </th:block>
 
-                                <!-- Лінійка виробів -->
+                                <!-- LINE: вільний вибір -->
                                 <select th:if="${currentCatalog.name() == 'LINE'}" name="priceUnit">
                                     <option value="грн/шт">грн / шт</option>
                                     <option value="грн/набір">грн / набір</option>
@@ -122,7 +123,7 @@
                                 </select>
                             </div>
 
-                            <!-- ТЕРМІНОВІСТЬ -->
+                            <!-- ── ТЕРМІНОВІСТЬ ───────────────────────────── -->
                             <div class="form-section-label">Терміновість</div>
                             <div class="form-field full">
                                 <div class="tags-wrap">
@@ -133,8 +134,11 @@
                                 </div>
                             </div>
 
-                            <!-- ====== КАТАЛОГ СМАКІВ ====== -->
+                            <!-- ══════════════════════════════════════════════
+                                 КАТАЛОГ СМАКІВ
+                            ══════════════════════════════════════════════ -->
                             <th:block th:if="${currentCatalog.name() == 'FLAVOR'}">
+
                                 <div class="form-section-label">Каталог смаків</div>
                                 <div class="form-field">
                                     <label>Основа смаку</label>
@@ -148,23 +152,68 @@
                                 <div class="form-field">
                                     <label>Дієтичні особливості</label>
                                     <div class="tags-wrap">
-                                        <label class="tag-label">
-                                            <input type="checkbox" name="dietaryTags" value="NO_SUGAR">Без цукру</label>
-                                        <label class="tag-label">
-                                            <input type="checkbox" name="dietaryTags" value="NO_GLUTEN">Без глютену</label>
-                                        <label class="tag-label">
-                                            <input type="checkbox" name="dietaryTags" value="NO_LACTOSE">Без лактози</label>
-                                        <label class="tag-label">
-                                            <input type="checkbox" name="dietaryTags" value="VEGAN">Веган</label>
+                                        <label class="tag-label"><input type="checkbox" name="dietaryTags" value="NO_SUGAR">Без цукру</label>
+                                        <label class="tag-label"><input type="checkbox" name="dietaryTags" value="NO_GLUTEN">Без глютену</label>
+                                        <label class="tag-label"><input type="checkbox" name="dietaryTags" value="NO_LACTOSE">Без лактози</label>
+                                        <label class="tag-label"><input type="checkbox" name="dietaryTags" value="VEGAN">Веган</label>
                                     </div>
                                 </div>
+
+                                <!-- ОПИС -->
+                                <div class="form-section-label">Опис</div>
+                                <div class="form-field full">
+                                    <textarea name="description" rows="3"
+                                              placeholder="Загальний опис виробу..."></textarea>
+                                </div>
+
+                                <!-- ПІЛЬГА -->
+                                <div class="form-section-label">Пільга для ЗСУ/ДСНС/ДПСУ</div>
+                                <div class="form-field">
+                                    <label>Знижка (%)</label>
+                                    <div class="price-wrap">
+                                        <button type="button" class="price-btn" onclick="changeDiscount(-5)">−</button>
+                                        <input type="number" name="discountPercent" id="discountInput"
+                                               class="price-input" value="0" min="0" max="100">
+                                        <button type="button" class="price-btn" onclick="changeDiscount(5)">+</button>
+                                    </div>
+                                    <small style="color:#aaa;margin-top:4px;display:block;">
+                                        0 = без знижки. Наприклад: 20 = ціна -20% для верифікованих
+                                    </small>
+                                </div>
+
+                                <!-- ХАРАКТЕРИСТИКИ -->
+                                <div class="form-section-label">Характеристики</div>
+                                <div class="form-field">
+                                    <label>Калорійність</label>
+                                    <input type="text" name="calories" placeholder="320 ккал/100 г">
+                                </div>
+                                <div class="form-field">
+                                    <label>Мінімальна вага (кг)</label>
+                                    <input type="number" name="minWeightKg"
+                                           value="1.0" min="0.5" step="0.5">
+                                </div>
+
+                                <!-- ТЕКСТОВІ БЛОКИ -->
+                                <div class="form-section-label">Текстові блоки на сторінці товару</div>
+                                <div class="form-field full">
+                                    <label>Про смак</label>
+                                    <textarea name="flavorDescription" rows="3"
+                                              placeholder="Детальний опис смаку, аромату, текстури..."></textarea>
+                                </div>
+                                <div class="form-field full">
+                                    <label>Склад (інгредієнти)</label>
+                                    <textarea name="ingredients" rows="3"
+                                              placeholder="Борошно, яйця, масло вершкове, цукор..."></textarea>
+                                </div>
+
                             </th:block>
 
-                            <!-- ====== КАТАЛОГ ДИЗАЙНІВ ====== -->
+                            <!-- ══════════════════════════════════════════════
+                                 КАТАЛОГ ДИЗАЙНІВ
+                            ══════════════════════════════════════════════ -->
                             <th:block th:if="${currentCatalog.name() == 'DESIGN'}">
-                                <div class="form-section-label">Каталог дизайнів</div>
 
-                                <!-- Головна подія -->
+                                <div class="form-section-label">Каталог дизайнів</div>
                                 <div class="form-field full">
                                     <label>Подія / Привід</label>
                                     <select name="designEvent" id="designEventSelect"
@@ -176,32 +225,71 @@
                                     </select>
                                 </div>
 
-                                <!-- Уточнення: для кого — з'являється після вибору події -->
-                                <div class="design-for-block" id="designForBlock"
-                                     style="display:none;">
+                                <div class="design-for-block" id="designForBlock" style="display:none;">
                                     <span class="design-for-label">Уточнення — для кого?</span>
                                     <div class="tags-wrap">
-                                        <!-- Чекбокси — можна обрати кілька -->
                                         <label class="tag-label" th:each="df : ${designFors}">
-                                            <input type="checkbox" name="designFor"
-                                                   th:value="${df.name()}">
+                                            <input type="checkbox" name="designFor" th:value="${df.name()}">
                                             <span th:text="${df.label}"></span>
                                         </label>
-                                        <!-- Запасний варіант якщо designFors порожній -->
-                                        <th:block th:if="${designFors == null or #lists.isEmpty(designFors)}">
-                                            <label class="tag-label"><input type="checkbox" name="designFor" value="FOR_GIRL"><span>Для дівчинки</span></label>
-                                            <label class="tag-label"><input type="checkbox" name="designFor" value="FOR_BOY"><span>Для хлопчика</span></label>
-                                            <label class="tag-label"><input type="checkbox" name="designFor" value="FOR_WOMAN"><span>Для жінки</span></label>
-                                            <label class="tag-label"><input type="checkbox" name="designFor" value="FOR_MAN"><span>Для чоловіка</span></label>
-                                            <label class="tag-label"><input type="checkbox" name="designFor" value="FOR_COUPLE"><span>Для пари</span></label>
-                                            <label class="tag-label"><input type="checkbox" name="designFor" value="UNISEX"><span>Універсальний</span></label>
-                                        </th:block>
                                     </div>
                                 </div>
+
+                                <!-- Дієтичні особливості -->
+                                <div class="form-field">
+                                    <label>Дієтичні особливості</label>
+                                    <div class="tags-wrap">
+                                        <label class="tag-label"><input type="checkbox" name="dietaryTags" value="NO_SUGAR">Без цукру</label>
+                                        <label class="tag-label"><input type="checkbox" name="dietaryTags" value="NO_GLUTEN">Без глютену</label>
+                                        <label class="tag-label"><input type="checkbox" name="dietaryTags" value="NO_LACTOSE">Без лактози</label>
+                                        <label class="tag-label"><input type="checkbox" name="dietaryTags" value="VEGAN">Веган</label>
+                                    </div>
+                                </div>
+
+                                <!-- ОПИС + СКЛАД -->
+                                <div class="form-section-label">Опис та Склад</div>
+                                <div class="form-field full">
+                                    <label>Опис</label>
+                                    <textarea name="description" rows="3"
+                                              placeholder="Загальний опис дизайну..."></textarea>
+                                </div>
+                                <div class="form-field full">
+                                    <label>Склад (інгредієнти)</label>
+                                    <textarea name="ingredients" rows="3"
+                                              placeholder="Борошно, яйця, масло вершкове..."></textarea>
+                                </div>
+
+                                <!-- ПІЛЬГА -->
+                                <div class="form-section-label">Пільга для ЗСУ/ДСНС/ДПСУ</div>
+                                <div class="form-field">
+                                    <label>Знижка (%)</label>
+                                    <div class="price-wrap">
+                                        <button type="button" class="price-btn" onclick="changeDiscount(-5)">−</button>
+                                        <input type="number" name="discountPercent" id="discountInput"
+                                               class="price-input" value="0" min="0" max="100">
+                                        <button type="button" class="price-btn" onclick="changeDiscount(5)">+</button>
+                                    </div>
+                                    <small style="color:#aaa;margin-top:4px;display:block;">
+                                        0 = без знижки. Наприклад: 20 = ціна -20% для верифікованих
+                                    </small>
+                                </div>
+
+                                <!-- ХАРАКТЕРИСТИКИ -->
+                                <div class="form-section-label">Характеристики</div>
+                                <div class="form-field">
+                                    <label>Калорійність</label>
+                                    <input type="text" name="calories" placeholder="320 ккал/100 г">
+                                </div>
+                                <!-- Без мінімальної ваги для дизайну -->
+                                <input type="hidden" name="minWeightKg" value="">
+
                             </th:block>
 
-                            <!-- ====== ЛІНІЙКА ВИРОБІВ ====== -->
+                            <!-- ══════════════════════════════════════════════
+                                 ЛІНІЙКА ВИРОБІВ
+                            ══════════════════════════════════════════════ -->
                             <th:block th:if="${currentCatalog.name() == 'LINE'}">
+
                                 <div class="form-section-label">Лінійка виробів</div>
                                 <div class="form-field full">
                                     <label>Тип виробу</label>
@@ -212,64 +300,69 @@
                                                 th:text="${pl.label}"></option>
                                     </select>
                                 </div>
+
+                                <!-- Дієтичні особливості -->
+                                <div class="form-field">
+                                    <label>Дієтичні особливості</label>
+                                    <div class="tags-wrap">
+                                        <label class="tag-label"><input type="checkbox" name="dietaryTags" value="NO_SUGAR">Без цукру</label>
+                                        <label class="tag-label"><input type="checkbox" name="dietaryTags" value="NO_GLUTEN">Без глютену</label>
+                                        <label class="tag-label"><input type="checkbox" name="dietaryTags" value="NO_LACTOSE">Без лактози</label>
+                                        <label class="tag-label"><input type="checkbox" name="dietaryTags" value="VEGAN">Веган</label>
+                                    </div>
+                                </div>
+
+                                <!-- ОПИС — обов'язковий -->
+                                <div class="form-section-label">Опис</div>
+                                <div class="form-field full">
+                                    <textarea name="description" rows="3"
+                                              placeholder="Опис виробу (обов'язково)..." required></textarea>
+                                </div>
+
+                                <!-- ПІЛЬГА -->
+                                <div class="form-section-label">Пільга для ЗСУ/ДСНС/ДПСУ</div>
+                                <div class="form-field">
+                                    <label>Знижка (%)</label>
+                                    <div class="price-wrap">
+                                        <button type="button" class="price-btn" onclick="changeDiscount(-5)">−</button>
+                                        <input type="number" name="discountPercent" id="discountInput"
+                                               class="price-input" value="0" min="0" max="100">
+                                        <button type="button" class="price-btn" onclick="changeDiscount(5)">+</button>
+                                    </div>
+                                    <small style="color:#aaa;margin-top:4px;display:block;">
+                                        0 = без знижки. Наприклад: 20 = ціна -20% для верифікованих
+                                    </small>
+                                </div>
+
+                                <!-- ХАРАКТЕРИСТИКИ -->
+                                <div class="form-section-label">Характеристики</div>
+                                <div class="form-field">
+                                    <label>Калорійність</label>
+                                    <input type="text" name="calories" placeholder="320 ккал/100 г">
+                                </div>
+                                <div class="form-field">
+                                    <label>Мінімальна вага (кг) — необов'язково</label>
+                                    <input type="number" name="minWeightKg"
+                                           placeholder="Наприклад: 0.5" min="0.1" step="0.1">
+                                </div>
+
+                                <!-- ТЕКСТОВІ БЛОКИ -->
+                                <div class="form-section-label">Текстові блоки на сторінці товару</div>
+                                <div class="form-field full">
+                                    <label>Про виріб</label>
+                                    <textarea name="flavorDescription" rows="3"
+                                              placeholder="Детальний опис виробу..."></textarea>
+                                </div>
+                                <div class="form-field full">
+                                    <label>Склад (інгредієнти)</label>
+                                    <textarea name="ingredients" rows="3"
+                                              placeholder="Склад виробу..."></textarea>
+                                </div>
+
                             </th:block>
 
-                            <!-- ОПИС -->
-                            <div class="form-section-label">Опис</div>
-                            <div class="form-field full">
-                                <textarea name="description" rows="3"
-                                          placeholder="Смак, склад, особливості виробу..."></textarea>
-                            </div>
-                            <!-- ЗНИЖКА ДЛЯ ЗАХИСНИКІВ -->
-                            <div class="form-section-label">Пільга для ЗСУ/ДСНС/ДПСУ</div>
-                            <div class="form-field">
-                                <label>Знижка (%)</label>
-                                <div class="price-wrap">
-                                    <button type="button" class="price-btn"
-                                            onclick="changeDiscount(-5)">−</button>
-                                    <input type="number" name="discountPercent"
-                                           id="discountInput" class="price-input"
-                                           value="0" min="0" max="100">
-                                    <button type="button" class="price-btn"
-                                            onclick="changeDiscount(5)">+</button>
-                                </div>
-                                <small style="color:#aaa; margin-top:4px; display:block;">
-                                    0 = без знижки. Наприклад: 20 = ціна -20% для верифікованих
-                                </small>
-                            </div>
-
-                            <!-- ХАРАКТЕРИСТИКИ -->
-                            <div class="form-section-label">Характеристики</div>
-                            <div class="form-field">
-                                <label>Калорійність</label>
-                                <input type="text" name="calories"
-                                       placeholder="Наприклад: 320 ккал/100 г">
-                            </div>
-                            <div class="form-field">
-                                <label>Алергени / Склад</label>
-                                <input type="text" name="allergens"
-                                       placeholder="Наприклад: містить лактозу, глютен">
-                            </div>
-                            <div class="form-field">
-                                <label>Мінімальна вага (кг)</label>
-                                <input type="number" name="minWeightKg"
-                                       value="1.0" min="0.5" step="0.5">
-                            </div>
-
-                            <!-- ПРО СМАК -->
-                            <div class="form-section-label">Текстові блоки на сторінці товару</div>
-                            <div class="form-field full">
-                                <label>Про смак</label>
-                                <textarea name="flavorDescription" rows="3"
-                                          placeholder="Детальний опис смаку, аромату, текстури..."></textarea>
-                            </div>
-                            <div class="form-field full">
-                                <label>Склад (інгредієнти)</label>
-                                <textarea name="ingredients" rows="3"
-                                          placeholder="Борошно, яйця, масло вершкове, цукор..."></textarea>
-                            </div>
-
                         </div>
+
                         <div style="text-align:center;">
                             <button type="submit" class="btn-add">Додати до каталогу</button>
                         </div>
@@ -280,8 +373,7 @@
                 <div class="search-bar-wrap">
                     <div class="search-bar-inner">
                         <svg width="22" height="22" viewBox="0 0 24 24"
-                             fill="none" stroke="#3AA6B9" stroke-width="2.2"
-                             stroke-linecap="round">
+                             fill="none" stroke="#3AA6B9" stroke-width="2.2" stroke-linecap="round">
                             <circle cx="11" cy="11" r="7"/>
                             <line x1="16.5" y1="16.5" x2="22" y2="22"/>
                         </svg>
@@ -289,8 +381,7 @@
                                placeholder="Пошук за назвою товару..."
                                oninput="filterProducts()" autocomplete="off">
                         <button class="search-clear" id="clearBtn"
-                                onclick="clearSearch()" style="display:none;"
-                                title="Очистити">✕</button>
+                                onclick="clearSearch()" style="display:none;" title="Очистити">✕</button>
                     </div>
                     <span id="searchCount" class="search-count"></span>
                 </div>
@@ -311,8 +402,7 @@
                         </thead>
                         <tbody>
                         <tr th:if="${products.empty}">
-                            <td colspan="7"
-                                style="text-align:center;padding:50px;color:#999;font-size:17px;">
+                            <td colspan="7" style="text-align:center;padding:50px;color:#999;font-size:17px;">
                                 Товарів поки немає — додайте перший!
                             </td>
                         </tr>
@@ -321,59 +411,50 @@
                             th:attr="data-name=${p.name}">
                             <td>
                                 <img th:if="${p.imagePath != null}"
-                                     th:src="${p.imagePath}"
-                                     class="product-thumb"
-                                     alt="фото">
+                                     th:src="${p.imagePath}" class="product-thumb" alt="фото">
                                 <div th:unless="${p.imagePath != null}"
-                                     style="width:64px;height:64px;background:#eee;
-                                            border-radius:10px;display:flex;
-                                            align-items:center;justify-content:center;
+                                     style="width:64px;height:64px;background:#eee;border-radius:10px;
+                                            display:flex;align-items:center;justify-content:center;
                                             color:#ccc;font-size:22px;">📷</div>
                             </td>
                             <td><strong th:text="${p.name}"></strong></td>
                             <td>
-                                <span th:if="${p.flavorBase != null}"
-                                      class="tag-pill"
+                                <span th:if="${p.flavorBase != null}" class="tag-pill"
                                       th:text="${p.flavorBase.label}"></span>
-                                <span th:if="${p.designEvent != null}"
-                                      class="tag-pill"
+                                <span th:if="${p.designEvent != null}" class="tag-pill"
                                       th:text="${p.designEvent.label}"></span>
-                                <span th:if="${p.designFor != null}"
-                                      class="tag-pill"
-                                      style="background:#f0e8f5;color:#6b3fa0;"
-                                      th:text="${p.designFor.replace(',', ' · ')}"></span>
-                                <span th:if="${p.productLine != null}"
-                                      class="tag-pill"
+                                <span th:if="${p.productLine != null}" class="tag-pill"
                                       th:text="${p.productLine.label}"></span>
-                                <!-- Дієтичні теги -->
                                 <th:block th:if="${p.dietaryTags != null}">
                                     <span th:if="${p.hasDietaryTag('NO_SUGAR')}"   class="tag-pill">Без цукру</span>
                                     <span th:if="${p.hasDietaryTag('NO_GLUTEN')}"  class="tag-pill">Без глютену</span>
                                     <span th:if="${p.hasDietaryTag('NO_LACTOSE')}" class="tag-pill">Без лактози</span>
                                     <span th:if="${p.hasDietaryTag('VEGAN')}"      class="tag-pill">Веган</span>
                                 </th:block>
+                                <!-- Знижка -->
+                                <span th:if="${p.hasDiscount()}" class="tag-pill"
+                                      style="background:#fff3cd;color:#856404;">
+                                    -<span th:text="${p.discountPercent}"></span>% ЗСУ
+                                </span>
                             </td>
                             <td>
                                 <strong th:text="${p.price}"></strong>
                                 <span th:text="' ' + ${p.priceUnit}"></span>
                             </td>
-                            <td>
-                                <span th:text="${p.urgency != null ? p.urgency.label : '—'}"></span>
-                            </td>
-                            <td>
-                                <span th:text="${p.available ? 'Активний' : 'Прихований'}"></span>
-                            </td>
-                            <td>
-                                <form th:action="@{/admin/assortment/{id}/toggle(id=${p.id})}"
-                                      method="post">
-                                    <input type="hidden" name="catalog"
-                                           th:value="${currentCatalog.name()}">
+                            <td><span th:text="${p.urgency != null ? p.urgency.label : '—'}"></span></td>
+                            <td><span th:text="${p.available ? 'Активний' : 'Прихований'}"></span></td>
+                            <td style="white-space:nowrap;">
+                                <a th:href="@{/admin/assortment/{id}/edit(id=${p.id},catalog=${currentCatalog.name()})}"
+                                   class="btn-sm btn-green">✏️ Редагувати</a>
+
+                                <form th:action="@{/admin/assortment/{id}/toggle(id=${p.id})}" method="post" style="display:inline;">
+                                    <input type="hidden" name="catalog" th:value="${currentCatalog.name()}">
                                     <button class="btn-sm btn-blue">Сховати/Показати</button>
                                 </form>
+
                                 <form th:action="@{/admin/assortment/{id}/delete(id=${p.id})}"
                                       method="post" style="display:inline;">
-                                    <input type="hidden" name="catalog"
-                                           th:value="${currentCatalog.name()}">
+                                    <input type="hidden" name="catalog" th:value="${currentCatalog.name()}">
                                     <button type="button" class="btn-sm btn-red"
                                             th:attr="data-name=${p.name}"
                                             onclick="confirmDelete(this)">Видалити</button>
@@ -390,14 +471,26 @@
     </main>
 </div>
 
+<style>
+    /* Фіксована одиниця виміру */
+    .unit-fixed {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background: #f0f0f0;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-family: 'Cormorant Garamond', serif;
+        color: #555;
+        font-size: 1rem;
+    }
+</style>
+
 <script th:src="@{/js/admin.js}"></script>
 <script>
     function showDesignFor() {
         var select = document.getElementById('designEventSelect');
         var block  = document.getElementById('designForBlock');
-        if (select && block) {
-            block.style.display = select.value ? 'block' : 'none';
-        }
+        if (select && block) block.style.display = select.value ? 'block' : 'none';
     }
 
     function changePrice(delta) {
@@ -405,11 +498,14 @@
         if (input) input.value = Math.max(1, (parseInt(input.value) || 0) + delta);
     }
 
+    function changeDiscount(delta) {
+        var input = document.getElementById('discountInput');
+        if (input) input.value = Math.max(0, Math.min(100, (parseInt(input.value) || 0) + delta));
+    }
+
     function confirmDelete(btn) {
         var name = btn.getAttribute('data-name');
-        if (confirm('Видалити "' + name + '"?')) {
-            btn.closest('form').submit();
-        }
+        if (confirm('Видалити "' + name + '"?')) btn.closest('form').submit();
     }
 
     function filterProducts() {
@@ -433,11 +529,6 @@
     function clearSearch() {
         var input = document.getElementById('productSearch');
         if (input) { input.value = ''; filterProducts(); input.focus(); }
-    }
-
-    function changeDiscount(delta) {
-        var input = document.getElementById('discountInput');
-        if (input) input.value = Math.max(0, Math.min(100, (parseInt(input.value) || 0) + delta));
     }
 </script>
 

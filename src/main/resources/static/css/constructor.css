@@ -2,6 +2,28 @@
    СТИЛІ КОНСТРУКТОРА ТОРТА
    =============================== */
 
+/* Анімація появи сторінки */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.constructor-page-wrapper {
+    animation: fadeInUp 0.8s ease-out forwards;
+}
+
+/* Красивий заголовок як у ШІ-дизайні */
+.constructor-main-title {
+    color: #5d4037;
+    font-family: 'Love Light', cursive;
+    font-size: 5rem;
+    margin-top: 40px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: 400;
+}
+
+/* === ОРИГІНАЛЬНІ СТИЛІ БЛОКІВ === */
 .constructor-section {
     padding: 40px 0;
     background-color: #FFFFFF;
@@ -14,6 +36,7 @@
     display: flex;
     gap: 40px;
     padding: 0 40px;
+    /* align-items: stretch - працює тут за замовчуванням, тому блоки будуть однієї висоти */
 }
 
 /* --- Ліва частина: Візуал торта --- */
@@ -25,7 +48,10 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    align-self: flex-start; /* Робить рамку рівно по розміру торта */
+    /* Я ВИДАЛИВ ЗВІДСИ 'align-self: flex-start;', щоб блок розтягувався по висоті! */
+    background-color: #fff;
+    /* Ефект об'єму: тінь тільки знизу */
+    box-shadow: 0 10px 30px -10px rgba(58, 166, 185, 0.3);
 }
 
 .box-title {
@@ -37,24 +63,9 @@
     text-align: center;
 }
 
-#cake-visual-stack {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 0px !important;
-    width: 100% !important;
-    max-width: 450px !important;
-}
+#cake-visual-stack { display: flex !important; flex-direction: column !important; width: 100% !important; max-width: 450px !important; }
 
-.draggable-layer {
-    display: flex !important;
-    align-items: center !important;
-    gap: 15px !important;
-    padding: 0px !important;
-    margin: 0px !important;
-    border: none !important;
-    background-color: transparent;
-    cursor: grab;
-}
+.draggable-layer { display: flex !important; align-items: center !important; gap: 15px !important; cursor: grab; }
 
 .cake-layer-row {
     display: flex !important;
@@ -87,16 +98,14 @@
     padding: 0 15px;
 }
 
-.arrow-btn:hover {
-    color: #3AA6B9;
-}
+.arrow-btn:hover { color: #3AA6B9; }
 
-/* --- Права частина: Деталі та Вартість --- */
+/* --- Права частина (Картки опису та вартості) --- */
 .cake-details-box {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 30px;
 }
 
 .info-card {
@@ -104,8 +113,11 @@
     border-radius: 20px;
     padding: 30px;
     background-color: #fff;
+    /* Ефект об'єму: м'яка тінь знизу (без ефекту підстрибування) */
+    box-shadow: 0 12px 35px -12px rgba(0, 0, 0, 0.1);
 }
 
+/* Решта стилів без змін, щоб нічого не поїхало */
 .description-list {
     list-style: none;
     padding: 0;
@@ -137,9 +149,7 @@
     transition: color 0.2s;
 }
 
-.triangle-btn:hover {
-    color: #277B8A;
-}
+.triangle-btn:hover { color: #277B8A; }
 
 .delete-btn {
     background: none;
@@ -164,7 +174,7 @@
     padding-right: 10px;
 }
 
-/* Калькулятор і стрілочки */
+/* Калькулятор */
 .calc-row {
     display: flex;
     align-items: center;
@@ -207,9 +217,7 @@
     transition: background 0.3s;
 }
 
-.add-to-cart-btn:hover {
-    background-color: #1c5f6b;
-}
+.add-to-cart-btn:hover { background-color: #1c5f6b; }
 
 /* =========================================
    КНОПКА ТА МОДАЛЬНЕ ВІКНО ДОДАВАННЯ ШАРУ
@@ -240,54 +248,30 @@
 .main-add-btn:hover {
     background-color: #3AA6B9;
     color: white;
-    border: 2px solid #3AA6B9;
 }
 
 /* Фон затемнення */
 .ingredients-modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.6);
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center;
     backdrop-filter: blur(5px);
 }
 
 /* Саме біле вікно */
 .ingredients-modal-content {
-    background: #fff;
-    width: 90%;
-    max-width: 1100px;
-    max-height: 90vh;
-    border-radius: 20px;
-    padding: 40px;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    background: #fff; width: 90%; max-width: 1100px; border-radius: 20px; padding: 40px; display: flex; flex-direction: column;
 }
 
 .ingredients-modal-close {
     position: absolute;
-    top: 20px;
-    right: 30px;
+    top: 20px; right: 30px;
     font-size: 40px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #999;
+    background: none; border: none;
+    cursor: pointer; color: #999;
     transition: color 0.2s;
     line-height: 1;
 }
-
-.ingredients-modal-close:hover {
-    color: #F44336;
-}
+.ingredients-modal-close:hover { color: #F44336; }
 
 /* Три колонки для інгредієнтів */
 .ingredients-grid {
@@ -299,20 +283,10 @@
     margin-top: 10px;
 }
 
-/* Красивий скролбар для вікна */
-.ingredients-grid::-webkit-scrollbar {
-    width: 8px;
-}
-.ingredients-grid::-webkit-scrollbar-thumb {
-    background-color: #3AA6B9;
-    border-radius: 10px;
-}
+.ingredients-grid::-webkit-scrollbar { width: 8px; }
+.ingredients-grid::-webkit-scrollbar-thumb { background-color: #3AA6B9; border-radius: 10px; }
 
-.ingredients-column {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
+.ingredients-column { display: flex; flex-direction: column; gap: 10px; }
 
 .ingredients-category-title {
     font-family: 'Cormorant Garamond', serif;
