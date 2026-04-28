@@ -36,25 +36,6 @@ public class HomeController {
         return "index";
     }
 
-    // ---- Логін ----
-    @GetMapping("/login")
-    public String loginPage() {
-        return "login";
-    }
-
-
-    // ---- Відновлення пароля ----
-    @GetMapping("/forgot-password")
-    public String forgotPasswordPage() {
-        return "forgot-password";
-    }
-
-    // ---- Реєстрація ----
-    @GetMapping("/register")
-    public String registerPage() {
-        return "register";
-    }
-
     // ---- Конструктор ----
     @GetMapping("/constructor")
     public String constructorPage() {

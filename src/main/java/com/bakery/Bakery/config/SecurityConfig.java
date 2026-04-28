@@ -41,12 +41,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/", "/register", "/login",
-                                "/assortment", "/constructor", "/ai-design",
+                                "/forgot-password",   // ← форма введення email
+                                "/reset-password",    // ← форма нового пароля (за токеном)
+                                "/assortment", "/product/**", "/constructor", "/ai-design",
                                 "/css/**", "/img/**", "/js/**", "/uploads/**"
                         ).permitAll()
-                        // Чат відкритий для ВСІХ (гість теж може писати)
                         .requestMatchers("/api/chat/**").permitAll()
-                        // Адмін-чат тільки для адміна
                         .requestMatchers("/api/admin/chat/**").hasAuthority("SUPER_ADMIN")
                         .requestMatchers("/admin/**").hasAuthority("SUPER_ADMIN")
                         .requestMatchers("/api/my-orders", "/orders/**", "/profile/**").authenticated()
@@ -69,6 +69,7 @@ public class SecurityConfig {
                         .clearAuthentication(true)
                         .permitAll()
                 );
+
         return http.build();
     }
 }

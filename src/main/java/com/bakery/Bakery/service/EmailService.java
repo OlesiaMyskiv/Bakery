@@ -5,10 +5,6 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-/**
- * Відповідає лише за відправку email.
- * Формування тексту — тут; рішення "коли відправляти" — у викликаючому сервісі.
- */
 @Service
 public class EmailService {
 
@@ -17,51 +13,67 @@ public class EmailService {
     @Value("${app.mail.from}")
     private String from;
 
+    // Базовий URL додатку (для посилань в листах)
+    @Value("${app.base-url:http://localhost:8080}")
+    private String baseUrl;
+
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
 
     /**
-     * Надсилає тимчасовий пароль користувачу після reset.
+     * Надсилає посилання для скидання пароля.
+     * Посилання дійсне 5 хвилин.
      */
-    public void sendTemporaryPassword(String toEmail, String tempPassword) {
+    public void sendResetLink(String toEmail, String token) {
+        String resetLink = baseUrl + "/reset-password?token=" + token;
+
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setFrom(from);
         msg.setTo(toEmail);
-        msg.setSubject("Відновлення пароля — CakeHouse");
+        msg.setSubject("Відновлення пароля — CakeHouse 🍰");
         msg.setText("""
                 Вітаємо!
                 
-                Ваш тимчасовий пароль: %s
+                Ми отримали запит на відновлення пароля для вашого акаунту.
                 
-                Після входу рекомендуємо змінити його у налаштуваннях профілю.
+                Натисніть на посилання нижче, щоб створити новий пароль:
+                %s
                 
-                З повагою, команда CakeHouse 🍰
-                """.formatted(tempPassword));
+                ⚠️ Посилання дійсне лише 5 хвилин.
+                
+                Якщо ви не робили цього запиту — просто проігноруйте цей лист.
+                
+                З повагою,
+                Команда CakeHouse 🍰
+                """.formatted(resetLink));
+
         mailSender.send(msg);
     }
 
     /**
-     * Надсилає підтвердження замовлення.
+     * Підтвердження успішної зміни пароля.
      */
-    public void sendOrderConfirmation(String toEmail, Long orderId) {
+    public void sendPasswordChangedConfirmation(String toEmail) {
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setFrom(from);
         msg.setTo(toEmail);
-        msg.setSubject("Замовлення #" + orderId + " прийнято — CakeHouse");
+        msg.setSubject("Пароль змінено — CakeHouse 🍰");
         msg.setText("""
-                Дякуємо за замовлення!
+                Вітаємо!
                 
-                Ваше замовлення #%d успішно прийнято і вже опрацьовується.
-                Відстежувати статус можна у своєму профілі.
+                Ваш пароль було успішно змінено.
                 
-                З повагою, команда CakeHouse 🍰
-                """.formatted(orderId));
+                Якщо це були не ви — негайно зверніться до нас.
+                
+                З повагою,
+                Команда CakeHouse 🍰
+                """);
         mailSender.send(msg);
     }
 
     /**
-     * Загальний метод для довільних повідомлень.
+     * Загальний метод.
      */
     public void send(String to, String subject, String body) {
         SimpleMailMessage msg = new SimpleMailMessage();

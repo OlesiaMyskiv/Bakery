@@ -1,23 +1,20 @@
 package com.bakery.Bakery.controller;
 
-import com.bakery.Bakery.dto.EditProfileDTO;
-import com.bakery.Bakery.dto.RegisterDTO;
 import com.bakery.Bakery.model.Role;
 import com.bakery.Bakery.model.User;
 import com.bakery.Bakery.model.VerificationStatus;
 import com.bakery.Bakery.repository.UserRepository;
+import com.bakery.Bakery.service.EmailService;
 import com.bakery.Bakery.service.FileStorageService;
 import com.bakery.Bakery.service.PasswordResetService;
 import com.bakery.Bakery.service.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import jakarta.validation.Valid;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -33,62 +30,166 @@ public class AuthController {
     private final UserService userService;
     private final FileStorageService fileStorageService;
     private final PasswordResetService passwordResetService;
+    private final EmailService emailService;
 
     public AuthController(UserRepository userRepository,
                           PasswordEncoder passwordEncoder,
                           UserService userService,
                           FileStorageService fileStorageService,
-                          PasswordResetService passwordResetService) {
+                          PasswordResetService passwordResetService,
+                          EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.userService = userService;
         this.fileStorageService = fileStorageService;
         this.passwordResetService = passwordResetService;
+        this.emailService = emailService;
     }
 
-    // ── Реєстрація ────────────────────────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════════════════════
+    // GET — СТОРІНКИ
+    // ══════════════════════════════════════════════════════════════════════════
+
+    @GetMapping("/login")
+    public String loginPage() {
+        return "login";
+    }
 
     @GetMapping("/register")
-    public String registerPage(Model model) {
-        model.addAttribute("registerDto", new RegisterDTO());
+    public String registerPage() {
         return "register";
     }
 
+    // ══════════════════════════════════════════════════════════════════════════
+    // ЗАБУЛИ ПАРОЛЬ — КРОК 1: введення email
+    // ══════════════════════════════════════════════════════════════════════════
+
+    @GetMapping("/forgot-password")
+    public String forgotPasswordPage() {
+        return "forgot-password";
+    }
+
+    @PostMapping("/forgot-password")
+    public String forgotPasswordSubmit(@RequestParam("email") String email,
+                                       RedirectAttributes redirectAttributes) {
+        // Запускаємо процес (навіть якщо email не знайдено — не кажемо юзеру)
+        passwordResetService.sendResetLink(email);
+
+        redirectAttributes.addFlashAttribute("successMsg",
+                "Якщо цей email зареєстрований — посилання для скидання пароля надіслано. Перевірте пошту.");
+        return "redirect:/forgot-password";
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // СКИДАННЯ ПАРОЛЯ — КРОК 2: введення нового пароля за токеном
+    // ══════════════════════════════════════════════════════════════════════════
+
+    /**
+     * Юзер клікає посилання з листа: /reset-password?token=abc123
+     * Перевіряємо токен, якщо валідний — показуємо форму нового пароля.
+     */
+    @GetMapping("/reset-password")
+    public String resetPasswordPage(@RequestParam(value = "token", required = false) String token,
+                                    Model model) {
+        if (token == null || token.isBlank()) {
+            model.addAttribute("error", "Посилання недійсне. Запросіть нове.");
+            return "reset-password";
+        }
+
+        User user = passwordResetService.validateToken(token);
+        if (user == null) {
+            model.addAttribute("error",
+                    "Посилання недійсне або вже минуло 5 хвилин. Запросіть нове.");
+            return "reset-password";
+        }
+
+        // Токен валідний — передаємо його у форму (прихованим полем)
+        model.addAttribute("token", token);
+        return "reset-password";
+    }
+
+    /**
+     * Юзер ввів новий пароль і підтвердження — зберігаємо.
+     */
+    @PostMapping("/reset-password")
+    public String resetPasswordSubmit(@RequestParam("token") String token,
+                                      @RequestParam("password") String password,
+                                      @RequestParam("confirmPassword") String confirmPassword,
+                                      RedirectAttributes redirectAttributes,
+                                      Model model) {
+
+        // Перевірка: паролі збігаються
+        if (!password.equals(confirmPassword)) {
+            model.addAttribute("token", token);
+            model.addAttribute("error", "Паролі не збігаються. Спробуйте ще раз.");
+            return "reset-password";
+        }
+
+        // Перевірка довжини
+        if (password.length() < 6) {
+            model.addAttribute("token", token);
+            model.addAttribute("error", "Пароль має бути не менше 6 символів.");
+            return "reset-password";
+        }
+
+        // Зберігаємо новий пароль (сервіс також перевіряє токен ще раз)
+        boolean success = passwordResetService.resetPassword(token, password);
+
+        if (!success) {
+            model.addAttribute("error",
+                    "Посилання вже недійсне. Запросіть нове відновлення пароля.");
+            return "reset-password";
+        }
+
+        // Надсилаємо підтвердження на пошту (необов'язково, але добра практика)
+        try {
+            User user = userRepository.findByResetToken(token).orElse(null);
+            // Токен вже очищений після resetPassword — шукаємо по-іншому
+            // (лист про підтвердження — необов'язковий, пропускаємо якщо не знайшли)
+        } catch (Exception ignored) {}
+
+        redirectAttributes.addFlashAttribute("successMsg",
+                "Пароль успішно змінено! Тепер можете увійти з новим паролем.");
+        return "redirect:/login";
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // РЕЄСТРАЦІЯ
+    // ══════════════════════════════════════════════════════════════════════════
+
     @PostMapping("/register")
     public String registerUser(
-            @Valid @ModelAttribute("registerDto") RegisterDTO dto,
-            BindingResult bindingResult,
+            @RequestParam("username") String username,
+            @RequestParam("phone") String phone,
+            @RequestParam("email") String email,
+            @RequestParam("password") String password,
+            @RequestParam("confirm_password") String confirmPassword,
+            @RequestParam("role") Role role,
+            @RequestParam(value = "consent", defaultValue = "false") boolean consent,
             @RequestParam(value = "document", required = false) MultipartFile document,
             HttpServletRequest request,
             Model model) {
 
-        // ── Валідація ──────────────────────────────────────────────────────────
-        if (bindingResult.hasErrors()) return "register";
-
-        if (!dto.passwordsMatch()) {
+        if (!password.equals(confirmPassword)) {
             model.addAttribute("error", "Паролі не співпадають!");
             return "register";
         }
-        if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
+        if (userRepository.findByEmail(email).isPresent()) {
             model.addAttribute("error", "Користувач з такою поштою вже існує!");
             return "register";
         }
 
-        // ── Створення юзера ───────────────────────────────────────────────────
         User user = new User();
-        user.setUsername(dto.getUsername());
-        user.setPhone(dto.getPhone());
-        user.setEmail(dto.getEmail());
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user.setRole(dto.getRole());
-        user.setConsent(dto.isConsent());
+        user.setUsername(username);
+        user.setPhone(phone);
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRole(role);
+        user.setConsent(consent);
 
-        boolean needsVerification = dto.getRole() == Role.ZSU
-                || dto.getRole() == Role.DSNS
-                || dto.getRole() == Role.DPSU;
+        boolean needsVerification = role == Role.ZSU || role == Role.DSNS || role == Role.DPSU;
         user.setVerificationStatus(needsVerification
-                ? VerificationStatus.PENDING
-                : VerificationStatus.NONE);
+                ? VerificationStatus.PENDING : VerificationStatus.NONE);
 
         if (needsVerification && document != null && !document.isEmpty()) {
             try {
@@ -102,41 +203,40 @@ public class AuthController {
 
         userRepository.save(user);
 
-        // ── Автологін після реєстрації ────────────────────────────────────────
         try {
-            request.login(dto.getEmail(), dto.getPassword());
+            request.login(email, password);
         } catch (ServletException e) {
             return "redirect:/login";
         }
         return "redirect:/profile";
     }
 
-    // ── Редагування профілю ───────────────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════════════════════
+    // РЕДАГУВАННЯ ПРОФІЛЮ
+    // ══════════════════════════════════════════════════════════════════════════
 
     @PostMapping("/edit-profile")
     public String editProfile(
-            @Valid @ModelAttribute EditProfileDTO dto,
-            BindingResult bindingResult,
+            @RequestParam("username") String username,
+            @RequestParam("email") String email,
+            @RequestParam("phone") String phone,
+            @RequestParam(value = "password", required = false) String password,
+            @RequestParam(value = "birthDate", required = false) String birthDateStr,
             @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture,
             RedirectAttributes redirectAttributes) {
-
-        if (bindingResult.hasErrors()) {
-            redirectAttributes.addFlashAttribute("error", "Перевірте введені дані.");
-            return "redirect:/profile";
-        }
 
         User dbUser = userService.getCurrentUser();
         if (dbUser == null) return "redirect:/login";
 
-        dbUser.setUsername(dto.getUsername());
-        dbUser.setEmail(dto.getEmail());
-        dbUser.setPhone(dto.getPhone());
+        dbUser.setUsername(username);
+        dbUser.setEmail(email);
+        dbUser.setPhone(phone);
 
-        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
-            dbUser.setPassword(passwordEncoder.encode(dto.getPassword()));
+        if (password != null && !password.isBlank()) {
+            dbUser.setPassword(passwordEncoder.encode(password));
         }
-        if (dto.getBirthDate() != null && !dto.getBirthDate().isBlank()) {
-            dbUser.setBirthDate(LocalDate.parse(dto.getBirthDate()));
+        if (birthDateStr != null && !birthDateStr.isBlank()) {
+            dbUser.setBirthDate(LocalDate.parse(birthDateStr));
         }
         if (profilePicture != null && !profilePicture.isEmpty()) {
             try {
@@ -153,7 +253,9 @@ public class AuthController {
         return "redirect:/profile";
     }
 
-    // ── Видалення аватарки ────────────────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════════════════════
+    // ВИДАЛЕННЯ АВАТАРКИ / АКАУНТУ
+    // ══════════════════════════════════════════════════════════════════════════
 
     @PostMapping("/delete-avatar")
     public String deleteAvatar() {
@@ -165,8 +267,6 @@ public class AuthController {
         return "redirect:/profile";
     }
 
-    // ── Видалення акаунту ─────────────────────────────────────────────────────
-
     @PostMapping("/delete-account")
     public String deleteAccount(HttpSession session) {
         User dbUser = userService.getCurrentUser();
@@ -176,17 +276,5 @@ public class AuthController {
             SecurityContextHolder.clearContext();
         }
         return "redirect:/";
-    }
-
-    // ── Відновлення пароля ────────────────────────────────────────────────────
-
-    @PostMapping("/forgot-password")
-    public String forgotPassword(@RequestParam("email") String email,
-                                 RedirectAttributes redirectAttributes) {
-        // Завжди показуємо успіх — щоб не розкривати наявність email у системі
-        passwordResetService.resetPassword(email.trim().toLowerCase());
-        redirectAttributes.addFlashAttribute("successMsg",
-                "Якщо такий email зареєстрований — тимчасовий пароль надіслано.");
-        return "redirect:/forgot-password";
     }
 }

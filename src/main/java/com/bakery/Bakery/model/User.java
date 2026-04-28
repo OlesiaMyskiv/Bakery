@@ -1,6 +1,8 @@
 package com.bakery.Bakery.model;
 
 import jakarta.persistence.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
@@ -21,13 +23,34 @@ public class User {
     private boolean consent;
 
     @Column(name = "document_path")
-    private String documentPath; // Сюди буде записуватися шлях до фотографії
+    private String documentPath;
 
-    // --- Порожній конструктор обов'язковий для бази ---
-    public User() {
-    }
+    @Column(name = "birth_date")
+    private LocalDate birthDate;
 
-    // --- Геттери та Сеттери ---
+    @Enumerated(EnumType.STRING)
+    @Column(name = "verification_status")
+    private VerificationStatus verificationStatus = VerificationStatus.NONE;
+
+    @Column(name = "profile_picture_path")
+    private String profilePicturePath;
+
+    // ── НОВІ ПОЛЯ ДЛЯ СКИДАННЯ ПАРОЛЯ ────────────────────────────────────────
+
+    /** Унікальний токен що надсилається на пошту. Null якщо reset не запитувався. */
+    @Column(name = "reset_token", unique = true)
+    private String resetToken;
+
+    /** Коли токен закінчується (now + 5 хвилин). */
+    @Column(name = "reset_token_exp")
+    private LocalDateTime resetTokenExp;
+
+    // ── Конструктор ───────────────────────────────────────────────────────────
+
+    public User() {}
+
+    // ── Getters & Setters ─────────────────────────────────────────────────────
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -52,27 +75,25 @@ public class User {
     public String getDocumentPath() { return documentPath; }
     public void setDocumentPath(String documentPath) { this.documentPath = documentPath; }
 
-    // ... твої старі поля (documentPath тощо) ...
-
-    @Column(name = "birth_date")
-    private java.time.LocalDate birthDate; // Дата народження
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "verification_status")
-    private VerificationStatus verificationStatus = VerificationStatus.NONE; // Статус перевірки
-
-    @Column(name = "profile_picture_path")
-    private String profilePicturePath; // Шлях до аватарки
-
-    // --- ДОДАЙ ГЕТТЕРИ ТА СЕТТЕРИ ВНИЗУ ---
-    public java.time.LocalDate getBirthDate() { return birthDate; }
-    public void setBirthDate(java.time.LocalDate birthDate) { this.birthDate = birthDate; }
+    public LocalDate getBirthDate() { return birthDate; }
+    public void setBirthDate(LocalDate birthDate) { this.birthDate = birthDate; }
 
     public VerificationStatus getVerificationStatus() { return verificationStatus; }
-    public void setVerificationStatus(VerificationStatus verificationStatus) { this.verificationStatus = verificationStatus; }
+    public void setVerificationStatus(VerificationStatus v) { this.verificationStatus = v; }
 
     public String getProfilePicturePath() { return profilePicturePath; }
-    public void setProfilePicturePath(String profilePicturePath) { this.profilePicturePath = profilePicturePath; }
+    public void setProfilePicturePath(String p) { this.profilePicturePath = p; }
 
+    public String getResetToken() { return resetToken; }
+    public void setResetToken(String resetToken) { this.resetToken = resetToken; }
 
+    public LocalDateTime getResetTokenExp() { return resetTokenExp; }
+    public void setResetTokenExp(LocalDateTime resetTokenExp) { this.resetTokenExp = resetTokenExp; }
+
+    /** Перевірка: токен ще дійсний? */
+    public boolean isResetTokenValid() {
+        return resetToken != null
+                && resetTokenExp != null
+                && LocalDateTime.now().isBefore(resetTokenExp);
+    }
 }
