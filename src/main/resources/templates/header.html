@@ -1,13 +1,211 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Love+Light&display=swap" rel="stylesheet">
-
     <link rel="stylesheet" th:href="@{/css/globals.css}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+
+    <style>
+        /* ============================================
+           ПЛАВАЮЧИЙ ЧАТ
+           ============================================ */
+
+        .global-chat-bubble {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: #3AA6B9;
+            color: white;
+            border: none;
+            cursor: pointer;
+            z-index: 9000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 18px rgba(58,166,185,0.55);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .global-chat-bubble:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 24px rgba(58,166,185,0.7);
+        }
+        .global-chat-bubble svg { width: 26px; height: 26px; }
+
+        .chat-unread-badge {
+            position: absolute;
+            top: -3px; right: -3px;
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 20px; height: 20px;
+            font-size: 11px; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            font-family: sans-serif;
+        }
+
+        /* Панель чату — перетягувана і змінювана */
+        .global-chat-panel {
+            position: fixed;
+            bottom: 100px;
+            right: 28px;
+            width: 360px;
+            height: 520px;
+            min-width: 260px;
+            min-height: 320px;
+            max-width: 90vw;
+            max-height: 85vh;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 36px rgba(0,0,0,0.18);
+            z-index: 9100;
+            display: none;           /* прихована поки не відкрита */
+            flex-direction: column;
+            overflow: hidden;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            /* resize через JS — не CSS resize щоб шрифт не масштабувався */
+        }
+        .global-chat-panel.open {
+            display: flex;
+        }
+
+        /* Ручка для resize — права нижня частина */
+        .gc-resize-handle {
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 100%; height: 5px;
+            cursor: ns-resize;
+            background: transparent;
+        }
+        .gc-resize-handle-corner {
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 18px; height: 18px;
+            cursor: nwse-resize;
+            background: transparent;
+        }
+        .gc-resize-handle-right {
+            position: absolute;
+            top: 0; left: 0;
+            width: 5px; height: 100%;
+            cursor: ew-resize;
+            background: transparent;
+        }
+
+        /* Хедер — тягнемо за нього */
+        .gc-header {
+            background: #3AA6B9;
+            color: white;
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            cursor: move;
+            flex-shrink: 0;
+            border-radius: 16px 16px 0 0;
+            user-select: none;
+        }
+        .gc-header-title { font-size: 18px; font-weight: 700; }
+        .gc-header-sub   { font-size: 13px; opacity: 0.8; margin-top: 2px; }
+        .gc-close {
+            background: none; border: none; color: white;
+            font-size: 20px; cursor: pointer; padding: 0; line-height: 1;
+            opacity: 0.85; flex-shrink: 0;
+        }
+        .gc-close:hover { opacity: 1; }
+
+        .gc-order-select-wrap {
+            padding: 10px 14px;
+            border-bottom: 1px solid #f0f0ec;
+            background: #f8f9fa;
+            flex-shrink: 0;
+        }
+        .gc-order-select-wrap label {
+            font-size: 12px; color: #888; display: block; margin-bottom: 4px;
+        }
+        .gc-order-select {
+            width: 100%; padding: 7px 10px;
+            border: 1px solid #ddd; border-radius: 8px;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 15px; background: white;
+        }
+        .gc-order-select:focus { outline: none; border-color: #3AA6B9; }
+
+        .gc-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: #f8f9fa;
+        }
+
+        .gc-empty, .gc-no-orders {
+            text-align: center; color: #bbb;
+            font-size: 15px; padding: 24px 12px; line-height: 1.5;
+        }
+
+        .gc-bubble {
+            max-width: 82%;
+            padding: 8px 12px;
+            border-radius: 14px;
+            font-size: 15px;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+        .gc-bubble.mine {
+            background: #3AA6B9; color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 3px;
+        }
+        .gc-bubble.theirs {
+            background: white; color: #1a1a1a;
+            align-self: flex-start;
+            border: 1px solid #e8e8e4;
+            border-bottom-left-radius: 3px;
+        }
+        .gc-sender {
+            font-size: 11px; font-weight: 700;
+            color: #3AA6B9; margin-bottom: 3px;
+        }
+        .gc-time {
+            font-size: 11px; opacity: 0.6;
+            margin-top: 3px; text-align: right;
+        }
+        .gc-bubble.theirs .gc-time { text-align: left; }
+
+        .gc-input-area {
+            padding: 10px 12px;
+            border-top: 1px solid #e8e8e4;
+            display: flex; gap: 8px;
+            background: white; flex-shrink: 0;
+            border-radius: 0 0 16px 16px;
+        }
+        .gc-textarea {
+            flex: 1;
+            border: 1px solid #ddd; border-radius: 16px;
+            padding: 8px 13px;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 15px; resize: none; height: 38px;
+            outline: none; transition: border-color 0.15s;
+        }
+        .gc-textarea:focus { border-color: #3AA6B9; }
+        .gc-send {
+            background: #3AA6B9; color: white; border: none;
+            border-radius: 50%; width: 38px; height: 38px;
+            font-size: 15px; cursor: pointer; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.15s;
+        }
+        .gc-send:hover { background: #2d8a9e; }
+    </style>
 </head>
 <body>
 
@@ -109,245 +307,245 @@
 </div>
 
 <script>
-    (function() {
-        var gcOrderId  = null;
-        var gcInterval = null;
-        var gcLoaded   = false;
-        var panel      = null;
+(function() {
+    var gcOrderId  = null;
+    var gcInterval = null;
+    var gcLoaded   = false;
+    var panel      = null;
+
+    // ============================================================
+    // ВІДКРИТИ / ЗАКРИТИ
+    // ============================================================
+    window.gcOpen = function() {
+        panel = document.getElementById('gcPanel');
+        if (!panel) return;
+        panel.classList.add('open');
+        document.getElementById('gcBubble').style.display = 'none';
+        if (!gcLoaded) { gcLoaded = true; gcLoadOrders(); }
+    };
+
+    window.gcClose = function() {
+        var p = document.getElementById('gcPanel');
+        if (p) p.classList.remove('open');
+        document.getElementById('gcBubble').style.display = 'flex';
+        if (gcInterval) clearInterval(gcInterval);
+        gcInterval = null;
+    };
+
+    // ============================================================
+    // ПЕРЕТЯГУВАННЯ (drag)
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        panel = document.getElementById('gcPanel');
+        var handle = document.getElementById('gcDragHandle');
+        if (!panel || !handle) return;
+
+        var dragging = false;
+        var startX, startY, startLeft, startTop;
+
+        handle.addEventListener('mousedown', function(e) {
+            // не реагуємо на кнопку закриття
+            if (e.target.classList.contains('gc-close') ||
+                e.target.closest('.gc-close')) return;
+
+            dragging = true;
+            var rect = panel.getBoundingClientRect();
+            startX    = e.clientX;
+            startY    = e.clientY;
+            startLeft = rect.left;
+            startTop  = rect.top;
+
+            // Переключаємо на абсолютне позиціонування від top/left
+            panel.style.right  = 'auto';
+            panel.style.bottom = 'auto';
+            panel.style.left   = startLeft + 'px';
+            panel.style.top    = startTop  + 'px';
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (!dragging) return;
+            var dx = e.clientX - startX;
+            var dy = e.clientY - startY;
+            var newLeft = startLeft + dx;
+            var newTop  = startTop  + dy;
+
+            // Не виходимо за межі екрану
+            newLeft = Math.max(0, Math.min(window.innerWidth  - panel.offsetWidth,  newLeft));
+            newTop  = Math.max(0, Math.min(window.innerHeight - panel.offsetHeight, newTop));
+
+            panel.style.left = newLeft + 'px';
+            panel.style.top  = newTop  + 'px';
+        });
+
+        document.addEventListener('mouseup', function() { dragging = false; });
 
         // ============================================================
-        // ВІДКРИТИ / ЗАКРИТИ
+        // ЗМІНА РОЗМІРУ (resize) — знизу, зліва, і кут
+        // Шрифт НЕ масштабується — тільки розмір контейнера
         // ============================================================
-        window.gcOpen = function() {
-            panel = document.getElementById('gcPanel');
-            if (!panel) return;
-            panel.classList.add('open');
-            document.getElementById('gcBubble').style.display = 'none';
-            if (!gcLoaded) { gcLoaded = true; gcLoadOrders(); }
-        };
+        function makeResizable(handleEl, direction) {
+            if (!handleEl) return;
+            var resizing = false;
+            var startW, startH, startLeft, startTop, startMouseX, startMouseY;
 
-        window.gcClose = function() {
-            var p = document.getElementById('gcPanel');
-            if (p) p.classList.remove('open');
-            document.getElementById('gcBubble').style.display = 'flex';
-            if (gcInterval) clearInterval(gcInterval);
-            gcInterval = null;
-        };
+            handleEl.addEventListener('mousedown', function(e) {
+                resizing   = true;
+                var rect   = panel.getBoundingClientRect();
+                startW     = rect.width;
+                startH     = rect.height;
+                startLeft  = rect.left;
+                startTop   = rect.top;
+                startMouseX = e.clientX;
+                startMouseY = e.clientY;
 
-        // ============================================================
-        // ПЕРЕТЯГУВАННЯ (drag)
-        // ============================================================
-        document.addEventListener('DOMContentLoaded', function() {
-            panel = document.getElementById('gcPanel');
-            var handle = document.getElementById('gcDragHandle');
-            if (!panel || !handle) return;
-
-            var dragging = false;
-            var startX, startY, startLeft, startTop;
-
-            handle.addEventListener('mousedown', function(e) {
-                // не реагуємо на кнопку закриття
-                if (e.target.classList.contains('gc-close') ||
-                    e.target.closest('.gc-close')) return;
-
-                dragging = true;
-                var rect = panel.getBoundingClientRect();
-                startX    = e.clientX;
-                startY    = e.clientY;
-                startLeft = rect.left;
-                startTop  = rect.top;
-
-                // Переключаємо на абсолютне позиціонування від top/left
                 panel.style.right  = 'auto';
                 panel.style.bottom = 'auto';
                 panel.style.left   = startLeft + 'px';
                 panel.style.top    = startTop  + 'px';
                 e.preventDefault();
+                e.stopPropagation();
             });
 
             document.addEventListener('mousemove', function(e) {
-                if (!dragging) return;
-                var dx = e.clientX - startX;
-                var dy = e.clientY - startY;
-                var newLeft = startLeft + dx;
-                var newTop  = startTop  + dy;
+                if (!resizing) return;
+                var dx = e.clientX - startMouseX;
+                var dy = e.clientY - startMouseY;
 
-                // Не виходимо за межі екрану
-                newLeft = Math.max(0, Math.min(window.innerWidth  - panel.offsetWidth,  newLeft));
-                newTop  = Math.max(0, Math.min(window.innerHeight - panel.offsetHeight, newTop));
-
-                panel.style.left = newLeft + 'px';
-                panel.style.top  = newTop  + 'px';
+                if (direction === 'bottom' || direction === 'corner') {
+                    var newH = Math.max(320, Math.min(window.innerHeight - startTop, startH + dy));
+                    panel.style.height = newH + 'px';
+                }
+                if (direction === 'left' || direction === 'corner') {
+                    // Тягнемо ліву межу — збільшуємо вліво
+                    var newW = Math.max(260, Math.min(window.innerWidth - startLeft, startW - dx));
+                    var newL = startLeft + dx;
+                    if (newL >= 0 && newW >= 260) {
+                        panel.style.width = newW + 'px';
+                        panel.style.left  = newL + 'px';
+                    }
+                }
             });
 
-            document.addEventListener('mouseup', function() { dragging = false; });
-
-            // ============================================================
-            // ЗМІНА РОЗМІРУ (resize) — знизу, зліва, і кут
-            // Шрифт НЕ масштабується — тільки розмір контейнера
-            // ============================================================
-            function makeResizable(handleEl, direction) {
-                if (!handleEl) return;
-                var resizing = false;
-                var startW, startH, startLeft, startTop, startMouseX, startMouseY;
-
-                handleEl.addEventListener('mousedown', function(e) {
-                    resizing   = true;
-                    var rect   = panel.getBoundingClientRect();
-                    startW     = rect.width;
-                    startH     = rect.height;
-                    startLeft  = rect.left;
-                    startTop   = rect.top;
-                    startMouseX = e.clientX;
-                    startMouseY = e.clientY;
-
-                    panel.style.right  = 'auto';
-                    panel.style.bottom = 'auto';
-                    panel.style.left   = startLeft + 'px';
-                    panel.style.top    = startTop  + 'px';
-                    e.preventDefault();
-                    e.stopPropagation();
-                });
-
-                document.addEventListener('mousemove', function(e) {
-                    if (!resizing) return;
-                    var dx = e.clientX - startMouseX;
-                    var dy = e.clientY - startMouseY;
-
-                    if (direction === 'bottom' || direction === 'corner') {
-                        var newH = Math.max(320, Math.min(window.innerHeight - startTop, startH + dy));
-                        panel.style.height = newH + 'px';
-                    }
-                    if (direction === 'left' || direction === 'corner') {
-                        // Тягнемо ліву межу — збільшуємо вліво
-                        var newW = Math.max(260, Math.min(window.innerWidth - startLeft, startW - dx));
-                        var newL = startLeft + dx;
-                        if (newL >= 0 && newW >= 260) {
-                            panel.style.width = newW + 'px';
-                            panel.style.left  = newL + 'px';
-                        }
-                    }
-                });
-
-                document.addEventListener('mouseup', function() { resizing = false; });
-            }
-
-            makeResizable(document.getElementById('gcResizeBottom'), 'bottom');
-            makeResizable(document.getElementById('gcResizeLeft'),   'left');
-            makeResizable(document.getElementById('gcResizeCorner'), 'corner');
-        });
-
-        // ============================================================
-        // ЗАВАНТАЖИТИ ЗАМОВЛЕННЯ
-        // ============================================================
-        function gcLoadOrders() {
-            fetch('/api/my-orders')
-                .then(function(r) {
-                    if (!r.ok) throw new Error('not ok');
-                    return r.json();
-                })
-                .then(function(orders) {
-                    var select = document.getElementById('gcOrderSelect');
-                    if (!select) return;
-                    select.innerHTML = '<option value="">— оберіть замовлення —</option>';
-                    if (!orders || orders.length === 0) {
-                        document.getElementById('gcMessages').innerHTML =
-                            '<div class="gc-no-orders">У вас ще немає замовлень 🎂<br><br>' +
-                            'Після оформлення замовлення ви зможете написати менеджеру.</div>';
-                        return;
-                    }
-                    orders.forEach(function(o) {
-                        var opt = document.createElement('option');
-                        opt.value = o.id;
-                        opt.textContent = '№' + o.id + ' — ' + (o.composition || 'Замовлення');
-                        select.appendChild(opt);
-                    });
-                    if (orders.length === 1) {
-                        select.value = orders[0].id;
-                        window.gcLoadMessages();
-                    }
-                })
-                .catch(function(e) {
-                    console.error('Chat orders error:', e);
-                    var msgs = document.getElementById('gcMessages');
-                    if (msgs) msgs.innerHTML =
-                        '<div class="gc-empty">Не вдалось завантажити замовлення</div>';
-                });
+            document.addEventListener('mouseup', function() { resizing = false; });
         }
 
-        // ============================================================
-        // ЗАВАНТАЖИТИ ПОВІДОМЛЕННЯ
-        // ============================================================
-        window.gcLoadMessages = function() {
-            var select = document.getElementById('gcOrderSelect');
-            if (!select) return;
-            gcOrderId = select.value;
-            if (gcInterval) clearInterval(gcInterval);
+        makeResizable(document.getElementById('gcResizeBottom'), 'bottom');
+        makeResizable(document.getElementById('gcResizeLeft'),   'left');
+        makeResizable(document.getElementById('gcResizeCorner'), 'corner');
+    });
 
-            if (!gcOrderId) {
-                document.getElementById('gcMessages').innerHTML =
-                    '<div class="gc-empty">Оберіть замовлення вище щоб переглянути чат</div>';
-                return;
-            }
-            gcFetchMessages();
-            gcInterval = setInterval(gcFetchMessages, 5000);
-        };
-
-        function gcFetchMessages() {
-            if (!gcOrderId) return;
-            fetch('/chat/' + gcOrderId + '/messages')
-                .then(function(r) { return r.json(); })
-                .then(function(messages) {
-                    var container = document.getElementById('gcMessages');
-                    if (!container) return;
-                    if (!messages || messages.length === 0) {
-                        container.innerHTML =
-                            '<div class="gc-empty">Напишіть перше повідомлення 🎂</div>';
-                        return;
-                    }
-                    var html = messages.map(function(m) {
-                        var cls  = m.isAdmin ? 'theirs' : 'mine';
-                        var time = m.sentAt ? m.sentAt.substring(11, 16) : '';
-                        return '<div class="gc-bubble ' + cls + '">' +
-                            (m.isAdmin
-                                ? '<div class="gc-sender">' + esc(m.senderName) + '</div>'
-                                : '') +
-                            '<div>' + esc(m.text) + '</div>' +
-                            '<div class="gc-time">' + time + '</div>' +
-                            '</div>';
-                    }).join('');
-                    container.innerHTML = html;
-                    container.scrollTop = container.scrollHeight;
-                })
-                .catch(function(e) { console.error('Messages error:', e); });
-        }
-
-        // ============================================================
-        // НАДІСЛАТИ
-        // ============================================================
-        window.gcSend = function() {
-            if (!gcOrderId) return;
-            var input = document.getElementById('gcInput');
-            var text  = (input.value || '').trim();
-            if (!text) return;
-
-            fetch('/chat/' + gcOrderId + '/send', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: text })
+    // ============================================================
+    // ЗАВАНТАЖИТИ ЗАМОВЛЕННЯ
+    // ============================================================
+    function gcLoadOrders() {
+        fetch('/api/my-orders')
+            .then(function(r) {
+                if (!r.ok) throw new Error('not ok');
+                return r.json();
             })
-                .then(function(r) { return r.json(); })
-                .then(function() { input.value = ''; gcFetchMessages(); })
-                .catch(function(e) { console.error('Send error:', e); });
-        };
+            .then(function(orders) {
+                var select = document.getElementById('gcOrderSelect');
+                if (!select) return;
+                select.innerHTML = '<option value="">— оберіть замовлення —</option>';
+                if (!orders || orders.length === 0) {
+                    document.getElementById('gcMessages').innerHTML =
+                        '<div class="gc-no-orders">У вас ще немає замовлень 🎂<br><br>' +
+                        'Після оформлення замовлення ви зможете написати менеджеру.</div>';
+                    return;
+                }
+                orders.forEach(function(o) {
+                    var opt = document.createElement('option');
+                    opt.value = o.id;
+                    opt.textContent = '№' + o.id + ' — ' + (o.composition || 'Замовлення');
+                    select.appendChild(opt);
+                });
+                if (orders.length === 1) {
+                    select.value = orders[0].id;
+                    window.gcLoadMessages();
+                }
+            })
+            .catch(function(e) {
+                console.error('Chat orders error:', e);
+                var msgs = document.getElementById('gcMessages');
+                if (msgs) msgs.innerHTML =
+                    '<div class="gc-empty">Не вдалось завантажити замовлення</div>';
+            });
+    }
 
-        function esc(s) {
-            return String(s)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;');
+    // ============================================================
+    // ЗАВАНТАЖИТИ ПОВІДОМЛЕННЯ
+    // ============================================================
+    window.gcLoadMessages = function() {
+        var select = document.getElementById('gcOrderSelect');
+        if (!select) return;
+        gcOrderId = select.value;
+        if (gcInterval) clearInterval(gcInterval);
+
+        if (!gcOrderId) {
+            document.getElementById('gcMessages').innerHTML =
+                '<div class="gc-empty">Оберіть замовлення вище щоб переглянути чат</div>';
+            return;
         }
-    })();
+        gcFetchMessages();
+        gcInterval = setInterval(gcFetchMessages, 5000);
+    };
+
+    function gcFetchMessages() {
+        if (!gcOrderId) return;
+        fetch('/chat/' + gcOrderId + '/messages')
+            .then(function(r) { return r.json(); })
+            .then(function(messages) {
+                var container = document.getElementById('gcMessages');
+                if (!container) return;
+                if (!messages || messages.length === 0) {
+                    container.innerHTML =
+                        '<div class="gc-empty">Напишіть перше повідомлення 🎂</div>';
+                    return;
+                }
+                var html = messages.map(function(m) {
+                    var cls  = m.isAdmin ? 'theirs' : 'mine';
+                    var time = m.sentAt ? m.sentAt.substring(11, 16) : '';
+                    return '<div class="gc-bubble ' + cls + '">' +
+                        (m.isAdmin
+                            ? '<div class="gc-sender">' + esc(m.senderName) + '</div>'
+                            : '') +
+                        '<div>' + esc(m.text) + '</div>' +
+                        '<div class="gc-time">' + time + '</div>' +
+                        '</div>';
+                }).join('');
+                container.innerHTML = html;
+                container.scrollTop = container.scrollHeight;
+            })
+            .catch(function(e) { console.error('Messages error:', e); });
+    }
+
+    // ============================================================
+    // НАДІСЛАТИ
+    // ============================================================
+    window.gcSend = function() {
+        if (!gcOrderId) return;
+        var input = document.getElementById('gcInput');
+        var text  = (input.value || '').trim();
+        if (!text) return;
+
+        fetch('/chat/' + gcOrderId + '/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: text })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function() { input.value = ''; gcFetchMessages(); })
+        .catch(function(e) { console.error('Send error:', e); });
+    };
+
+    function esc(s) {
+        return String(s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+})();
 </script>
 
 </body>
