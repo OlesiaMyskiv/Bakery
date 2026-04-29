@@ -875,3 +875,11 @@
     font-size: 20px;
     color: #aaa;
 }
+/* Індикатор непрочитаних повідомлень у сайдбарі */
+.ca-unread-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #e74c3c;
+    flex-shrink: 0;
+}

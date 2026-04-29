@@ -15,7 +15,7 @@
 
 <div class="admin-layout">
 
-    <aside class="admin-sidebar">
+    <div class="sidebar-avatar-wrap">
         <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:20px;padding:0 16px;">
             <div class="sidebar-avatar-circle">
                 <img th:if="${adminUser != null and adminUser.profilePicturePath != null}"
@@ -36,7 +36,7 @@
             <a th:href="@{/admin/reviews}"      class="sidebar-link">Відгуки</a>
             <a th:href="@{/admin/chats}"        class="sidebar-link" style="display: flex; align-items: center; justify-content: space-between;">
                 <span>Чати</span>
-                <span id="admin-global-unread-dot" class="ca-unread-dot" style="display: none; margin: 0; background-color: #e74c3c;"></span>
+                <span id="admin-global-unread-dot" class="ca-unread-dot" style="display: none; margin: 0;"></span>
             </a>
             <a th:href="@{/logout}"             class="sidebar-link sidebar-exit">Вихід</a>
         </nav>
