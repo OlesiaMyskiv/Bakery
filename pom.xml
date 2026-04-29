@@ -57,13 +57,7 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- ── EMAIL (для forgot-password) ───────────────────── -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-mail</artifactId>
-        </dependency>
-
-        <!-- ── LOMBOK (прибирає ручні геттери/сеттери) ───────── -->
+        <!-- ── LOMBOK ────────────────────────────────────────── -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
