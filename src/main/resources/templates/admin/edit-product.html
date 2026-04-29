@@ -16,8 +16,8 @@
 
 <div class="admin-layout">
 
-    <div class="sidebar-avatar-wrap">
-        <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:20px;padding:0 16px;">
+    <aside class="admin-sidebar">
+        <div class="sidebar-avatar-wrap">
             <div class="sidebar-avatar-circle">
                 <img th:if="${adminUser != null and adminUser.profilePicturePath != null}"
                      th:src="${adminUser.profilePicturePath}" alt="Фото">

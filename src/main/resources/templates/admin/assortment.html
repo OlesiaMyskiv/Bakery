@@ -15,8 +15,8 @@
 
 <div class="admin-layout">
 
-    <div class="sidebar-avatar-wrap">
-        <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:20px;padding:0 16px;">
+    <aside class="admin-sidebar">
+        <div class="sidebar-avatar-wrap">
             <div class="sidebar-avatar-circle">
                 <img th:if="${adminUser != null and adminUser.profilePicturePath != null}"
                      th:src="${adminUser.profilePicturePath}" alt="Фото">
@@ -41,6 +41,7 @@
             <a th:href="@{/logout}"             class="sidebar-link sidebar-exit">Вихід</a>
         </nav>
     </aside>
+
 
     <main class="admin-content">
         <div class="admin-card">
@@ -180,7 +181,7 @@
                                            value="1.0" min="0.5" step="0.5">
                                 </div>
 
-                                <div class="form-section-label">Текстові блоки на сторінці товару</div>
+                                <div class="form-section-label">Текстові blocks на сторінці товару</div>
                                 <div class="form-field full">
                                     <label>Про смак</label>
                                     <textarea name="flavorDescription" rows="2"
@@ -317,7 +318,7 @@
                                            placeholder="Наприклад: 0.5" min="0.1" step="0.1">
                                 </div>
 
-                                <div class="form-section-label">Текстові блоки на сторінці товару</div>
+                                <div class="form-section-label">Текстові blocks на сторінці товару</div>
                                 <div class="form-field full">
                                     <label>Про виріб</label>
                                     <textarea name="flavorDescription" rows="2"

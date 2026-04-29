@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Кошик — Cake House</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Love+Light&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/globals.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/cart.css}">
+</head>
+<body>
+
+<header th:replace="~{header :: header}"></header>
+
+<!-- Передаємо статус верифікації у JS -->
+<script th:inline="javascript">
+    window.IS_VERIFIED = /*[[${isVerified}]]*/ false;
+</script>
+
+<main class="cart-page">
+    <h1 class="cart-title">🛒 Кошик</h1>
+
+    <div class="cart-layout">
+
+        <!-- ══ ЛІВА КОЛОНКА — ТОВАРИ ═══════════════════════════════════════ -->
+        <div class="cart-items-col">
+            <!-- Заповнюється через cart.js → renderCartPage() -->
+            <div id="cartItemsContainer">
+                <div class="cart-empty">Завантаження...</div>
+            </div>
+        </div>
+
+        <!-- ══ ПРАВА КОЛОНКА — ПІДСУМОК + ФОРМА ═══════════════════════════ -->
+        <div class="cart-summary-col">
+            <div class="cart-summary-card">
+
+                <!-- Підсумок -->
+                <div class="summary-title">Підсумок та оформлення</div>
+
+                <div class="summary-row">
+                    <span>Товари:</span>
+                    <span id="cartTotalBase">0 грн</span>
+                </div>
+                <div class="summary-row" id="militaryRow" style="color:#3a7a3a;">
+                    <span>🇺🇦 Солодощі для ЗСУ:</span>
+                    <span id="militaryAmount" style="display:none;">+ 100 грн</span>
+                </div>
+                <div class="summary-row total-row">
+                    <span>Разом до сплати:</span>
+                    <span id="cartTotalFinal">0 грн</span>
+                </div>
+
+                <hr class="summary-divider">
+
+                <!-- Форма оформлення -->
+                <form id="checkoutForm" th:action="@{/cart/checkout}" method="post">
+
+                    <!-- Прихований JSON кошика — заповнюється перед submit -->
+                    <input type="hidden" name="cartJson"         id="cartJsonField">
+                    <input type="hidden" name="paymentStatus"    id="paymentStatusField" value="ON_DELIVERY">
+                    <input type="hidden" name="militarySweets"   id="militarySweetsField" value="false">
+
+                    <!-- Деталі доставки -->
+                    <div class="form-section-title">Деталі доставки</div>
+
+                    <div class="form-group">
+                        <label>Дата</label>
+                        <input type="date" name="deliveryDate" id="deliveryDate" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Час</label>
+                        <select name="deliveryTime" required>
+                            <option value="10:00-12:00">10:00 – 12:00</option>
+                            <option value="12:00-14:00">12:00 – 14:00</option>
+                            <option value="14:00-16:00">14:00 – 16:00</option>
+                            <option value="16:00-18:00">16:00 – 18:00</option>
+                            <option value="18:00-20:00">18:00 – 20:00</option>
+                        </select>
+                    </div>
+
+                    <!-- Спосіб отримання -->
+                    <div class="form-section-title">Спосіб отримання</div>
+                    <div class="form-group">
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="deliveryType" value="PICKUP" checked>
+                                Самовивіз
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="deliveryType" value="DELIVERY">
+                                Доставка курʼєром
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Адреса (показується тільки при доставці) -->
+                    <div id="addressBlock">
+                        <div class="form-group">
+                            <label>Адреса доставки</label>
+                            <input type="text" name="address" id="addressInput"
+                                   placeholder="Вулиця, будинок, квартира">
+                        </div>
+                    </div>
+
+                    <!-- Спосіб оплати -->
+                    <div class="form-section-title">Спосіб оплати</div>
+                    <div class="form-group">
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="paymentMethod" value="ON_DELIVERY" checked>
+                                При отриманні
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="paymentMethod" value="ONLINE">
+                                💳 Онлайн (PayPal)
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Коментар -->
+                    <div class="form-section-title">Коментар до замовлення</div>
+                    <div class="form-group">
+                        <textarea name="comment"
+                                  placeholder="Побажання, алергени, особливі вимоги..."></textarea>
+                    </div>
+
+                    <!-- Солодощі для ЗСУ -->
+                    <div class="military-sweet-block">
+                        <label class="military-sweet-label">
+                            <input type="checkbox" id="militaryCheckbox">
+                            <div class="military-sweet-text">
+                                <strong>🇺🇦 Додати солодощі для військових (+100 грн)</strong>
+                                <small>Ми додамо енергетичний набір і передамо волонтерам</small>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Кнопка -->
+                    <button type="submit" class="checkout-btn" id="checkoutBtn" disabled>
+                        Оформити замовлення
+                    </button>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- ══ МОДАЛЬНЕ ВІКНО PAYPAL ══════════════════════════════════════════════ -->
+<div class="payment-overlay" id="paymentModal">
+    <div class="payment-modal">
+        <div class="payment-modal-logo">🅿</div>
+        <div class="payment-modal-title">PayPal</div>
+        <div class="payment-modal-subtitle">Безпечна онлайн-оплата</div>
+        <div class="payment-modal-amount" id="paypalAmount">0 грн</div>
+
+        <button class="paypal-pay-btn" id="paypalPayBtn" onclick="simulatePayment()" type="button">
+            Оплатити
+        </button>
+        <button class="paypal-cancel-btn" onclick="cancelOnlinePayment()" type="button">
+            Скасувати
+        </button>
+    </div>
+</div>
+
+<!-- ══ УСПІШНА ОПЛАТА ═════════════════════════════════════════════════════ -->
+<div class="payment-success-overlay" id="paymentSuccess">
+    <div class="payment-success-modal">
+        <div class="success-icon">✅</div>
+        <div class="success-title">Оплата успішна!</div>
+        <div class="success-sub">Оформлюємо замовлення...</div>
+    </div>
+</div>
+
+<script th:src="@{/js/cart.js}"></script>
+<script>
+    // Перед відправкою форми — заповнюємо JSON кошика
+    document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+        var cart = getCart();
+
+        // Перевірка: дизайн без смаку
+        if (hasDesignWithoutFlavor(cart)) {
+            e.preventDefault();
+            alert('⚠️ Оберіть смак торта до дизайну!');
+            return;
+        }
+
+        // Перевірка: залогінений
+        var isLoggedIn = /*[[${#authorization.expression('isAuthenticated()')}]]*/ false;
+        if (!isLoggedIn) {
+            e.preventDefault();
+            window.location.href = '/login';
+            return;
+        }
+
+        // Заповнюємо поля
+        document.getElementById('cartJsonField').value = JSON.stringify(cart);
+
+        var milCheck = document.getElementById('militaryCheckbox');
+        document.getElementById('militarySweetsField').value = milCheck.checked ? 'true' : 'false';
+    });
+
+    // Скасування онлайн-оплати → повертаємо на "При отриманні"
+    function cancelOnlinePayment() {
+        closePaymentModal();
+        var onDelivery = document.querySelector('input[name="paymentMethod"][value="ON_DELIVERY"]');
+        if (onDelivery) onDelivery.checked = true;
+        document.getElementById('paymentStatusField').value = 'ON_DELIVERY';
+    }
+
+    // Оновлюємо суму в PayPal-модалці при відкритті
+    document.querySelectorAll('input[name="paymentMethod"]').forEach(function(r) {
+        r.addEventListener('change', function() {
+            if (this.value === 'ONLINE') {
+                var amount = document.getElementById('cartTotalFinal');
+                var paypalAmount = document.getElementById('paypalAmount');
+                if (amount && paypalAmount) paypalAmount.textContent = amount.textContent;
+                openPaymentModal();
+            }
+        });
+    });
+
+    // Чекбокс солодощів — показуємо/ховаємо рядок
+    document.getElementById('militaryCheckbox').addEventListener('change', function() {
+        var row    = document.getElementById('militaryAmount');
+        var milRow = document.getElementById('militaryRow');
+        if (row) row.style.display = this.checked ? 'inline' : 'none';
+    });
+</script>
+
+</body>
+</html>

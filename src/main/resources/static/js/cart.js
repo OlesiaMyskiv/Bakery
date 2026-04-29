@@ -1,178 +1,452 @@
-// src/main/resources/static/js/cart.js
-// JavaScript для сторінки кошика
+/**
+ * CAKE HOUSE — КОШИК
+ * Зберігається в localStorage під ключем 'cakeCart'
+ *
+ * Структура елемента кошика:
+ * {
+ *   id:           string,   // унікальний ключ: "product_7" | "ai_design" | "constructor"
+ *   type:         string,   // "FLAVOR" | "DESIGN" | "LINE" | "AI_DESIGN" | "CONSTRUCTOR"
+ *   productId:    number|null,
+ *   name:         string,
+ *   imagePath:    string|null,
+ *   priceUnit:    string,   // "грн/кг" | "грн/декор" | "грн/шт" | ...
+ *   unitPrice:    number,
+ *   discountPrice: number|null,  // ціна зі знижкою якщо є
+ *   quantity:     number,   // кг або шт
+ *   unit:         string,   // "кг" | "шт" | "декор" | ...
+ *   urgency:      string|null, // "TODAY" | "HOURS_24" | "HOURS_48"
+ *   aiImageUrl:   string|null,
+ *   constructorImg: string|null,
+ *   description:  string|null,
+ * }
+ */
 
-document.addEventListener('DOMContentLoaded', (event) => {
-    // JavaScript для динамічного оновлення суми та показу/приховування полів адреси
+const CART_KEY = 'cakeCart';
 
-    const quantityInputs = document.querySelectorAll('.quantity-input');
-    const totalPriceDisplay = document.getElementById('total-price-display');
-    // itemTotalElements шукаються всередині циклу оновлення суми
+// ── Читання/запис ─────────────────────────────────────────────────────────────
 
-    // Приховуємо кнопку "Оновити" поруч з кількістю (вона не потрібна при AJAX)
-    document.querySelectorAll('.quantity-form button[type="submit"]').forEach(button => {
-        button.style.display = 'none';
-    });
+function getCart() {
+    try {
+        return JSON.parse(localStorage.getItem(CART_KEY)) || [];
+    } catch (e) {
+        return [];
+    }
+}
 
+function saveCart(cart) {
+    localStorage.setItem(CART_KEY, JSON.stringify(cart));
+    updateCartBadge();
+}
 
-    // JavaScript для показу/приховування полів адреси - ВИКОРИСТОВУЄМО classList
-    const deliveryMethodRadios = document.querySelectorAll('input[name="deliveryMethod"]');
-    const addressFields = document.getElementById('address-fields');
-    const cityInput = document.getElementById('city');
-    const streetInput = document.getElementById('street');
-    const houseInput = document.getElementById('house');
+// ── Додавання товару ──────────────────────────────────────────────────────────
 
-    function toggleAddressFields() {
-        // Перевіряємо, чи елементи форми оформлення замовлення існують
-        if (!addressFields || !cityInput || !streetInput || !houseInput || deliveryMethodRadios.length === 0) {
-            // console.warn("Не всі елементи форми оформлення замовлення знайдені.");
-            return; // Виходимо, якщо елементи не знайдені (наприклад, якщо користувач анонімний)
-        }
+/**
+ * Додає товар з каталогу в кошик.
+ * @param {Object} item - дані товару
+ */
+function addToCart(item) {
+    const cart = getCart();
+    const existingIdx = cart.findIndex(function(c) { return c.id === item.id; });
 
-        if (document.getElementById('delivery').checked) {
-            addressFields.classList.remove('hidden'); // Видаляємо клас 'hidden', щоб показати
-            // Робимо поля адреси обов'язковими при виборі доставки
-            cityInput.required = true;
-            streetInput.required = true;
-            houseInput.required = true;
-        } else {
-            addressFields.classList.add('hidden'); // Додаємо клас 'hidden', щоб приховати
-            // Робимо поля адреси необов'язковими при виборі самовивозу
-            cityInput.required = false;
-            streetInput.required = false;
-            houseInput.required = false;
-        }
+    if (existingIdx !== -1) {
+        // Вже є — збільшуємо кількість
+        cart[existingIdx].quantity = Math.round((cart[existingIdx].quantity + item.quantity) * 10) / 10;
+    } else {
+        cart.push(item);
     }
 
-    // Додаємо обробник подій до радіо-кнопок (якщо вони існують)
-    if (deliveryMethodRadios.length > 0) {
-        deliveryMethodRadios.forEach(radio => {
-            radio.addEventListener('change', toggleAddressFields);
+    saveCart(cart);
+    showCartNotification(item.name);
+}
+
+/**
+ * Додає товар з сторінки product-detail.
+ * Викликається кнопкою "Додати в кошик".
+ */
+function addProductToCart(productId, name, type, imagePath, priceUnit, unitPrice, discountPrice, quantity, unit, urgency) {
+    var id = 'product_' + productId;
+    addToCart({
+        id:            id,
+        type:          type,
+        productId:     productId,
+        name:          name,
+        imagePath:     imagePath,
+        priceUnit:     priceUnit,
+        unitPrice:     unitPrice,
+        discountPrice: discountPrice || null,
+        quantity:      quantity,
+        unit:          unit,
+        urgency:       urgency || null,
+        aiImageUrl:    null,
+        constructorImg: null,
+        description:   null
+    });
+}
+
+/**
+ * Додає ШІ-дизайн в кошик.
+ */
+function addAiDesignToCart(imageUrl, description) {
+    var id = 'ai_' + Date.now();
+    addToCart({
+        id:            id,
+        type:          'AI_DESIGN',
+        productId:     null,
+        name:          'ШІ-дизайн торта',
+        imagePath:     imageUrl,
+        priceUnit:     'грн/шт',
+        unitPrice:     0,
+        discountPrice: null,
+        quantity:      1,
+        unit:          'шт',
+        urgency:       null,
+        aiImageUrl:    imageUrl,
+        constructorImg: null,
+        description:   description || null
+    });
+}
+
+/**
+ * Додає конструктор торта в кошик.
+ */
+function addConstructorToCart(constructorImg, description, price) {
+    var id = 'constructor_' + Date.now();
+    addToCart({
+        id:            id,
+        type:          'CONSTRUCTOR',
+        productId:     null,
+        name:          'Торт з конструктора',
+        imagePath:     constructorImg,
+        priceUnit:     'грн/шт',
+        unitPrice:     price || 0,
+        discountPrice: null,
+        quantity:      1,
+        unit:          'шт',
+        urgency:       null,
+        aiImageUrl:    null,
+        constructorImg: constructorImg,
+        description:   description || null
+    });
+}
+
+// ── Видалення / оновлення ─────────────────────────────────────────────────────
+
+function removeFromCart(id) {
+    var cart = getCart().filter(function(c) { return c.id !== id; });
+    saveCart(cart);
+    renderCartPage();
+}
+
+function updateQty(id, newQty) {
+    var cart = getCart();
+    var idx = cart.findIndex(function(c) { return c.id === id; });
+    if (idx !== -1) {
+        var qty = Math.max(0.5, Math.round(newQty * 10) / 10);
+        cart[idx].quantity = qty;
+        saveCart(cart);
+        renderCartPage();
+    }
+}
+
+function clearCart() {
+    saveCart([]);
+}
+
+// ── Підрахунки ────────────────────────────────────────────────────────────────
+
+/**
+ * Підраховує суму кошика.
+ * Якщо користувач верифікований — використовує discountPrice де є.
+ */
+function calcCartTotal(cart, isVerified) {
+    return cart.reduce(function(sum, item) {
+        var price = (isVerified && item.discountPrice) ? item.discountPrice : item.unitPrice;
+        return sum + price * item.quantity;
+    }, 0);
+}
+
+/**
+ * Визначає мінімальну дату доставки на основі терміновості товарів у кошику.
+ * TODAY → сьогодні, HOURS_24 → завтра, HOURS_48 → через 2 дні
+ */
+function calcMinDeliveryDate(cart) {
+    var daysToAdd = 0;
+    cart.forEach(function(item) {
+        if (item.urgency === 'HOURS_24' && daysToAdd < 1) daysToAdd = 1;
+        if (item.urgency === 'HOURS_48' && daysToAdd < 2) daysToAdd = 2;
+    });
+    var date = new Date();
+    date.setDate(date.getDate() + daysToAdd);
+    return date;
+}
+
+/**
+ * Перевіряє: є DESIGN без FLAVOR → повертає true (помилка)
+ */
+function hasDesignWithoutFlavor(cart) {
+    var hasDesign = cart.some(function(c) {
+        return c.type === 'DESIGN' || c.type === 'AI_DESIGN';
+    });
+    var hasFlavor = cart.some(function(c) { return c.type === 'FLAVOR'; });
+    return hasDesign && !hasFlavor;
+}
+
+// ── Іконка кошика в хедері ────────────────────────────────────────────────────
+
+function updateCartBadge() {
+    var cart = getCart();
+    var total = cart.reduce(function(s, c) { return s + c.quantity; }, 0);
+    var badge = document.getElementById('cartBadge');
+    if (badge) {
+        badge.textContent = total > 0 ? Math.round(total) : '';
+        badge.style.display = total > 0 ? 'flex' : 'none';
+    }
+}
+
+// ── Сповіщення ────────────────────────────────────────────────────────────────
+
+function showCartNotification(name) {
+    var existing = document.getElementById('cartToast');
+    if (existing) existing.remove();
+
+    var toast = document.createElement('div');
+    toast.id = 'cartToast';
+    toast.innerHTML = '🛒 «' + name + '» додано в кошик';
+    toast.style.cssText = [
+        'position:fixed', 'bottom:30px', 'right:30px', 'z-index:9999',
+        'background:#3AA6B9', 'color:white', 'padding:14px 24px',
+        'border-radius:12px', 'font-family:Cormorant Garamond,serif',
+        'font-size:18px', 'box-shadow:0 4px 20px rgba(0,0,0,0.15)',
+        'transition:opacity 0.4s ease', 'opacity:1'
+    ].join(';');
+
+    document.body.appendChild(toast);
+    setTimeout(function() { toast.style.opacity = '0'; }, 2500);
+    setTimeout(function() { if (toast.parentNode) toast.remove(); }, 3000);
+}
+
+// ── Рендер сторінки кошика ────────────────────────────────────────────────────
+
+function renderCartPage() {
+    var container = document.getElementById('cartItemsContainer');
+    if (!container) return;
+
+    var cart    = getCart();
+    var isVerified = window.IS_VERIFIED === true;
+
+    if (cart.length === 0) {
+        container.innerHTML = '<div class="cart-empty">🎂 Кошик порожній.<br><a href="/assortment" class="cart-empty-link">Перейти до асортименту</a></div>';
+        updateSummary(0, 0);
+        return;
+    }
+
+    // Групуємо по типу
+    var groups = {
+        FLAVOR:      { label: 'Смаки',           icon: '🎂', items: [] },
+        DESIGN:      { label: 'Дизайни',          icon: '👑', items: [] },
+        LINE:        { label: 'Лінійка виробів',  icon: '🕯', items: [] },
+        AI_DESIGN:   { label: 'ШІ-дизайн',        icon: '🤖', items: [] },
+        CONSTRUCTOR: { label: 'Конструктор',       icon: '🏗', items: [] }
+    };
+
+    cart.forEach(function(item) {
+        if (groups[item.type]) groups[item.type].items.push(item);
+        else groups['LINE'].items.push(item);
+    });
+
+    var html = '';
+
+    // Попередження якщо є дизайн без смаку
+    if (hasDesignWithoutFlavor(cart)) {
+        html += '<div class="cart-warning">⚠️ До дизайну обов\'язково оберіть смак торта!</div>';
+    }
+
+    Object.values(groups).forEach(function(group) {
+        if (group.items.length === 0) return;
+
+        html += '<div class="cart-group">';
+        html += '<div class="cart-group-title">' + group.icon + ' ' + group.label + '</div>';
+
+        group.items.forEach(function(item) {
+            var price      = (isVerified && item.discountPrice) ? item.discountPrice : item.unitPrice;
+            var subtotal   = Math.round(price * item.quantity);
+            var stepVal    = item.unit === 'кг' ? '0.5' : '1';
+            var minVal     = item.unit === 'кг' ? '0.5' : '1';
+            var isKg       = item.unit === 'кг';
+
+            html += '<div class="cart-item" data-id="' + item.id + '">';
+
+            // Фото
+            html += '<div class="cart-item-img">';
+            if (item.imagePath) {
+                html += '<img src="' + item.imagePath + '" alt="' + item.name + '">';
+            } else {
+                html += '<div class="cart-item-img-placeholder">🎂</div>';
+            }
+            html += '</div>';
+
+            // Інфо
+            html += '<div class="cart-item-info">';
+            html += '<div class="cart-item-name">' + item.name + '</div>';
+
+            if (item.description) {
+                html += '<div class="cart-item-desc">' + item.description + '</div>';
+            }
+
+            // Ціна
+            html += '<div class="cart-item-price">';
+            html += '<span>' + price + ' ' + item.priceUnit + '</span>';
+            if (isVerified && item.discountPrice) {
+                html += ' <span class="cart-defenders">🇺🇦 Захисникам</span>';
+            }
+            html += '</div>';
+
+            // Кількість
+            html += '<div class="cart-item-qty">';
+            html += '<button class="qty-btn" onclick="changeQty(\'' + item.id + '\',-' + stepVal + ')" type="button">−</button>';
+            html += '<input class="qty-input" type="number" value="' + item.quantity + '" min="' + minVal + '" step="' + stepVal + '" onchange="updateQty(\'' + item.id + '\',parseFloat(this.value))">';
+            html += '<span class="qty-unit">' + item.unit + '</span>';
+            html += '<button class="qty-btn" onclick="changeQty(\'' + item.id + '\',' + stepVal + ')" type="button">+</button>';
+            html += '</div>';
+
+            html += '</div>'; // cart-item-info
+
+            // Підсумок + видалити
+            html += '<div class="cart-item-right">';
+            html += '<div class="cart-item-subtotal" id="subtotal_' + item.id + '">' + subtotal + ' грн</div>';
+            html += '<button class="cart-item-remove" onclick="removeFromCart(\'' + item.id + '\')" type="button" title="Видалити">🗑</button>';
+            html += '</div>';
+
+            html += '</div>'; // cart-item
+        });
+
+        html += '</div>'; // cart-group
+    });
+
+    container.innerHTML = html;
+
+    // Оновлюємо суму
+    var total = calcCartTotal(cart, isVerified);
+    updateSummary(total, cart.length);
+    updateMinDate(cart);
+}
+
+function changeQty(id, delta) {
+    var cart = getCart();
+    var idx = cart.findIndex(function(c) { return c.id === id; });
+    if (idx !== -1) {
+        var newQty = Math.max(0.5, Math.round((cart[idx].quantity + delta) * 10) / 10);
+        cart[idx].quantity = newQty;
+        saveCart(cart);
+        renderCartPage();
+    }
+}
+
+function updateSummary(total, count) {
+    var el = document.getElementById('cartTotalBase');
+    if (el) el.textContent = Math.round(total) + ' грн';
+
+    var militaryCheck = document.getElementById('militaryCheckbox');
+    var militaryAdd = militaryCheck && militaryCheck.checked ? 100 : 0;
+
+    var finalEl = document.getElementById('cartTotalFinal');
+    if (finalEl) finalEl.textContent = Math.round(total + militaryAdd) + ' грн';
+
+    // Активність кнопки оформлення
+    var btn = document.getElementById('checkoutBtn');
+    if (btn) {
+        var cart   = getCart();
+        var hasErr = hasDesignWithoutFlavor(cart);
+        btn.disabled  = count === 0 || hasErr;
+        btn.title     = hasErr ? 'Оберіть смак до дизайну!' : '';
+    }
+}
+
+function updateMinDate(cart) {
+    var minDate = calcMinDeliveryDate(cart);
+    var dateInput = document.getElementById('deliveryDate');
+    if (dateInput) {
+        var y = minDate.getFullYear();
+        var m = String(minDate.getMonth() + 1).padStart(2, '0');
+        var d = String(minDate.getDate()).padStart(2, '0');
+        dateInput.min   = y + '-' + m + '-' + d;
+        dateInput.value = y + '-' + m + '-' + d;
+    }
+}
+
+// ── Оплата PayPal-заглушка ────────────────────────────────────────────────────
+
+function openPaymentModal() {
+    var modal = document.getElementById('paymentModal');
+    if (modal) modal.classList.add('open');
+}
+
+function closePaymentModal() {
+    var modal = document.getElementById('paymentModal');
+    if (modal) modal.classList.remove('open');
+}
+
+function simulatePayment() {
+    var btn = document.getElementById('paypalPayBtn');
+    if (btn) {
+        btn.textContent = '⏳ Обробка...';
+        btn.disabled = true;
+    }
+    setTimeout(function() {
+        // Закриваємо PayPal
+        closePaymentModal();
+
+        // Показуємо успіх
+        var success = document.getElementById('paymentSuccess');
+        if (success) success.classList.add('open');
+
+        // Виставляємо оплату в формі
+        var payField = document.getElementById('paymentStatusField');
+        if (payField) payField.value = 'PAID';
+
+        // Через 2 секунди автоматично submit форми
+        setTimeout(function() {
+            var form = document.getElementById('checkoutForm');
+            if (form) form.submit();
+        }, 2000);
+    }, 1800);
+}
+
+// ── Ініціалізація ─────────────────────────────────────────────────────────────
+
+document.addEventListener('DOMContentLoaded', function() {
+    updateCartBadge();
+    renderCartPage();
+
+    // Чекбокс солодощів для ЗСУ
+    var milCheck = document.getElementById('militaryCheckbox');
+    if (milCheck) {
+        milCheck.addEventListener('change', function() {
+            var cart  = getCart();
+            var isV   = window.IS_VERIFIED === true;
+            var total = calcCartTotal(cart, isV);
+            updateSummary(total, cart.length);
         });
     }
 
-    // Викликаємо функцію при завантаженні сторінки, щоб встановити початковий стан полів адреси
-    // Перевіряємо, чи потрібні елементи існують перед викликом
-    if (addressFields && deliveryMethodRadios.length > 0) {
-        toggleAddressFields();
-    }
-
-
-    // ***** ЛОГІКА ДИНАМІЧНОГО ОНОВЛЕННЯ КІЛЬКОСТІ ТА СУМИ *****
-
-    // Обробник події 'input' для МИТТЄВОГО ВІЗУАЛЬНОГО оновлення суми на стороні клієнта
-    quantityInputs.forEach(input => {
-        input.addEventListener('input', function() {
-            const itemContainer = this.closest('.bg-white');
-            const unitPriceElement = itemContainer.querySelector('.unit-price');
-            const itemTotalElement = itemContainer.querySelector('.item-total');
-
-            if (unitPriceElement && itemTotalElement) {
-                const unitPrice = parseFloat(unitPriceElement.textContent.replace(',', '.')) || 0;
-                const quantity = parseInt(this.value) || 0;
-                const newItemTotal = quantity * unitPrice;
-                itemTotalElement.textContent = newItemTotal.toFixed(2);
-
-                // Перерахунок та оновлення ЗАГАЛЬНОЇ суми на стороні клієнта
-                let newOverallTotal = 0;
-                document.querySelectorAll('.item-total').forEach(totalElem => {
-                    newOverallTotal += parseFloat(totalElem.textContent.replace(',', '.')) || 0;
-                });
-                if (totalPriceDisplay) { // Перевіряємо, чи елемент загальної суми існує
-                    totalPriceDisplay.textContent = newOverallTotal.toFixed(2);
-                }
+    // Радіо доставки
+    var deliveryRadios = document.querySelectorAll('input[name="deliveryType"]');
+    var addressBlock   = document.getElementById('addressBlock');
+    deliveryRadios.forEach(function(r) {
+        r.addEventListener('change', function() {
+            if (addressBlock) {
+                addressBlock.style.display = this.value === 'DELIVERY' ? 'block' : 'none';
             }
         });
     });
 
-    // Обробник події 'blur' для ВІДПРАВКИ AJAX запиту на сервер для збереження оновленої кількості
-    quantityInputs.forEach(input => {
-        input.addEventListener('blur', function() { // Поле втратило фокус
-            const form = this.closest('.quantity-form'); // Форма для цього елемента кошика
-            const assortmentIdInput = form.querySelector('input[name="assortmentId"]');
-            const quantity = parseInt(this.value) || 0;
-            const assortmentId = assortmentIdInput ? assortmentIdInput.value : null;
-
-            // Перевіряємо, чи отримали потрібні дані
-            if (assortmentId && quantity >= 1) { // Перевіряємо, що кількість >= 1 перед відправкою
-                // Отримуємо CSRF токен та ім'я заголовка з HTML (зазвичай з прихованого поля в головній формі)
-                const csrfTokenInput = document.querySelector('input[name="_csrf"]'); // Зазвичай ім'я параметра _csrf
-                const csrfToken = csrfTokenInput ? csrfTokenInput.value : null;
-                const csrfHeader = 'X-CSRF-TOKEN'; // Стандартне ім'я заголовка для Spring Security CSRF
-
-                if (!csrfToken) {
-                    console.error("CSRF token not found. AJAX update cannot be sent.");
-                    alert("Помилка безпеки: Не знайдено CSRF токен. Оновлення неможливе.");
-                    return; // Припиняємо виконання, якщо токен відсутній
-                }
-
-                // Створюємо об'єкт FormData для відправки даних як form-urlencoded
-                const formData = new FormData();
-                formData.append('assortmentId', assortmentId);
-                formData.append('quantity', quantity);
-
-                // Використовуємо Fetch API для надсилання POST запиту
-                fetch('/cart/update', {
-                    method: 'POST',
-                    headers: {
-                        // 'Content-Type': 'application/x-www-form-urlencoded', // Fetch з FormData сам встановить правильний Content-Type
-                        [csrfHeader]: csrfToken // Додаємо CSRF токен як заголовок
-                    },
-                    body: formData // Відправляємо дані форми
-                })
-                    .then(response => {
-                        if (!response.ok) {
-                            // Якщо відповідь сервера не OK (наприклад, 400, 401, 500)
-                            console.error('Server responded with status: ' + response.status);
-                            // Можна прочитати тіло відповіді для більш детальної інформації від сервера
-                            return response.text().then(text => {
-                                console.error('Server response body:', text);
-                                alert('Помилка оновлення кошика. Спробуйте ще раз або перезавантажте сторінку.');
-                                // optionally, revert the input value here
-                                // const originalQuantity = itemTotalElement.getAttribute('data-original-quantity'); // Requires storing original quantity
-                                // this.value = originalQuantity;
-                                throw new Error('Server update failed'); // Кидаємо помилку, щоб потрапити в блок catch
-                            });
-                        }
-                        return response.text(); // Сервер повертає загальну суму як текст
-                    })
-                    .then(newTotalText => {
-                        // Цей блок виконується при УСПІШНІЙ відповіді сервера
-                        console.log('Cart item quantity updated successfully.');
-                        // Візуальне оновлення вже відбулося на подію 'input'.
-                        // newTotalText містить нову загальну суму з сервера. Можна її використати,
-                        // щоб остаточно оновити відображення загальної суми, хоча клієнтська логіка вже це зробила.
-                        if (totalPriceDisplay) {
-                            try {
-                                const serverCalculatedTotal = parseFloat(newTotalText);
-                                if (!isNaN(serverCalculatedTotal)) {
-                                    // Оновлюємо загальну суму на випадок розбіжностей з клієнтською логікою
-                                    // totalPriceDisplay.textContent = serverCalculatedTotal.toFixed(2);
-                                }
-                            } catch (e) {
-                                console.warn("Failed to parse server total response:", e);
-                            }
-                        }
-                    })
-                    .catch(error => {
-                        // Цей блок виконується при помилці Fetch або помилці, кинутій у попередньому .then
-                        console.error('Fetch error during cart update:', error);
-                        // alert('Сталася помилка при оновленні кошика.'); // Або більш конкретне повідомлення вже було показано в .then
-                    });
-
-            } else if (quantity < 1) {
-                // Якщо користувач ввів 0 або від'ємне число, можна встановити 1
-                this.value = 1;
-                // І надіслати AJAX для оновлення на сервері з кількістю 1
-                // (або викликати логіку відправки AJAX повторно з новим значенням)
-                // Для простоти, можна просто викликати removeItem, якщо quantity === 0
-                // Але краще дозволити мінімум 1 і не давати ставити 0
-                console.warn("Quantity must be at least 1. Setting to 1.");
-                // Відправити оновлення з кількістю 1 на сервер, якщо потрібно
-                // (Це вже робиться завдяки newQuantity = quantity > 0 ? quantity : 1; у сервісі)
+    // Радіо оплати
+    var payRadios = document.querySelectorAll('input[name="paymentMethod"]');
+    payRadios.forEach(function(r) {
+        r.addEventListener('change', function() {
+            if (this.value === 'ONLINE') {
+                openPaymentModal();
             }
         });
     });
-
-    // ***** КІНЕЦЬ ЛОГІКИ ДИНАМІЧНОГО ОНОВЛЕННЯ *****
-
-}); // Закриття DOMContentLoaded
+});
