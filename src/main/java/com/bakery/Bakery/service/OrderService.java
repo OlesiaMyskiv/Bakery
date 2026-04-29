@@ -51,6 +51,11 @@ public class OrderService {
                 .toList();
     }
 
+    /** Всі замовлення юзера — для адмін-панелі */
+    public List<Order> findAllByUser(Long userId) {
+        return orderRepository.findByUserIdOrderByCreatedAtDesc(userId);
+    }
+
     public long countByStatus(Order.OrderStatus status) {
         return orderRepository.findByOrderStatusOrderByCreatedAtDesc(status).size();
     }

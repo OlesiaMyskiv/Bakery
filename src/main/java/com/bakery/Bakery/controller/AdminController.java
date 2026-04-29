@@ -3,6 +3,7 @@ package com.bakery.Bakery.controller;
 import com.bakery.Bakery.model.*;
 import com.bakery.Bakery.repository.UserRepository;
 import com.bakery.Bakery.service.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -79,6 +80,37 @@ public class AdminController {
         return "admin/users";
     }
 
+    // ══════════════════════════════════════════════════════════════════════════════
+// ВСТАВИТИ В AdminController.java після методу users()
+// Також додати імпорти якщо відсутні:
+//   import org.springframework.http.ResponseEntity;
+//   import org.springframework.web.bind.annotation.ResponseBody;
+// ══════════════════════════════════════════════════════════════════════════════
+
+    @GetMapping("/users/{id}/history")
+    @ResponseBody
+    public ResponseEntity<?> userHistory(@PathVariable Long id) {
+        // Використовуємо orderService а не orderRepository
+        var orders = orderService.findAllByUser(id);
+
+        var result = orders.stream().map(o -> {
+            var m = new java.util.HashMap<String, Object>();
+            m.put("id",          o.getId());
+            m.put("composition", o.getComposition() != null ? o.getComposition() : "—");
+            m.put("status",      o.getOrderStatus().getLabel());
+            m.put("statusKey",   o.getOrderStatus().name());
+            m.put("deadline",    o.getDeadline() != null
+                    ? o.getDeadline().format(java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"))
+                    : "—");
+            m.put("createdAt",   o.getCreatedAt() != null
+                    ? o.getCreatedAt().format(java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy"))
+                    : "—");
+            m.put("price", o.getPrice() != null ? o.getPrice() + " грн" : "—");
+            return m;
+        }).toList();
+
+        return ResponseEntity.ok(result);
+    }
     // ── Верифікація ───────────────────────────────────────────────────────────
 
     @GetMapping("/verification")

@@ -84,8 +84,13 @@
                             th:text="${activeCountMap != null and activeCountMap[u.id] != null ? activeCountMap[u.id] : 0}">0</td>
                         <td th:text="${totalSpentMap != null and totalSpentMap[u.id] != null ? totalSpentMap[u.id] + ' грн' : '0 грн'}">0 грн</td>
                         <td>
-                            <a th:href="@{/admin/users/{id}/history(id=${u.id})}"
-                               class="btn-history">Історія</a>
+                            <!-- Кнопка Історія — дизайн як на фото -->
+                            <button class="btn-history-modal"
+                                    th:data-user-id="${u.id}"
+                                    th:data-user-name="${u.username}"
+                                    onclick="openHistory(this)">
+                                Історія
+                            </button>
                         </td>
                     </tr>
                     </tbody>
@@ -95,9 +100,78 @@
     </main>
 </div>
 
+<!-- ══ СПЛИВАЮЧЕ ВІКНО ІСТОРІЇ ══════════════════════════════════════════════ -->
+<div class="history-overlay" id="historyOverlay" onclick="closeHistoryOnOverlay(event)">
+    <div class="history-modal">
+
+        <div class="history-modal-header">
+            <span class="history-modal-title" id="historyModalTitle">Історія замовлень</span>
+            <button class="history-close-btn" onclick="closeHistory()">✕</button>
+        </div>
+
+        <div class="history-modal-body" id="historyModalBody">
+            <div class="history-loading">Завантаження...</div>
+        </div>
+
+    </div>
+</div>
+
+
 <script>
+    function openHistory(btn) {
+        var userId   = btn.getAttribute('data-user-id');
+        var userName = btn.getAttribute('data-user-name');
+
+        document.getElementById('historyModalTitle').textContent =
+            'Історія замовлень — ' + userName;
+        document.getElementById('historyModalBody').innerHTML =
+            '<div class="history-loading">Завантаження...</div>';
+        document.getElementById('historyOverlay').classList.add('open');
+
+        fetch('/admin/users/' + userId + '/history', { credentials: 'include' })
+            .then(function(r) { return r.json(); })
+            .then(function(orders) {
+                var body = document.getElementById('historyModalBody');
+                if (!orders || orders.length === 0) {
+                    body.innerHTML = '<div class="history-empty">Замовлень ще немає</div>';
+                    return;
+                }
+                body.innerHTML = orders.map(function(o) {
+                    var statusClass = 'status-' + o.statusKey;
+                    return '<div class="history-order-card">' +
+                        '<div class="history-order-top">' +
+                        '<span class="history-order-num">№' + o.id + '</span>' +
+                        '<span class="history-order-date">' + esc(o.createdAt) + '</span>' +
+                        '</div>' +
+                        '<div class="history-order-composition">' + esc(o.composition) + '</div>' +
+                        '<div class="history-order-bottom">' +
+                        '<span class="history-status-badge ' + statusClass + '">' + esc(o.status) + '</span>' +
+                        '<span class="history-deadline">Дедлайн: ' + esc(o.deadline) + '</span>' +
+                        '<span class="history-price">' + esc(o.price) + '</span>' +
+                        '</div>' +
+                        '</div>';
+                }).join('');
+            })
+            .catch(function() {
+                document.getElementById('historyModalBody').innerHTML =
+                    '<div class="history-empty">Помилка завантаження</div>';
+            });
+    }
+
+    function closeHistory() {
+        document.getElementById('historyOverlay').classList.remove('open');
+    }
+
+    function closeHistoryOnOverlay(e) {
+        if (e.target === document.getElementById('historyOverlay')) closeHistory();
+    }
+
+    function esc(s) {
+        return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
     function filterClients() {
-        var q = document.getElementById('clientSearch').value.toLowerCase();
+        var q    = document.getElementById('clientSearch').value.toLowerCase();
         var rows = document.querySelectorAll('#clientsTable tbody tr[data-name]');
         rows.forEach(function(row) {
             var name  = (row.getAttribute('data-name')  || '').toLowerCase();
@@ -106,5 +180,6 @@
         });
     }
 </script>
+
 </body>
 </html>
