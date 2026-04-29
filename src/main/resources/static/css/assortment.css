@@ -1,0 +1,567 @@
+/* ============================================================
+   CAKE HOUSE — ASSORTMENT PAGE CSS
+   ============================================================ */
+
+/* ── Загальна сторінка ────────────────────────────────────── */
+.assort-page {
+    max-width: 100%;
+    margin: 0;
+    padding: 0 0 4rem;
+}
+
+/* ── Вкладки каталогів ────────────────────────────────────── */
+.assort-tabs-bar {
+    display: flex;
+    margin-bottom: 0;
+}
+
+.assort-tab {
+    flex: 1;
+    text-align: center;
+    padding: 1.2rem 1rem; /* Трохи збільшили вертикальні відступи для балансу */
+    background: #4a8a9a;
+    color: white;
+    text-decoration: none;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem; /* Збільшено з 1.1rem до 1.4rem */
+    font-weight: 700;
+    border-right: 1px solid #3a7a8a;
+    letter-spacing: 0.05em; /* Трохи додали простору між літерами */
+}
+
+.assort-tab:last-child { border-right: none; }
+.assort-tab.active, .assort-tab:hover { background: #2d6b7a; }
+
+/* ── Основний лейаут ──────────────────────────────────────── */
+.assort-body {
+    display: flex;
+    gap: 20px;
+    min-height: 600px;
+    padding: 20px 20px 40px;
+    align-items: flex-start;
+}
+
+/* ════════════════════════════════════════════════════════════
+   ЛІВА ПАНЕЛЬ — ФІЛЬТРИ
+   ════════════════════════════════════════════════════════════ */
+.assort-sidebar {
+    width: 260px;
+    min-width: 260px;
+    flex-shrink: 0;
+    background: #5a9aaa;
+    padding: 1.2rem 1rem;
+    color: white;
+    border-radius: 16px;
+    box-shadow: 0 6px 24px rgba(58, 122, 138, 0.35);
+    margin-bottom: 20px;
+}
+
+.filter-reset-wrap {
+    text-align: right;
+    margin-bottom: 0.8rem;
+}
+
+.filter-reset-link {
+    color: #cef;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.85rem;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.filter-section {
+    margin-bottom: 1.4rem;
+}
+
+.filter-section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.6rem;
+    color: white;
+}
+
+.filter-check-label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.35rem;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    cursor: pointer;
+    color: white;
+}
+
+.filter-check-label input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    accent-color: #2d6b7a;
+}
+
+/* ── Діапазонний слайдер (від–до) ─────────────────────────── */
+.price-slider-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.price-range-container {
+    position: relative;
+    height: 28px;
+    margin: 4px 0;
+}
+
+/* Обидва повзунки накладаються */
+.price-range-container input[type="range"] {
+    position: absolute;
+    width: 100%;
+    height: 4px;
+    background: transparent;
+    pointer-events: none;
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Трек */
+.price-range-track {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 2px;
+    transform: translateY(-50%);
+}
+
+/* Виділена частина між повзунками */
+.price-range-fill {
+    position: absolute;
+    top: 50%;
+    height: 4px;
+    background: white;
+    border-radius: 2px;
+    transform: translateY(-50%);
+}
+
+/* Thumb обох повзунків */
+.price-range-container input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid #2d6b7a;
+    cursor: pointer;
+    pointer-events: all;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+.price-range-container input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid #2d6b7a;
+    cursor: pointer;
+    pointer-events: all;
+}
+
+.price-range-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: #cef;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+/* Два числових поля Від / До */
+.price-inputs-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.price-inputs-row .price-field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+}
+
+.price-inputs-row .price-field label {
+    font-size: 0.7rem;
+    color: #cef;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+.price-inputs-row .price-field input[type="number"] {
+    width: 100%;
+    padding: 0.2rem 0.35rem;
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 5px;
+    background: rgba(255,255,255,0.15);
+    color: white;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.8rem;
+}
+
+.price-inputs-row .price-field input[type="number"]::placeholder {
+    color: rgba(255,255,255,0.5);
+}
+
+.price-inputs-row .price-separator {
+    color: #cef;
+    font-size: 0.9rem;
+    padding-top: 18px;
+}
+
+.filter-apply-btn {
+    width: 100%;
+    padding: 0.75rem;
+    background: #2d4a5a;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    margin-top: 0.5rem;
+}
+
+.filter-apply-btn:hover { background: #1a3040; }
+
+/* ════════════════════════════════════════════════════════════
+   ПРАВА ЧАСТИНА
+   ════════════════════════════════════════════════════════════ */
+.assort-right {
+    flex: 1;
+    padding: 1.2rem 2rem 2rem;
+    background: #faf3ee;
+    min-width: 0;
+    border-radius: 16px;
+}
+
+/* Топ-бар: пошук + сортування */
+.assort-top-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+    flex-wrap: nowrap;
+}
+
+/* Розпірка між пошуком і сортуванням */
+.assort-top-spacer {
+    flex: 1;
+}
+
+.search-form-inline {
+    flex: 0 1 320px;
+    min-width: 160px;
+}
+
+.search-input-inline {
+    width: 100%;
+    padding: 0.45rem 1rem;
+    border: 1px solid #d4b8a0;
+    border-radius: 20px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    background: white;
+    outline: none;
+}
+
+.search-input-inline:focus { border-color: #4a8a9a; }
+
+.sort-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+.sort-label {
+    font-family: 'Cormorant Garamond', serif;
+    color: #5a3a2a;
+    font-size: 0.95rem;
+}
+
+.sort-btn {
+    padding: 0.3rem 0.9rem;
+    border: 1px solid #4a8a9a;
+    border-radius: 16px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.9rem;
+    color: #4a8a9a;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.sort-btn:hover, .sort-btn.sort-active {
+    background: #4a8a9a;
+    color: white;
+}
+
+.assort-count {
+    font-family: 'Cormorant Garamond', serif;
+    color: #888;
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+}
+
+.assort-empty {
+    text-align: center;
+    padding: 4rem;
+    font-family: 'Cormorant Garamond', serif;
+    color: #888;
+    font-size: 1.2rem;
+}
+
+/* ════════════════════════════════════════════════════════════
+   СІТКА ТОВАРІВ — 3 колонки (ширша сторінка)
+   ════════════════════════════════════════════════════════════ */
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.4rem;
+}
+
+@media (max-width: 1100px) {
+    .products-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 700px) {
+    .products-grid { grid-template-columns: 1fr; }
+    .assort-sidebar { width: 100%; min-width: unset; }
+    .assort-body { flex-direction: column; }
+}
+
+/* Картка товару */
+.product-card {
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border-radius: 14px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid #f0e0d0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.product-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+.product-card-img-wrap {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+    background: #faf3ee;
+}
+
+.product-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.product-card-img-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+}
+
+/* Бейдж знижки — ОНОВЛЕНО: ТЕПЕР СПРАВА ТА З ФОНОМ-ПРАПОРОМ */
+/* Бейдж знижки */
+.defenders-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 6px; /* Прямокутник з трохи закругленими кутами */
+    overflow: hidden; /* Щоб кути синього та жовтого фону теж закруглились */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    text-align: center;
+}
+
+.defenders-text-top {
+    background-color: #3b7bbd; /* Синій колір */
+    color: white;
+    padding: 4px 10px 1px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem; /* Розмір тексту */
+    line-height: 1;
+}
+
+.defenders-text-bottom {
+    background-color: #fbd652; /* Жовтий колір */
+    color: black;
+    padding: 3px 10px 4px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem; /* Розмір тексту */
+    line-height: 1;
+}
+
+/* Ціна захисників */
+.defenders-price-row { border-top: 1px solid #f0e8e0; padding-top: 4px; margin-top: 2px; }
+.defenders-label { color: #3a7a3a !important; font-weight: 700; }
+.defenders-price { color: #3a7a3a !important; font-weight: 700; }
+
+.product-card-body {
+    padding: 0.9rem 1rem 1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.product-card-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #3a2a1a;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    text-align: center;
+}
+
+.product-card-prices {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+.price-label { color: #888; font-size: 0.9rem; }
+.price-value { font-weight: 600; color: #3a2a1a; font-size: 0.95rem; }
+.discount-price { color: #c0665a; font-weight: 700; }
+
+.product-card-btn {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.6rem 0.5rem 0.8rem;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.9rem;
+    color: #4a8a9a;
+    border-top: 1px solid #f0e8e0;
+}
+
+.btn-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.9rem;
+    color: #4a8a9a;
+}
+
+/* Контейнер для лінії та кола */
+.btn-line-circle {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-shrink: 0;
+    position: relative;
+}
+
+/* Лінія з градієнтом від прозорого до бірюзового */
+.btn-line {
+    width: 40px; /* Зробили трохи довшою */
+    height: 1.5px;
+    background: linear-gradient(to right, rgba(74, 138, 154, 0), #4a8a9a);
+    transition: width 0.25s ease;
+    position: relative;
+    z-index: 2; /* Лінія поверх кола */
+    margin-right: -13px; /* Затягуємо лінію рівно в центр кола (радіус 13px) */
+}
+
+/* Крапочка на кінці лінії */
+.btn-line::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 5px;
+    height: 5px;
+    background: #4a8a9a;
+    border-radius: 50%;
+    transition: background 0.25s ease;
+}
+
+/* Коло з градієнтною рамкою, що зникає зліва */
+.btn-circle {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 1.5px solid transparent;
+    /* Трюк для градієнтної рамки: всередині білий фон, ззовні градієнт */
+    background-image: linear-gradient(white, white), linear-gradient(to right, rgba(74, 138, 154, 0) 10%, #4a8a9a);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    flex-shrink: 0;
+    transition: all 0.25s ease;
+    z-index: 1;
+}
+
+/* --- Анімації при наведенні мишки на картку --- */
+.product-card:hover .btn-line {
+    width: 26px; /* Лінія стискається */
+}
+
+.product-card:hover .btn-circle {
+    /* Коло заповнюється бірюзовим кольором */
+    background-image: linear-gradient(#4a8a9a, #4a8a9a), linear-gradient(to right, rgba(74, 138, 154, 0) 10%, #4a8a9a);
+}
+
+.product-card:hover .btn-line::after {
+    background: white; /* Крапочка стає білою, щоб контрастувати з фоном кола */
+}
+
+.product-card:hover .btn-text {
+    color: #3a7a8a;
+}
+
+/* ── Пагінація ────────────────────────────────────────────── */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 2rem;
+}
+
+.page-btn {
+    padding: 0.4rem 0.9rem;
+    border: 1px solid #4a8a9a;
+    border-radius: 6px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: #4a8a9a;
+    text-decoration: none;
+}
+
+.page-btn:hover, .page-btn.active {
+    background: #4a8a9a;
+    color: white;
+}

@@ -56,6 +56,23 @@ public class ChatController {
         return ResponseEntity.ok(result);
     }
 
+    // ── Клієнт: перевірити чи є непрочитані повідомлення (фоновий запит) ────
+    @Transactional(readOnly = true)
+    @GetMapping("/api/chat/unread")
+    public ResponseEntity<?> checkUnreadStatus(@RequestParam(required = false) String guestToken) {
+        User currentUser = userService.getCurrentUser();
+        ChatSession session = null;
+
+        if (currentUser != null && currentUser.getRole() != Role.SUPER_ADMIN) {
+            session = sessionRepo.findByUserId(currentUser.getId()).orElse(null);
+        } else if (guestToken != null && !guestToken.isBlank()) {
+            session = sessionRepo.findByGuestToken(guestToken).orElse(null);
+        }
+
+        boolean hasUnread = session != null && session.isUnreadForClient();
+        return ResponseEntity.ok(Map.of("unread", hasUnread));
+    }
+
     // ── Клієнт: отримати повідомлення ─────────────────────────────────────────
     @Transactional
     @GetMapping("/api/chat/{sessionId}/messages")

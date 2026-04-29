@@ -143,8 +143,7 @@
                             <img th:if="${p.imagePath != null}" th:src="${p.imagePath}" th:alt="${p.name}" class="product-card-img">
                             <div th:unless="${p.imagePath != null}" class="product-card-img-placeholder"></div>
                             <div th:if="${p.hasDiscount()}" class="defenders-badge">
-                                <div class="defenders-text-top">Нашим</div>
-                                <div class="defenders-text-bottom">захисникам</div>
+                                <span class="defenders-text">Нашим захисникам</span>
                             </div>
                         </div>
                         <div class="product-card-body">
