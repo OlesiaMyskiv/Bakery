@@ -37,7 +37,10 @@
             <a th:href="@{/admin/verification}" class="sidebar-link">Верифікація</a>
             <a th:href="@{/admin/assortment}"   class="sidebar-link">Асортимент</a>
             <a th:href="@{/admin/reviews}"      class="sidebar-link">Відгуки</a>
-            <a th:href="@{/admin/chats}"        class="sidebar-link active">Чати</a>
+            <a th:href="@{/admin/chats}"        class="sidebar-link active" style="display: flex; align-items: center; justify-content: space-between;">
+                <span>Чати</span>
+                <span id="admin-global-unread-dot" class="ca-unread-dot" style="display: none; margin: 0;"></span>
+            </a>
             <a th:href="@{/logout}"             class="sidebar-link sidebar-exit">Вихід</a>
         </nav>
     </aside>
@@ -255,6 +258,7 @@
     .ca-inp-send:hover { background: #2d8a9e; }
 </style>
 
+<script th:src="@{/js/admin.js}"></script>
 <script>
     var currentSessionId = null;
     var pollInterval     = null;
@@ -263,6 +267,14 @@
         fetch('/api/admin/chat/sessions', { credentials: 'include' })
             .then(function(r) { return r.json(); })
             .then(function(sessions) {
+
+                // НОВЕ: Перевіряємо чи є хоча б один непрочитаний чат
+                var hasUnread = sessions.some(function(s) { return s.unread; });
+                var globalDot = document.getElementById('admin-global-unread-dot');
+                if (globalDot) {
+                    globalDot.style.display = hasUnread ? 'block' : 'none';
+                }
+
                 var container = document.getElementById('caSessions');
                 if (!sessions || sessions.length === 0) {
                     container.innerHTML = '<div class="ca-empty-list">Поки немає чатів</div>';

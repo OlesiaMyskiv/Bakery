@@ -64,3 +64,36 @@ function clearSearch() {
         searchInput.focus();
     }
 }
+
+// ── ГЛОБАЛЬНА ПЕРЕВІРКА НЕПРОЧИТАНИХ ЧАТІВ ДЛЯ АДМІНА ────────────
+
+// Функція для перевірки непрочитаних повідомлень у всіх чатах
+function updateGlobalUnreadStatus() {
+    const dot = document.getElementById('admin-global-unread-dot');
+    if (!dot) return; // Якщо на сторінці немає сайдбару, нічого не робимо
+
+    fetch('/api/admin/chat/sessions', { credentials: 'include' })
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        })
+        .then(sessions => {
+            // Перевіряємо, чи є хоча б одна сесія з позначкою unread: true
+            const hasUnread = sessions.some(session => session.unread);
+
+            if (hasUnread) {
+                dot.style.display = 'block';
+            } else {
+                dot.style.display = 'none';
+            }
+        })
+        .catch(error => console.error('Помилка перевірки чатів:', error));
+}
+
+// Запускаємо перевірку при завантаженні сторінки
+document.addEventListener('DOMContentLoaded', () => {
+    updateGlobalUnreadStatus();
+
+    // Встановлюємо інтервал перевірки кожні 10 секунд
+    setInterval(updateGlobalUnreadStatus, 10000);
+});
