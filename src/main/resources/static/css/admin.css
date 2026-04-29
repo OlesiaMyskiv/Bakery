@@ -876,92 +876,62 @@ body {
 
 /* ФОРМА ДОДАВАННЯ — ШИРОКА ТА ВІДЦЕНТРОВАНА */
 .add-form-card {
-    background: white;
-    border-radius: 18px;
-    padding: 40px;
-    width: 100%;
-    max-width: 1100px; /* Збільшена ширина */
-    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    padding: 25px 30px !important; /* Менше простору всередині білої картки */
 }
 
 .add-form-title {
-    font-size: 24px;
-    font-weight: 700;
-    color: #1a1a1a;
-    margin-bottom: 25px;
-    border-bottom: 2px solid #f2f2ec;
-    padding-bottom: 10px;
+    margin-bottom: 15px !important; /* Менший відступ під заголовком "Додати" */
 }
 
 .form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 25px 50px; /* Збільшені відступи між полями */
+    gap: 15px 25px !important; /* Менша відстань між полями вводу */
 }
 
-.form-field { display: flex; flex-direction: column; gap: 8px; }
-.form-field.full { grid-column: 1 / -1; }
-.form-field label { font-size: 15px; color: #666; font-weight: 600; }
-
-.form-field input, .form-field select, .form-field textarea {
-    padding: 12px 15px;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    font-size: 17px;
-    font-family: inherit;
-    background: #fafafa;
+.form-field {
+    gap: 4px !important; /* Менша відстань між лейблом і самим інпутом */
 }
 
-.form-field input:focus { outline: none; border-color: #3AA6B9; background: white; }
-
-/* Ціна та кнопки */
-.price-wrap { display: flex; gap: 8px; align-items: center; }
-.price-btn {
-    width: 42px; height: 42px; border: 1px solid #ddd; border-radius: 10px;
-    background: #f5f5f0; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+.form-section-label {
+    margin-top: 10px !important; /* Значно менші відступи для назв секцій */
+    padding-bottom: 4px !important;
+    font-size: 13px !important;
 }
-.price-btn:hover { background: #3AA6B9; color: white; border-color: #3AA6B9; }
 
-/* Теги */
-.tags-wrap { display: flex; flex-wrap: wrap; gap: 10px; }
+.form-field input[type="text"],
+.form-field input[type="number"],
+.form-field select,
+.form-field textarea {
+    padding: 8px 12px !important; /* Вужчі поля вводу */
+    font-size: 16px !important; /* Трохи менший текст в полях */
+}
+
 .tag-label {
-    padding: 8px 18px; border-radius: 20px; background: #f5f5f0; border: 1px solid #ddd; cursor: pointer; transition: 0.2s;
+    padding: 5px 12px !important; /* Менші кнопки-теги (веган, без цукру) */
+    font-size: 14px !important;
 }
-.tag-label:has(input:checked) { background: #3AA6B9; color: white; border-color: #3AA6B9; }
-.tag-label input { display: none; }
+
+.price-btn {
+    width: 32px !important; /* Зменшені кнопки плюс і мінус */
+    height: 32px !important;
+    font-size: 18px !important;
+}
 
 .btn-add {
-    margin-top: 30px;
-    background: #3AA6B9;
-    color: white;
-    border: none;
-    border-radius: 12px;
-    padding: 15px 45px;
-    font-size: 20px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: inherit;
-    transition: 0.2s;
-}
-.btn-add:hover { background: #2d8a9e; transform: translateY(-2px); }
-
-/* ТАБЛИЦЯ — ТАКОЖ ШИРОКА */
-.products-table-wrap {
-    width: 100%;
-    max-width: 1100px;
-    background: white;
-    border-radius: 18px;
-    overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    margin-top: 15px !important; /* Ближче кнопка додавання */
+    padding: 10px 30px !important; /* Менша сама кнопка */
+    font-size: 18px !important;
 }
 
-.products-table { width: 100%; border-collapse: collapse; }
-.products-table thead tr { background: #f9c9c9; }
-.products-table th { padding: 18px; text-align: left; color: #3AA6B9; font-size: 16px; }
-.products-table td { padding: 15px 18px; border-bottom: 1px solid #f0f0ec; vertical-align: middle; }
-.products-table tr:hover { background: #fafaf8; }
+/* Таблиця */
+.products-table th,
+.products-table td {
+    padding: 10px 14px !important; /* Менші відступи в клітинках таблиці */
+}
 
-.product-thumb { width: 64px; height: 64px; object-fit: cover; border-radius: 10px; }
+.product-thumb {
+    width: 50px !important; /* Трохи менші картинки в таблиці */
+    height: 50px !important;
+}
 .tag-pill { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 700; background: #e0f5f9; color: #2d8a9e; margin: 2px; }
 
 .btn-sm { border: none; border-radius: 12px; padding: 8px 15px; font-weight: 700; cursor: pointer; font-family: inherit; margin-bottom: 5px; width: 100%; }

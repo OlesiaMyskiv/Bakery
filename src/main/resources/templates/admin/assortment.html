@@ -43,7 +43,6 @@
         <div class="admin-card">
             <h1 class="page-title">Асортимент</h1>
 
-            <!-- 3 КНОПКИ КАТАЛОГІВ -->
             <div class="catalog-tabs">
                 <a th:each="ct : ${catalogTypes}"
                    th:href="@{/admin/assortment(catalog=${ct.name()})}"
@@ -54,9 +53,6 @@
 
             <div class="assort-center">
 
-                <!-- ══════════════════════════════════════════════════════════
-                     ФОРМА ДОДАВАННЯ
-                ══════════════════════════════════════════════════════════ -->
                 <div class="add-form-card">
                     <div class="add-form-title">
                         + Додати до «<span th:text="${currentCatalog.label}"></span>»
@@ -68,7 +64,6 @@
 
                         <div class="form-grid">
 
-                            <!-- ── ОСНОВНА ІНФОРМАЦІЯ ─────────────────────── -->
                             <div class="form-section-label">Основна інформація</div>
                             <div class="form-field">
                                 <label>Назва виробу *</label>
@@ -80,7 +75,6 @@
                                 <input type="file" name="image" accept="image/*">
                             </div>
 
-                            <!-- ── ЦІНА ───────────────────────────────────── -->
                             <div class="form-section-label">Ціна</div>
                             <div class="form-field">
                                 <label>Сума (грн) *</label>
@@ -94,23 +88,19 @@
                                 </div>
                             </div>
 
-                            <!-- Одиниця виміру — залежить від каталогу -->
                             <div class="form-field">
                                 <label>Одиниця виміру *</label>
 
-                                <!-- FLAVOR: тільки кг -->
                                 <th:block th:if="${currentCatalog.name() == 'FLAVOR'}">
                                     <input type="hidden" name="priceUnit" value="грн/кг">
                                     <div class="unit-fixed">грн / кг</div>
                                 </th:block>
 
-                                <!-- DESIGN: тільки декор -->
                                 <th:block th:if="${currentCatalog.name() == 'DESIGN'}">
                                     <input type="hidden" name="priceUnit" value="грн/декор">
                                     <div class="unit-fixed">грн / декор</div>
                                 </th:block>
 
-                                <!-- LINE: вільний вибір -->
                                 <select th:if="${currentCatalog.name() == 'LINE'}" name="priceUnit">
                                     <option value="грн/шт">грн / шт</option>
                                     <option value="грн/набір">грн / набір</option>
@@ -124,7 +114,6 @@
                                 </select>
                             </div>
 
-                            <!-- ── ТЕРМІНОВІСТЬ ───────────────────────────── -->
                             <div class="form-section-label">Терміновість</div>
                             <div class="form-field full">
                                 <div class="tags-wrap">
@@ -135,9 +124,6 @@
                                 </div>
                             </div>
 
-                            <!-- ══════════════════════════════════════════════
-                                 КАТАЛОГ СМАКІВ
-                            ══════════════════════════════════════════════ -->
                             <th:block th:if="${currentCatalog.name() == 'FLAVOR'}">
 
                                 <div class="form-section-label">Каталог смаків</div>
@@ -160,14 +146,12 @@
                                     </div>
                                 </div>
 
-                                <!-- ОПИС -->
                                 <div class="form-section-label">Опис</div>
                                 <div class="form-field full">
-                                    <textarea name="description" rows="3"
+                                    <textarea name="description" rows="2"
                                               placeholder="Загальний опис виробу..."></textarea>
                                 </div>
 
-                                <!-- ПІЛЬГА -->
                                 <div class="form-section-label">Пільга для ЗСУ/ДСНС/ДПСУ</div>
                                 <div class="form-field">
                                     <label>Знижка (%)</label>
@@ -178,11 +162,10 @@
                                         <button type="button" class="price-btn" onclick="changeDiscount(5)">+</button>
                                     </div>
                                     <small style="color:#aaa;margin-top:4px;display:block;">
-                                        0 = без знижки. Наприклад: 20 = ціна -20% для верифікованих
+                                        0 = без знижки.
                                     </small>
                                 </div>
 
-                                <!-- ХАРАКТЕРИСТИКИ -->
                                 <div class="form-section-label">Характеристики</div>
                                 <div class="form-field">
                                     <label>Калорійність</label>
@@ -194,24 +177,20 @@
                                            value="1.0" min="0.5" step="0.5">
                                 </div>
 
-                                <!-- ТЕКСТОВІ БЛОКИ -->
                                 <div class="form-section-label">Текстові блоки на сторінці товару</div>
                                 <div class="form-field full">
                                     <label>Про смак</label>
-                                    <textarea name="flavorDescription" rows="3"
+                                    <textarea name="flavorDescription" rows="2"
                                               placeholder="Детальний опис смаку, аромату, текстури..."></textarea>
                                 </div>
                                 <div class="form-field full">
                                     <label>Склад (інгредієнти)</label>
-                                    <textarea name="ingredients" rows="3"
+                                    <textarea name="ingredients" rows="2"
                                               placeholder="Борошно, яйця, масло вершкове, цукор..."></textarea>
                                 </div>
 
                             </th:block>
 
-                            <!-- ══════════════════════════════════════════════
-                                 КАТАЛОГ ДИЗАЙНІВ
-                            ══════════════════════════════════════════════ -->
                             <th:block th:if="${currentCatalog.name() == 'DESIGN'}">
 
                                 <div class="form-section-label">Каталог дизайнів</div>
@@ -236,7 +215,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Дієтичні особливості -->
                                 <div class="form-field">
                                     <label>Дієтичні особливості</label>
                                     <div class="tags-wrap">
@@ -247,20 +225,18 @@
                                     </div>
                                 </div>
 
-                                <!-- ОПИС + СКЛАД -->
                                 <div class="form-section-label">Опис та Склад</div>
                                 <div class="form-field full">
                                     <label>Опис</label>
-                                    <textarea name="description" rows="3"
+                                    <textarea name="description" rows="2"
                                               placeholder="Загальний опис дизайну..."></textarea>
                                 </div>
                                 <div class="form-field full">
                                     <label>Склад (інгредієнти)</label>
-                                    <textarea name="ingredients" rows="3"
+                                    <textarea name="ingredients" rows="2"
                                               placeholder="Борошно, яйця, масло вершкове..."></textarea>
                                 </div>
 
-                                <!-- ПІЛЬГА -->
                                 <div class="form-section-label">Пільга для ЗСУ/ДСНС/ДПСУ</div>
                                 <div class="form-field">
                                     <label>Знижка (%)</label>
@@ -271,24 +247,19 @@
                                         <button type="button" class="price-btn" onclick="changeDiscount(5)">+</button>
                                     </div>
                                     <small style="color:#aaa;margin-top:4px;display:block;">
-                                        0 = без знижки. Наприклад: 20 = ціна -20% для верифікованих
+                                        0 = без знижки.
                                     </small>
                                 </div>
 
-                                <!-- ХАРАКТЕРИСТИКИ -->
                                 <div class="form-section-label">Характеристики</div>
                                 <div class="form-field">
                                     <label>Калорійність</label>
                                     <input type="text" name="calories" placeholder="320 ккал/100 г">
                                 </div>
-                                <!-- Без мінімальної ваги для дизайну -->
                                 <input type="hidden" name="minWeightKg" value="">
 
                             </th:block>
 
-                            <!-- ══════════════════════════════════════════════
-                                 ЛІНІЙКА ВИРОБІВ
-                            ══════════════════════════════════════════════ -->
                             <th:block th:if="${currentCatalog.name() == 'LINE'}">
 
                                 <div class="form-section-label">Лінійка виробів</div>
@@ -302,7 +273,6 @@
                                     </select>
                                 </div>
 
-                                <!-- Дієтичні особливості -->
                                 <div class="form-field">
                                     <label>Дієтичні особливості</label>
                                     <div class="tags-wrap">
@@ -313,14 +283,12 @@
                                     </div>
                                 </div>
 
-                                <!-- ОПИС — обов'язковий -->
                                 <div class="form-section-label">Опис</div>
                                 <div class="form-field full">
-                                    <textarea name="description" rows="3"
+                                    <textarea name="description" rows="2"
                                               placeholder="Опис виробу (обов'язково)..." required></textarea>
                                 </div>
 
-                                <!-- ПІЛЬГА -->
                                 <div class="form-section-label">Пільга для ЗСУ/ДСНС/ДПСУ</div>
                                 <div class="form-field">
                                     <label>Знижка (%)</label>
@@ -331,11 +299,10 @@
                                         <button type="button" class="price-btn" onclick="changeDiscount(5)">+</button>
                                     </div>
                                     <small style="color:#aaa;margin-top:4px;display:block;">
-                                        0 = без знижки. Наприклад: 20 = ціна -20% для верифікованих
+                                        0 = без знижки.
                                     </small>
                                 </div>
 
-                                <!-- ХАРАКТЕРИСТИКИ -->
                                 <div class="form-section-label">Характеристики</div>
                                 <div class="form-field">
                                     <label>Калорійність</label>
@@ -347,16 +314,15 @@
                                            placeholder="Наприклад: 0.5" min="0.1" step="0.1">
                                 </div>
 
-                                <!-- ТЕКСТОВІ БЛОКИ -->
                                 <div class="form-section-label">Текстові блоки на сторінці товару</div>
                                 <div class="form-field full">
                                     <label>Про виріб</label>
-                                    <textarea name="flavorDescription" rows="3"
+                                    <textarea name="flavorDescription" rows="2"
                                               placeholder="Детальний опис виробу..."></textarea>
                                 </div>
                                 <div class="form-field full">
                                     <label>Склад (інгредієнти)</label>
-                                    <textarea name="ingredients" rows="3"
+                                    <textarea name="ingredients" rows="2"
                                               placeholder="Склад виробу..."></textarea>
                                 </div>
 
@@ -370,7 +336,6 @@
                     </form>
                 </div>
 
-                <!-- ПОШУК -->
                 <div class="search-bar-wrap">
                     <div class="search-bar-inner">
                         <svg width="22" height="22" viewBox="0 0 24 24"
@@ -387,7 +352,6 @@
                     <span id="searchCount" class="search-count"></span>
                 </div>
 
-                <!-- ТАБЛИЦЯ ТОВАРІВ -->
                 <div class="products-table-wrap">
                     <table class="products-table" id="productsTable">
                         <thead>
@@ -414,9 +378,9 @@
                                 <img th:if="${p.imagePath != null}"
                                      th:src="${p.imagePath}" class="product-thumb" alt="фото">
                                 <div th:unless="${p.imagePath != null}"
-                                     style="width:64px;height:64px;background:#eee;border-radius:10px;
+                                     style="width:50px;height:50px;background:#eee;border-radius:10px;
                                             display:flex;align-items:center;justify-content:center;
-                                            color:#ccc;font-size:22px;">📷</div>
+                                            color:#ccc;font-size:18px;">📷</div>
                             </td>
                             <td><strong th:text="${p.name}"></strong></td>
                             <td>
@@ -432,7 +396,6 @@
                                     <span th:if="${p.hasDietaryTag('NO_LACTOSE')}" class="tag-pill">Без лактози</span>
                                     <span th:if="${p.hasDietaryTag('VEGAN')}"      class="tag-pill">Веган</span>
                                 </th:block>
-                                <!-- Знижка -->
                                 <span th:if="${p.hasDiscount()}" class="tag-pill"
                                       style="background:#fff3cd;color:#856404;">
                                     -<span th:text="${p.discountPercent}"></span>% ЗСУ
@@ -471,20 +434,6 @@
         </div>
     </main>
 </div>
-
-<style>
-    /* Фіксована одиниця виміру */
-    .unit-fixed {
-        display: inline-block;
-        padding: 0.5rem 1rem;
-        background: #f0f0f0;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        font-family: 'Cormorant Garamond', serif;
-        color: #555;
-        font-size: 1rem;
-    }
-</style>
 
 <script th:src="@{/js/admin.js}"></script>
 <script>
