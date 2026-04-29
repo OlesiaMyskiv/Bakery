@@ -4,13 +4,14 @@
    Бірюзовий: #3AA6B9  Фон: #f2f2ec
    ============================================ */
 
+
 /* =========================================
    ОСНОВНИЙ ЛЕЙАУТ АДМІН-ПАНЕЛІ
    ========================================= */
 .admin-layout {
     display: flex;
     min-height: calc(100vh - 80px);
-    background-color: #ffffff; /* ФОН СТОРІНКИ БІЛИЙ */
+    background-color: #F9F9F9; /* ЗМІНИТИ НА ЦЕЙ КОЛІР */
     font-size: 21px;
 }
 
@@ -42,60 +43,64 @@
 /* =========================================
    БОКОВА ПАНЕЛЬ (САЙДБАР) — ВСЯ БІРЮЗОВА (3AA6B9)
    ========================================= */
+/* =========================================
+   БОКОВА ПАНЕЛЬ (САЙДБАР) — ДИЗАЙН ЯК У ПРОФІЛІ
+   ========================================= */
 .admin-sidebar {
-    width: 300px;
-    background-color: #3AA6B9; /* ЛІВА ЧАСТИНА ВСЯ ЦЬОГО КОЛЬОРУ */
-    color: #ffffff;
+    width: 320px;
+    flex-shrink: 0;
+    background-color: #FFFFFF;
+    border-radius: 20px;
+    padding: 20px 0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    z-index: 10;
     display: flex;
     flex-direction: column;
-    padding: 40px 0;
-    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
-    z-index: 10;
+    margin: 30px 0 30px 30px; /* Відступи, щоб сайдбар виглядав як плаваюча картка */
+    height: fit-content;
+    min-height: 80vh;
 }
 
-/* Блок профілю */
+/* Блок профілю (Фото і напис СУПЕРАДМІН) */
 .sidebar-avatar-wrap {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 40px;
-    padding: 0 20px;
+    margin-bottom: 20px;
+    padding: 0 20px 20px 20px;
     text-align: center;
+    border-bottom: 1px solid #f0f0f0; /* Лінія, що відділяє фото від меню */
 }
 
 .sidebar-avatar-circle {
     width: 100px;
     height: 100px;
     border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.2);
+    background-color: #D9D9D9;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    margin-bottom: 15px;
-    border: 3px solid #ffffff;
+    margin-bottom: 10px;
+    border: 2px solid #3AA6B9;
+}
+
+.sidebar-avatar-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .sidebar-role {
-    font-size: 1rem; /* Збільшено */
-    color: #ffffff;
+    font-size: 16px;
+    color: #3AA6B9; /* Робимо текст бірюзовим, бо фон тепер білий */
     letter-spacing: 2px;
     font-weight: bold;
     text-transform: uppercase;
-    opacity: 0.9;
-}
-
-.sidebar-role {
-    font-size: 0.75rem;
-    color: #ffffff;
-    letter-spacing: 2px;
-    font-weight: bold;
-    text-transform: uppercase;
-    opacity: 0.9;
 }
 
 /* =========================================
-   НАВІГАЦІЯ ТА СВІТЛЯНА РИСКА
+   НАВІГАЦІЯ ТА ПОСИЛАННЯ (ЯК У ПРОФІЛІ)
    ========================================= */
 .sidebar-nav {
     display: flex;
@@ -104,56 +109,44 @@
 }
 
 .sidebar-link {
-    color: rgba(255, 255, 255, 0.75); /* Неактивні пункти — напівпрозорі */
-    text-decoration: none;
-    padding: 18px 30px;
-    font-size: 1.1rem;
-    position: relative;
-    transition: all 0.3s ease;
     display: block;
+    padding: 15px 30px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    color: #333333; /* Темний текст */
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-left: 5px solid transparent;
     font-weight: 400;
 }
 
-/* ТА САМА РИСКА, ЩО СВІТИТЬСЯ */
-.sidebar-link::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    width: 6px;
-    background-color: #ffffff; /* Біла риска на бірюзовому фоні */
-    border-radius: 0 4px 4px 0;
-    transform: scaleY(0);
-    transform-origin: center;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
-}
-
 .sidebar-link:hover {
-    color: #ffffff;
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: #f0f8f9;
+    color: #3AA6B9;
 }
 
-/* АКТИВНА СТОРІНКА */
+/* АКТИВНА СТОРІНКА (з бірюзовою лінією зліва) */
 .sidebar-link.active {
-    color: #ffffff;
-    font-weight: 700; /* ШРИФТ ЖИРНІШИЙ */
-    background-color: rgba(0, 0, 0, 0.1); /* Трохи затемнюємо фон активного пункту */
+    background-color: #e6f4f6;
+    color: #3AA6B9;
+    border-left: 5px solid #3AA6B9;
+    font-weight: 700;
 }
 
-.sidebar-link.active::before {
-    transform: scaleY(1);
-    /* Ефект світіння білої риски */
-    box-shadow: 0 0 15px #ffffff, 0 0 25px rgba(255, 255, 255, 0.6);
-}
-
-.sidebar-exit {
+/* Кнопка "Вихід" */
+.sidebar-link.sidebar-exit {
+    color: #E2A8A8;
     margin-top: auto;
-    padding-bottom: 30px;
-    color: #ffffff;
-    opacity: 0.8;
+    margin-bottom: 20px;
+    border-top: 1px solid #f0f0f0;
+    padding-top: 20px;
 }
 
+.sidebar-link.sidebar-exit:hover {
+    background-color: #fff0f0;
+    color: #d18a8a;
+    border-left: 5px solid transparent; /* Щоб при виході не з'являлась синя лінія */
+}
 /* =========================================
    ТАБЛИЦЯ (РОЖЕВІ ЗАГОЛОВКИ ТА БЕЖЕВИЙ ФОН)
    ========================================= */
