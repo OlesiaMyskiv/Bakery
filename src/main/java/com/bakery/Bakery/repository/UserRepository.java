@@ -11,6 +11,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmail(String email);
 
+    Optional<User> findByEmailIgnoreCase(String email);
+
     /** Пошук юзера за reset-токеном (для сторінки введення нового пароля). */
     Optional<User> findByResetToken(String resetToken);
 

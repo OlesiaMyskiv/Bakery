@@ -39,6 +39,9 @@ public class Order {
     @Column(name = "constructor_img")
     private String constructorImg;
 
+    @Column(name = "first_image_path")
+    private String firstImagePath;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status")
     private PaymentStatus paymentStatus = PaymentStatus.ON_DELIVERY;
@@ -104,6 +107,9 @@ public class Order {
 
     public String getConstructorImg() { return constructorImg; }
     public void setConstructorImg(String constructorImg) { this.constructorImg = constructorImg; }
+
+    public String getFirstImagePath() { return firstImagePath; }
+    public void setFirstImagePath(String firstImagePath) { this.firstImagePath = firstImagePath; }
 
     public PaymentStatus getPaymentStatus() { return paymentStatus; }
     public void setPaymentStatus(PaymentStatus paymentStatus) { this.paymentStatus = paymentStatus; }

@@ -161,7 +161,18 @@
                                 </div>
                             </div>
                             <!-- Кнопка рисочка + кружечок -->
-                            <div class="product-card-btn">
+                            <div class="product-card-btn"
+                                 th:attr="data-product-id=${p.id},
+                                          data-name=${p.name},
+                                          data-type=${p.catalogType.name()},
+                                          data-image=${p.imagePath},
+                                          data-price-unit=${p.priceUnit},
+                                          data-price=${p.price},
+                                          data-discount=${p.hasDiscount() ? p.discountedPrice : ''},
+                                          data-weight=${p.minWeightKg},
+                                          data-unit=${p.catalogType.name() == 'FLAVOR' ? 'кг' : 'шт'},
+                                          data-urgency=${p.urgency != null ? p.urgency.name() : ''}"
+                                 onclick="event.preventDefault(); cartAddFromCard(this);">
                                 <span class="btn-text">додати в корзину</span>
                                 <div class="btn-line-circle">
                                     <div class="btn-line"></div>
@@ -205,6 +216,24 @@
         rMin.value=minVal; rMax.value=maxVal; updateRange();
     }
     document.addEventListener('DOMContentLoaded', function(){ updateRange(); });
+</script>
+<script src="/js/cart.js"></script>
+<script>
+    function cartAddFromCard(el) {
+        var d = el.dataset;
+        addProductToCart(
+            parseInt(d.productId),
+            d.name,
+            d.type,
+            d.image || null,
+            d.priceUnit,
+            parseInt(d.price),
+            d.discount ? parseInt(d.discount) : null,
+            parseFloat(d.weight) || 1,
+            d.unit || 'шт',
+            d.urgency || null
+        );
+    }
 </script>
 </body>
 </html>

@@ -15,19 +15,17 @@ public class AdminInitializer {
     @Bean
     CommandLineRunner initAdmin(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         return args -> {
-            String adminEmail = "Myskiv12385@gmail.com";
+            String adminEmail = "myskiv12385@gmail.com";
 
-            // Знаходимо існуючого адміна і ОНОВЛЮЄМО його пароль
-            userRepository.findByEmail(adminEmail).ifPresent(existingAdmin -> {
+            // Знаходимо існуючого адміна (незалежно від регістру) і ОНОВЛЮЄМО його
+            userRepository.findByEmailIgnoreCase(adminEmail).ifPresentOrElse(existingAdmin -> {
+                existingAdmin.setEmail(adminEmail); // нормалізуємо до нижнього регістру
                 existingAdmin.setPassword(passwordEncoder.encode("19102005"));
                 existingAdmin.setRole(Role.SUPER_ADMIN);
                 existingAdmin.setVerificationStatus(VerificationStatus.NONE);
                 userRepository.save(existingAdmin);
-                System.out.println("✅ Пароль адміна оновлено: " + adminEmail);
-            });
-
-            // Якщо адміна взагалі немає — створюємо
-            if (userRepository.findByEmail(adminEmail).isEmpty()) {
+                System.out.println("✅ Адмін оновлено: " + adminEmail);
+            }, () -> {
                 User superAdmin = new User();
                 superAdmin.setUsername("Олеся Миськів");
                 superAdmin.setEmail(adminEmail);
@@ -37,7 +35,7 @@ public class AdminInitializer {
                 superAdmin.setVerificationStatus(VerificationStatus.NONE);
                 userRepository.save(superAdmin);
                 System.out.println("✅ SUPER_ADMIN створений: " + adminEmail);
-            }
+            });
         };
     }
 }

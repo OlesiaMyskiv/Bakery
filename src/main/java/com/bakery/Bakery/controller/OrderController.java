@@ -56,4 +56,5 @@ public class OrderController {
         redirectAttributes.addFlashAttribute("successMsg", "Замовлення скасовано.");
         return "redirect:/profile";
     }
+
 }

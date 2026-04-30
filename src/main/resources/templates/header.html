@@ -41,19 +41,32 @@
                 <a th:href="@{/profile}" sec:authorize="isAuthenticated() and !hasAuthority('SUPER_ADMIN')" class="icon-link">
                     <img th:src="@{/img/user-icon.svg}" alt="Профіль">
                 </a>
-                <a th:href="@{/cart}" class="icon-link">
+
+                <!-- Іконка кошика з лічильником -->
+                <a th:href="@{/cart}" class="icon-link cart-icon-wrap">
                     <img th:src="@{/img/cart-icon.svg}" alt="Кошик">
+                    <span class="cart-badge" id="cartBadge"></span>
                 </a>
             </div>
         </div>
     </div>
 </header>
 
-<!-- chat.js завантажується для ВСІХ сторінок.
-     Сам вирішує показувати кнопку чи ні:
-     - Адмін: кнопка прихована (адмін має окрему сторінку /admin/chats)
-     - Клієнт/ЗСУ/ДПСУ/ДСНС: кнопка видима
-     - Гість (не залогінений): кнопка видима -->
+<!-- Лічильник кошика — оновлюється на всіх сторінках -->
+<script>
+    (function() {
+        try {
+            var cart  = JSON.parse(localStorage.getItem('cakeCart')) || [];
+            var total = cart.reduce(function(s, c) { return s + (parseFloat(c.quantity) || 0); }, 0);
+            var badge = document.getElementById('cartBadge');
+            if (badge && total > 0) {
+                badge.textContent = Math.round(total);
+                badge.style.display = 'flex';
+            }
+        } catch(e) {}
+    })();
+</script>
+
 <script th:src="@{/js/chat.js}" defer></script>
 
 </body>

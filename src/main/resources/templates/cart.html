@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="uk" xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="uk" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Кошик — Cake House</title>
@@ -191,12 +190,7 @@
         }
 
         // Перевірка: залогінений
-        var isLoggedIn = /*[[${#authorization.expression('isAuthenticated()')}]]*/ false;
-        if (!isLoggedIn) {
-            e.preventDefault();
-            window.location.href = '/login';
-            return;
-        }
+        // Авторизацію перевіряє SecurityConfig — якщо тут, то вже залогінений
 
         // Заповнюємо поля
         document.getElementById('cartJsonField').value = JSON.stringify(cart);
@@ -213,17 +207,13 @@
         document.getElementById('paymentStatusField').value = 'ON_DELIVERY';
     }
 
-    // Оновлюємо суму в PayPal-модалці при відкритті
-    document.querySelectorAll('input[name="paymentMethod"]').forEach(function(r) {
-        r.addEventListener('change', function() {
-            if (this.value === 'ONLINE') {
-                var amount = document.getElementById('cartTotalFinal');
-                var paypalAmount = document.getElementById('paypalAmount');
-                if (amount && paypalAmount) paypalAmount.textContent = amount.textContent;
-                openPaymentModal();
-            }
-        });
-    });
+    // Слухач оплати вже є в cart.js — тут тільки оновлюємо суму в PayPal при відкритті
+    function beforeOpenPaypal() {
+        var amount = document.getElementById('cartTotalFinal');
+        var paypalAmount = document.getElementById('paypalAmount');
+        if (amount && paypalAmount) paypalAmount.textContent = amount.textContent;
+        openPaymentModal();
+    }
 
     // Чекбокс солодощів — показуємо/ховаємо рядок
     document.getElementById('militaryCheckbox').addEventListener('change', function() {

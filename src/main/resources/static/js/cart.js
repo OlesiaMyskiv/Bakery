@@ -440,11 +440,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Радіо оплати
+    // Радіо оплати — відкриваємо PayPal одразу при виборі "Онлайн"
     var payRadios = document.querySelectorAll('input[name="paymentMethod"]');
     payRadios.forEach(function(r) {
         r.addEventListener('change', function() {
             if (this.value === 'ONLINE') {
+                // Синхронізуємо суму в PayPal-модалці
+                var totalEl = document.getElementById('cartTotalFinal');
+                var paypalEl = document.getElementById('paypalAmount');
+                if (totalEl && paypalEl) {
+                    paypalEl.textContent = totalEl.textContent;
+                }
                 openPaymentModal();
             }
         });

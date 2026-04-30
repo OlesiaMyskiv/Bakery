@@ -18,6 +18,6 @@ public class UserService {
         if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
             return null;
         }
-        return userRepository.findByEmail(auth.getName()).orElse(null);
+        return userRepository.findByEmailIgnoreCase(auth.getName()).orElse(null);
     }
 }

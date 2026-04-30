@@ -117,3 +117,32 @@
     transform: scale(1.2);
     filter: grayscale(0%) brightness(0.8);
 }
+/* ══════════════════════════════════════════════════════════════
+   ДОДАТИ В КІНЕЦЬ header.css
+   ══════════════════════════════════════════════════════════════ */
+
+/* Іконка кошика з лічильником */
+.cart-icon-wrap {
+    position: relative;
+}
+
+.cart-badge {
+    display: none;           /* показується через JS коли є товари */
+    position: absolute;
+    top: -7px;
+    right: -9px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: 9px;
+    background: #DF7481;
+    color: white;
+    font-size: 11px;
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 700;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    pointer-events: none;   /* не блокує клік на посилання */
+}

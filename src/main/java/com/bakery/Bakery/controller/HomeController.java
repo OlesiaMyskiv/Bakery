@@ -86,4 +86,5 @@ public class HomeController {
         Collections.shuffle(pool, new Random());
         return pool.stream().limit(5).toList();
     }
+
 }

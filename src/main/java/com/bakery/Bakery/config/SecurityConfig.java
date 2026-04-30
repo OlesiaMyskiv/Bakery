@@ -24,7 +24,7 @@ public class SecurityConfig {
     @Bean
     public UserDetailsService userDetailsService(UserRepository userRepository) {
         return email -> {
-            com.bakery.Bakery.model.User dbUser = userRepository.findByEmail(email)
+            com.bakery.Bakery.model.User dbUser = userRepository.findByEmailIgnoreCase(email)
                     .orElseThrow(() -> new UsernameNotFoundException("Не знайдено"));
             return User.builder()
                     .username(dbUser.getEmail())
@@ -41,14 +41,16 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/", "/register", "/login",
-                                "/forgot-password",   // ← форма введення email
-                                "/reset-password",    // ← форма нового пароля (за токеном)
+                                "/forgot-password",
+                                "/reset-password",
                                 "/assortment", "/product/**", "/constructor", "/ai-design",
                                 "/css/**", "/img/**", "/js/**", "/uploads/**"
                         ).permitAll()
                         .requestMatchers("/api/chat/**").permitAll()
                         .requestMatchers("/api/admin/chat/**").hasAuthority("SUPER_ADMIN")
                         .requestMatchers("/admin/**").hasAuthority("SUPER_ADMIN")
+                        // ── КОШИК і ЗАМОВЛЕННЯ — тільки залогінені ──────────
+                        .requestMatchers("/cart", "/cart/**").authenticated()
                         .requestMatchers("/api/my-orders", "/orders/**", "/profile/**").authenticated()
                         .anyRequest().authenticated()
                 )

@@ -76,9 +76,137 @@
 
             <!-- Активні замовлення -->
             <div id="orders" class="tab-content active">
-                <h2 class="content-title">Активні замовлення</h2>
-                <div class="empty-state"><p>У вас поки немає активних замовлень.</p></div>
+                <h2 class="content-title" style="text-align:center;">Активні замовлення</h2>
+
+                <div th:if="${activeOrders == null or activeOrders.empty}" class="empty-state">
+                    <p>У вас поки немає активних замовлень.</p>
+                </div>
+
+                <div class="orders-list" th:unless="${activeOrders == null or activeOrders.empty}">
+                    <th:block th:each="order : ${activeOrders}">
+                        <div class="order-card">
+
+                            <!-- Заголовок -->
+                            <div class="order-card-header">
+                                <span class="order-num">№ <span th:text="${order.id}"></span></span>
+                                <span class="order-date" th:if="${order.deadline != null}"
+                                      th:text="${#temporals.format(order.deadline, 'EEEE dd.MM.yyyy, HH:mm')}"></span>
+                            </div>
+
+                            <!-- Прогрес-бар -->
+                            <div class="order-progress">
+                                <div class="progress-step">
+                                    <div class="step-dot"
+                                         th:classappend="${order.orderStatus.name() == 'NEW'} ? ' step-active' : ' step-done-dot'"></div>
+                                    <div class="step-label">ПРИЙНЯТО</div>
+                                </div>
+                                <div th:classappend="${order.orderStatus.name() != 'NEW'} ? 'progress-line-done' : 'progress-line'"
+                                     class="progress-line"></div>
+                                <div class="progress-step">
+                                    <div class="step-dot"
+                                         th:classappend="${order.orderStatus.name() == 'IN_PROGRESS'} ? ' step-active' : (${order.orderStatus.name() == 'READY'} ? ' step-done-dot' : '')"></div>
+                                    <div class="step-label"
+                                         th:classappend="${order.orderStatus.name() == 'IN_PROGRESS'} ? ' step-label-active'">ГОТУЄТЬСЯ</div>
+                                </div>
+                                <div th:classappend="${order.orderStatus.name() == 'READY'} ? 'progress-line-done' : 'progress-line'"
+                                     class="progress-line"></div>
+                                <div class="progress-step">
+                                    <div class="step-dot"
+                                         th:classappend="${order.orderStatus.name() == 'READY'} ? ' step-active'"></div>
+                                    <div class="step-label"
+                                         th:classappend="${order.orderStatus.name() == 'READY'} ? ' step-label-active'">ОЧІКУЄ В КОНДИТЕРСЬКІЙ</div>
+                                </div>
+                                <div class="progress-line"></div>
+                                <div class="progress-step">
+                                    <div class="step-dot"></div>
+                                    <div class="step-label">ВИКОНАНО</div>
+                                </div>
+                            </div>
+
+                            <!-- Товари — кожен окремим рядком з фото -->
+                            <div class="order-items-list"
+                                 th:with="rawItems=${order.composition != null ? order.composition : ''},
+                               items=${#strings.contains(rawItems,'|') ? #strings.arraySplit(rawItems,'|') : #strings.arraySplit(rawItems,';')}">
+
+                                <th:block th:each="item, stat : ${items}">
+                                    <div class="order-item-row-full">
+                                        <!-- Фото: перший товар — реальне фото, решта — 🎂 -->
+                                        <div class="order-item-img-wrap">
+                                            <img th:if="${stat.index == 0 and order.aiImageUrl != null}"
+                                                 th:src="${order.aiImageUrl}" class="order-item-img" alt="">
+                                            <img th:if="${stat.index == 0 and order.aiImageUrl == null and order.constructorImg != null}"
+                                                 th:src="${order.constructorImg}" class="order-item-img" alt="">
+                                            <img th:if="${stat.index == 0 and order.aiImageUrl == null and order.constructorImg == null and order.firstImagePath != null}"
+                                                 th:src="${order.firstImagePath}" class="order-item-img" alt="">
+                                            <div th:if="${stat.index != 0 or (order.aiImageUrl == null and order.constructorImg == null and order.firstImagePath == null)}"
+                                                 class="order-item-img-placeholder">🎂</div>
+                                        </div>
+
+                                        <!-- Назва і ціна -->
+                                        <div class="order-item-info">
+                                            <th:block th:with="trimmed=${#strings.trim(item)}">
+                                                <!-- Назва — до першого ' — ' -->
+                                                <div class="order-item-name"
+                                                     th:text="${#strings.contains(trimmed,' — ') ? #strings.substringBefore(trimmed,' — ') : trimmed}">
+                                                </div>
+                                                <!-- Ціна — після першого ' — ' -->
+                                                <div class="order-item-price"
+                                                     th:if="${#strings.contains(trimmed,' — ')}"
+                                                     th:text="${#strings.substringAfter(trimmed,' — ')}">
+                                                </div>
+                                            </th:block>
+                                        </div>
+                                    </div>
+                                </th:block>
+
+                                <!-- Вага якщо є -->
+                                <div class="order-meta" th:if="${order.weightKg != null}" style="padding: 8px 0 4px 12px;">
+                                    Вага: <strong th:text="${order.weightKg} + ' кг.'"></strong>
+                                </div>
+                            </div>
+
+                            <!-- Адреса + ціна -->
+                            <div class="order-card-footer">
+                                <div class="order-address-wrap">
+                                    <div class="order-delivery-time" th:if="${order.deadline != null}">
+                                        Доставка: <span th:text="${#temporals.format(order.deadline, 'HH:mm')}"></span>
+                                    </div>
+                                    <div class="order-address" th:text="${order.address}"></div>
+                                </div>
+                                <div class="order-price-wrap">
+                                    <span class="order-total">Загальна сума: <strong th:text="${order.price} + ' грн.'"></strong></span>
+                                    <span class="order-payment-status"
+                                          th:classappend="${order.paymentStatus.name() == 'PAID'} ? ' paid' : ' pending'"
+                                          th:text="'(' + ${order.paymentStatus.label} + ')'"></span>
+                                </div>
+                            </div>
+
+                            <!-- Кнопки -->
+                            <div class="order-card-actions">
+                                <button class="order-btn-chat" onclick="switchTab(event, 'chat'); initChat();">
+                                    💬 Чат з менеджером
+                                </button>
+                                <button th:if="${order.orderStatus.name() == 'NEW'}"
+                                        class="order-btn-cancel order-btn-cancel-active"
+                                        th:onclick="'cancelOrder(' + ${order.id} + ', false)'">
+                                    ✕ Скасувати замовлення
+                                </button>
+                                <button th:if="${order.orderStatus.name() == 'IN_PROGRESS'}"
+                                        class="order-btn-cancel order-btn-cancel-warning"
+                                        th:onclick="'cancelOrder(' + ${order.id} + ', true)'">
+                                    ✕ Скасувати замовлення
+                                </button>
+                                <span th:if="${order.orderStatus.name() == 'READY'}" class="order-cancel-disabled">
+                        ✕ Скасувати замовлення
+                    </span>
+                            </div>
+
+                        </div>
+                    </th:block>
+                </div>
             </div>
+
+
 
             <!-- Історія -->
             <div id="history" class="tab-content">
@@ -169,6 +297,27 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script>
+
+
+    function cancelOrder(orderId) {
+        if (!confirm('Скасувати замовлення №' + orderId + '?')) return;
+
+        fetch('/orders/' + orderId + '/cancel', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' }
+        })
+            .then(function(r) {
+                if (r.ok) {
+                    // Перезавантажуємо сторінку щоб оновити список
+                    window.location.reload();
+                } else {
+                    alert('Не вдалося скасувати замовлення');
+                }
+            })
+            .catch(function() { alert('Помилка з\'єднання'); });
+    }
+
     // ── Вкладки ──────────────────────────────────────────────────────────────
     function switchTab(event, tabId) {
         event.preventDefault();
