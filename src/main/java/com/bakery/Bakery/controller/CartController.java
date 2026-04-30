@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -108,6 +109,7 @@ public class CartController {
         String firstAiImage = null;
         String firstConstructorImg = null;
         String firstImagePath = null;   // фото першого звичайного товару
+        java.util.List<String> itemImages = new ArrayList<>(); // фото кожного товару
         Double totalWeight = null;
 
         for (Map<String, Object> item : cartItems) {
@@ -141,18 +143,21 @@ public class CartController {
                 totalWeight = (totalWeight == null ? 0 : totalWeight) + qty;
             }
 
-            // Зображення
-            if ("AI_DESIGN".equals(type) && firstAiImage == null) {
-                firstAiImage = String.valueOf(item.getOrDefault("aiImageUrl", ""));
-                if (firstAiImage.isEmpty() || "null".equals(firstAiImage)) firstAiImage = null;
-            } else if ("CONSTRUCTOR".equals(type) && firstConstructorImg == null) {
-                firstConstructorImg = String.valueOf(item.getOrDefault("constructorImg", ""));
-                if (firstConstructorImg.isEmpty() || "null".equals(firstConstructorImg)) firstConstructorImg = null;
-            } else if (firstImagePath == null) {
-                // Звичайний товар (FLAVOR, DESIGN, LINE) — зберігаємо фото асортименту
+            // Зображення — зберігаємо для кожного товару
+            String itemImg = "/img/2.png"; // дефолт
+            if ("AI_DESIGN".equals(type)) {
+                String ai = String.valueOf(item.getOrDefault("aiImageUrl", ""));
+                if (!ai.isEmpty() && !"null".equals(ai)) { itemImg = ai; if (firstAiImage == null) firstAiImage = ai; }
+            } else if ("CONSTRUCTOR".equals(type)) {
+                String ci = String.valueOf(item.getOrDefault("constructorImg", ""));
+                if (!ci.isEmpty() && !"null".equals(ci)) { itemImg = ci; if (firstConstructorImg == null) firstConstructorImg = ci; }
+            } else if (name.contains("Солодощі для ЗСУ") || name.contains("\uD83C\uDDFA\uD83C\uDDE6")) {
+                itemImg = "/img/energy_ua.png";
+            } else {
                 String ip = String.valueOf(item.getOrDefault("imagePath", ""));
-                if (!ip.isEmpty() && !"null".equals(ip)) firstImagePath = ip;
+                if (!ip.isEmpty() && !"null".equals(ip)) { itemImg = ip; if (firstImagePath == null) firstImagePath = ip; }
             }
+            itemImages.add(itemImg);
         }
 
         // Солодощі для ЗСУ
@@ -202,6 +207,10 @@ public class CartController {
         order.setAiImageUrl(firstAiImage);
         order.setConstructorImg(firstConstructorImg);
         order.setFirstImagePath(firstImagePath);
+        // Зберігаємо JSON масив фото всіх товарів
+        try {
+            order.setImagesJson(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(itemImages));
+        } catch (Exception e) { order.setImagesJson("[]"); }
         order.setPaymentStatus(payment);
         order.setOrderStatus(Order.OrderStatus.NEW);
         order.setCreatedAt(LocalDateTime.now());

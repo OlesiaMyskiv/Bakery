@@ -165,7 +165,7 @@
                                  th:attr="data-product-id=${p.id},
                                           data-name=${p.name},
                                           data-type=${p.catalogType.name()},
-                                          data-image=${p.imagePath},
+                                          data-image=${p.imagePath != null ? p.imagePath : ''},
                                           data-price-unit=${p.priceUnit},
                                           data-price=${p.price},
                                           data-discount=${p.hasDiscount() ? p.discountedPrice : ''},

@@ -809,3 +809,33 @@
     font-size: 16px;
     color: #777;
 }
+/* ── Історія замовлень ─────────────────────────────────────────────────────── */
+.order-card-done {
+    border-left: 4px solid #4CAF50;
+    opacity: 0.9;
+}
+
+.order-card-cancelled {
+    border-left: 4px solid #e57373;
+    opacity: 0.85;
+}
+
+.order-status-badge {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.badge-done {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.badge-cancelled {
+    background: #fce4ec;
+    color: #c62828;
+}

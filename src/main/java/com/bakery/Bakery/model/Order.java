@@ -42,6 +42,9 @@ public class Order {
     @Column(name = "first_image_path")
     private String firstImagePath;
 
+    @Column(name = "images_json", columnDefinition = "TEXT")
+    private String imagesJson;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status")
     private PaymentStatus paymentStatus = PaymentStatus.ON_DELIVERY;
@@ -110,6 +113,9 @@ public class Order {
 
     public String getFirstImagePath() { return firstImagePath; }
     public void setFirstImagePath(String firstImagePath) { this.firstImagePath = firstImagePath; }
+
+    public String getImagesJson() { return imagesJson; }
+    public void setImagesJson(String imagesJson) { this.imagesJson = imagesJson; }
 
     public PaymentStatus getPaymentStatus() { return paymentStatus; }
     public void setPaymentStatus(PaymentStatus paymentStatus) { this.paymentStatus = paymentStatus; }

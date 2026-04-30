@@ -96,25 +96,18 @@
                             <!-- Прогрес-бар -->
                             <div class="order-progress">
                                 <div class="progress-step">
-                                    <div class="step-dot"
-                                         th:classappend="${order.orderStatus.name() == 'NEW'} ? ' step-active' : ' step-done-dot'"></div>
+                                    <div class="step-dot" th:classappend="${order.orderStatus.name() == 'NEW'} ? ' step-active' : ' step-done-dot'"></div>
                                     <div class="step-label">ПРИЙНЯТО</div>
                                 </div>
-                                <div th:classappend="${order.orderStatus.name() != 'NEW'} ? 'progress-line-done' : 'progress-line'"
-                                     class="progress-line"></div>
+                                <div th:classappend="${order.orderStatus.name() != 'NEW'} ? 'progress-line-done' : 'progress-line'" class="progress-line"></div>
                                 <div class="progress-step">
-                                    <div class="step-dot"
-                                         th:classappend="${order.orderStatus.name() == 'IN_PROGRESS'} ? ' step-active' : (${order.orderStatus.name() == 'READY'} ? ' step-done-dot' : '')"></div>
-                                    <div class="step-label"
-                                         th:classappend="${order.orderStatus.name() == 'IN_PROGRESS'} ? ' step-label-active'">ГОТУЄТЬСЯ</div>
+                                    <div class="step-dot" th:classappend="${order.orderStatus.name() == 'IN_PROGRESS'} ? ' step-active' : (${order.orderStatus.name() == 'READY'} ? ' step-done-dot' : '')"></div>
+                                    <div class="step-label" th:classappend="${order.orderStatus.name() == 'IN_PROGRESS'} ? ' step-label-active'">ГОТУЄТЬСЯ</div>
                                 </div>
-                                <div th:classappend="${order.orderStatus.name() == 'READY'} ? 'progress-line-done' : 'progress-line'"
-                                     class="progress-line"></div>
+                                <div th:classappend="${order.orderStatus.name() == 'READY'} ? 'progress-line-done' : 'progress-line'" class="progress-line"></div>
                                 <div class="progress-step">
-                                    <div class="step-dot"
-                                         th:classappend="${order.orderStatus.name() == 'READY'} ? ' step-active'"></div>
-                                    <div class="step-label"
-                                         th:classappend="${order.orderStatus.name() == 'READY'} ? ' step-label-active'">ОЧІКУЄ В КОНДИТЕРСЬКІЙ</div>
+                                    <div class="step-dot" th:classappend="${order.orderStatus.name() == 'READY'} ? ' step-active'"></div>
+                                    <div class="step-label" th:classappend="${order.orderStatus.name() == 'READY'} ? ' step-label-active'">ОЧІКУЄ В КОНДИТЕРСЬКІЙ</div>
                                 </div>
                                 <div class="progress-line"></div>
                                 <div class="progress-step">
@@ -130,26 +123,35 @@
 
                                 <th:block th:each="item, stat : ${items}">
                                     <div class="order-item-row-full">
-                                        <!-- Фото: перший товар — реальне фото, решта — 🎂 -->
                                         <div class="order-item-img-wrap">
-                                            <img th:if="${stat.index == 0 and order.aiImageUrl != null}"
-                                                 th:src="${order.aiImageUrl}" class="order-item-img" alt="">
-                                            <img th:if="${stat.index == 0 and order.aiImageUrl == null and order.constructorImg != null}"
-                                                 th:src="${order.constructorImg}" class="order-item-img" alt="">
-                                            <img th:if="${stat.index == 0 and order.aiImageUrl == null and order.constructorImg == null and order.firstImagePath != null}"
-                                                 th:src="${order.firstImagePath}" class="order-item-img" alt="">
-                                            <div th:if="${stat.index != 0 or (order.aiImageUrl == null and order.constructorImg == null and order.firstImagePath == null)}"
-                                                 class="order-item-img-placeholder">🎂</div>
+                                            <!--
+                                              Логіка фото:
+                                              1. Якщо є imagesJson — беремо фото за індексом
+                                              2. Якщо перший товар і є firstImagePath — показуємо
+                                              3. Інакше — 🎂
+                                              (imagesJson парситься в JS після завантаження)
+                                            -->
+                                            <img th:if="${stat.index == 0 and order.firstImagePath != null}"
+                                                 th:src="${order.firstImagePath}"
+                                                 class="order-item-img" alt=""
+                                                 th:attr="data-order-id=${order.id}, data-item-index=0">
+                                            <div th:unless="${stat.index == 0 and order.firstImagePath != null}"
+                                                 class="order-item-img-placeholder"
+                                                 th:attr="data-order-id=${order.id}, data-item-index=${stat.index}"
+                                                 th:id="'img-placeholder-' + ${order.id} + '-' + ${stat.index}">🎂</div>
+
+                                            <!-- Прихований JSON фото для JS -->
+                                            <span th:if="${stat.index == 0 and order.imagesJson != null}"
+                                                  th:attr="data-images-json=${order.imagesJson}"
+                                                  th:id="'images-data-' + ${order.id}"
+                                                  style="display:none;"></span>
                                         </div>
 
-                                        <!-- Назва і ціна -->
                                         <div class="order-item-info">
                                             <th:block th:with="trimmed=${#strings.trim(item)}">
-                                                <!-- Назва — до першого ' — ' -->
                                                 <div class="order-item-name"
                                                      th:text="${#strings.contains(trimmed,' — ') ? #strings.substringBefore(trimmed,' — ') : trimmed}">
                                                 </div>
-                                                <!-- Ціна — після першого ' — ' -->
                                                 <div class="order-item-price"
                                                      th:if="${#strings.contains(trimmed,' — ')}"
                                                      th:text="${#strings.substringAfter(trimmed,' — ')}">
@@ -159,7 +161,6 @@
                                     </div>
                                 </th:block>
 
-                                <!-- Вага якщо є -->
                                 <div class="order-meta" th:if="${order.weightKg != null}" style="padding: 8px 0 4px 12px;">
                                     Вага: <strong th:text="${order.weightKg} + ' кг.'"></strong>
                                 </div>
@@ -208,10 +209,75 @@
 
 
 
+
             <!-- Історія -->
             <div id="history" class="tab-content">
-                <h2 class="content-title">Історія замовлень</h2>
-                <div class="empty-state"><p>Історія порожня.</p></div>
+                <h2 class="content-title" style="text-align:center;">Історія замовлень</h2>
+
+                <div th:if="${historyOrders == null or historyOrders.empty}" class="empty-state">
+                    <p>Історія замовлень порожня.</p>
+                </div>
+
+                <div class="orders-list" th:unless="${historyOrders == null or historyOrders.empty}">
+                    <th:block th:each="order : ${historyOrders}">
+                        <div class="order-card"
+                             th:classappend="${order.orderStatus.name() == 'CANCELLED'} ? ' order-card-cancelled' : ' order-card-done'">
+
+                            <!-- Заголовок -->
+                            <div class="order-card-header">
+                                <span class="order-num">№ <span th:text="${order.id}"></span></span>
+                                <span class="order-status-badge"
+                                      th:classappend="${order.orderStatus.name() == 'CANCELLED'} ? ' badge-cancelled' : ' badge-done'"
+                                      th:text="${order.orderStatus.label}"></span>
+                                <span class="order-date" th:if="${order.createdAt != null}"
+                                      th:text="${#temporals.format(order.createdAt, 'dd.MM.yyyy')}"></span>
+                            </div>
+
+                            <!-- Товари -->
+                            <div class="order-items-list"
+                                 th:with="rawItems=${order.composition != null ? order.composition : ''},
+                                          items=${#strings.contains(rawItems,'|') ? #strings.arraySplit(rawItems,'|') : #strings.arraySplit(rawItems,';')}">
+                                <th:block th:each="item, stat : ${items}">
+                                    <div class="order-item-row-full">
+                                        <div class="order-item-img-wrap">
+                                            <img th:if="${stat.index == 0 and order.aiImageUrl != null}"
+                                                 th:src="${order.aiImageUrl}" class="order-item-img" alt="">
+                                            <img th:if="${stat.index == 0 and order.aiImageUrl == null and order.constructorImg != null}"
+                                                 th:src="${order.constructorImg}" class="order-item-img" alt="">
+                                            <img th:if="${stat.index == 0 and order.aiImageUrl == null and order.constructorImg == null and order.firstImagePath != null}"
+                                                 th:src="${order.firstImagePath}" class="order-item-img" alt="">
+                                            <div th:if="${stat.index != 0 or (order.aiImageUrl == null and order.constructorImg == null and order.firstImagePath == null)}"
+                                                 class="order-item-img-placeholder">🎂</div>
+                                        </div>
+                                        <div class="order-item-info">
+                                            <th:block th:with="trimmed=${#strings.trim(item)}">
+                                                <div class="order-item-name"
+                                                     th:text="${#strings.contains(trimmed,' — ') ? #strings.substringBefore(trimmed,' — ') : trimmed}"></div>
+                                                <div class="order-item-price"
+                                                     th:if="${#strings.contains(trimmed,' — ')}"
+                                                     th:text="${#strings.substringAfter(trimmed,' — ')}"></div>
+                                            </th:block>
+                                        </div>
+                                    </div>
+                                </th:block>
+                            </div>
+
+                            <!-- Футер -->
+                            <div class="order-card-footer">
+                                <div class="order-address-wrap">
+                                    <div class="order-address" th:text="${order.address}"></div>
+                                    <div class="order-delivery-time" th:if="${order.deadline != null}">
+                                        Дата: <span th:text="${#temporals.format(order.deadline, 'dd.MM.yyyy HH:mm')}"></span>
+                                    </div>
+                                </div>
+                                <div class="order-price-wrap" th:if="${order.price != null}">
+                                    <span class="order-total">Сума: <strong th:text="${order.price} + ' грн.'"></strong></span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </th:block>
+                </div>
             </div>
 
             <!-- Список бажань -->
@@ -485,6 +551,27 @@
         checkUnreadStatus();
         // І повторюємо кожні 5 секунд
         setInterval(checkUnreadStatus, 5000);
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('[id^="images-data-"]').forEach(function(el) {
+            var orderId = el.id.replace('images-data-', '');
+            try {
+                var images = JSON.parse(el.getAttribute('data-images-json'));
+                images.forEach(function(imgSrc, idx) {
+                    var placeholder = document.getElementById('img-placeholder-' + orderId + '-' + idx);
+                    if (placeholder && imgSrc && imgSrc !== '/img/2.png') {
+                        var imgEl = document.createElement('img');
+                        imgEl.src = imgSrc;
+                        imgEl.className = 'order-item-img';
+                        imgEl.alt = '';
+                        placeholder.parentNode.replaceChild(imgEl, placeholder);
+                    } else if (idx === 0) {
+                        // Перший товар — якщо є firstImagePath вже показано через th:if
+                    }
+                });
+            } catch(e) {}
+        });
     });
 
 </script>
