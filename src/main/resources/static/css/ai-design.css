@@ -243,3 +243,75 @@
     opacity: 0.9;
     line-height: 1.4;
 }
+/* ── ШІ-дизайн: кнопки після зображення ───────────────────── */
+.ai-result-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    width: 100%;
+}
+
+.ai-result-price {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1.1rem;
+    color: #1a1a1a;
+    padding: 10px 14px;
+    border-top: 1px solid #f0ece8;
+    background: white;
+}
+
+.ai-result-actions {
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border-top: 1px solid #f0f0f0;
+    border-radius: 0 0 14px 14px;
+    overflow: hidden;
+}
+
+/* Кнопка "додати в корзину" — рисочка + кружечок */
+.ai-btn-cart {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.6rem 0.5rem 0.8rem;
+    background: none;
+    border: none;
+    border-bottom: 1px solid #f5f0ec;
+    cursor: pointer;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.9rem;
+    color: #4a8a9a;
+    width: 100%;
+}
+
+.ai-btn-cart:hover { background: #f0f8f9; }
+.ai-btn-cart:hover .btn-circle { background: #4a8a9a; }
+
+/* Кнопка "Додати в список бажань" */
+.ai-btn-wishlist {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.4rem 0.6rem 0.4rem 0.8rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+.ai-btn-wishlist:hover { background: #fff5f6; }
+
+.ai-wishlist-label {
+    font-size: 0.85rem;
+    color: #DF7481;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+/* Серце і btn-line-circle — спільні стилі (з assortment.css) */
+.ai-btn-cart .btn-text  { font-size: 0.9rem; color: #4a8a9a; }
+.ai-btn-cart .btn-line  { width: 32px; height: 1px; background: #4a8a9a; transition: width .25s; }
+.ai-btn-cart .btn-circle { width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid #4a8a9a; transition: background .25s; }
+.ai-btn-cart .btn-line-circle { display: flex; align-items: center; }
+.ai-btn-cart:hover .btn-line { width: 20px; }

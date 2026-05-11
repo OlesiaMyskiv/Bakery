@@ -1,0 +1,197 @@
+/* ── Головний контейнер (Overlay) ────────────────────────────── */
+.order-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 3000;
+    align-items: center;
+    justify-content: center;
+}
+
+.order-modal-overlay.open {
+    display: flex;
+}
+
+/* ── Модальне вікно (Box) ────────────────────────────────────── */
+.order-modal-box {
+    background: white;
+    border-radius: 20px;
+    width: 94%;
+    max-width: 620px;
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
+    overflow: hidden;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+/* ── Шапка (Header) ─────────────────────────────────────────── */
+.order-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 24px;
+    border-bottom: 1px solid #f0ece8;
+    flex-shrink: 0;
+}
+
+.order-modal-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.order-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #aaa;
+    cursor: pointer;
+    padding: 0;
+}
+
+.order-modal-close:hover {
+    color: #e74c3c;
+}
+
+/* ── Тіло модалки (Body) ─────────────────────────────────────── */
+.order-modal-body {
+    overflow-y: auto;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex: 1;
+}
+
+/* ── Список товарів (Items) ──────────────────────────────────── */
+.order-modal-items {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #f0ece8;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.omi-item-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-bottom: 1px solid #f8f4f0;
+}
+
+.omi-item-row:last-child {
+    border-bottom: none;
+}
+
+.omi-item-img,
+.omi-item-img-placeholder {
+    width: 58px;
+    height: 52px;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.omi-item-img {
+    object-fit: cover;
+}
+
+.omi-item-img-placeholder {
+    background: #faf3ee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+}
+
+.omi-item-name {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #1a1a1a;
+}
+
+.omi-item-price {
+    font-size: 0.88rem;
+    color: #888;
+}
+
+/* ── Інфо-сітка (Info Grid) ─────────────────────────────────── */
+.order-modal-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.omi-block {
+    background: #faf8f5;
+    border-radius: 10px;
+    padding: 10px 14px;
+}
+
+.omi-label {
+    font-size: 0.78rem;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.omi-value {
+    font-size: 1rem;
+    color: #1a1a1a;
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+.omi-deadline {
+    color: #e8829a;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+/* ── Футер (Footer & Buttons) ───────────────────────────────── */
+.order-modal-footer {
+    display: flex;
+    gap: 10px;
+    padding: 16px 24px;
+    border-top: 1px solid #f0ece8;
+    flex-shrink: 0;
+}
+
+.order-modal-btn-bakers,
+.order-modal-btn-close {
+    padding: 12px;
+    border-radius: 10px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.order-modal-btn-bakers {
+    flex: 1;
+    background: #3AA6B9;
+    color: white;
+    border: none;
+    font-weight: 700;
+}
+
+.order-modal-btn-bakers:hover {
+    background: #2d8a9e;
+}
+
+.order-modal-btn-close {
+    padding-left: 24px;
+    padding-right: 24px;
+    background: none;
+    border: 1px solid #e0e0e0;
+    color: #888;
+}
+
+.order-modal-btn-close:hover {
+    border-color: #aaa;
+    color: #666;
+}

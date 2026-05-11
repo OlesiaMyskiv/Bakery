@@ -1,0 +1,327 @@
+/* ══════════════════════════════════════════════════════════════
+   БОНУСИ — profile + cart
+   Додати в кінець profile.css і cart.css
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Баланс ──────────────────────────────────────────────────── */
+.bonus-balance-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f0fafa;
+    border: 1.5px solid #C1ECE4;
+    border-radius: 14px;
+    padding: 18px 24px;
+    margin-bottom: 14px;
+}
+
+.bonus-balance-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    color: #555;
+}
+
+.bonus-icon-lg {
+    width: 36px;
+    height: 36px;
+    opacity: 0.85;
+}
+
+.bonus-balance-amount {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.bonus-amount-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: #3AA6B9;
+    line-height: 1;
+}
+
+.bonus-amount-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: #888;
+    letter-spacing: 0.08em;
+}
+
+/* ── Як це працює ────────────────────────────────────────────── */
+.bonus-info-block {
+    background: white;
+    border: 1px solid #e8e8e8;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: #555;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.bonus-info-block strong {
+    white-space: nowrap;
+    color: #1a1a1a;
+}
+
+/* ── Головна сітка прогрес + історія ────────────────────────── */
+.bonus-main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+@media (max-width: 700px) {
+    .bonus-main-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Прогрес ─────────────────────────────────────────────────── */
+.bonus-progress-card {
+    background: white;
+    border: 1px solid #f0f0f0;
+    border-radius: 14px;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.bonus-progress-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    text-align: center;
+}
+
+.bonus-levels-row {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.9rem;
+    color: #888;
+}
+
+.bonus-progress-bar-wrap {
+    position: relative;
+    height: 10px;
+    background: #f0f0f0;
+    border-radius: 5px;
+    overflow: visible;
+}
+
+.bonus-progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #C1ECE4, #3AA6B9);
+    border-radius: 5px;
+    transition: width 0.6s ease;
+    position: relative;
+}
+
+.bonus-progress-bar-fill::after {
+    content: '';
+    position: absolute;
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    background: #FF9EAA;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 0 0 2px rgba(255,158,170,0.3);
+}
+
+.bonus-progress-pct {
+    position: absolute;
+    right: 0;
+    top: -22px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.85rem;
+    color: #3AA6B9;
+    font-weight: 700;
+}
+
+.bonus-to-next {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.9rem;
+    color: #777;
+    text-align: center;
+}
+
+/* Таблиця рівнів */
+.bonus-levels-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 4px;
+    border-top: 1px solid #f0f0f0;
+    padding-top: 10px;
+}
+
+.bonus-level-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.9rem;
+    padding: 4px 0;
+    border-bottom: 1px dashed #f5f5f5;
+}
+
+.bll-name    { color: #1a1a1a; font-weight: 600; flex: 1; }
+.bll-range   { color: #888; flex: 1; text-align: center; }
+.bll-cashback { color: #3AA6B9; font-weight: 700; min-width: 40px; text-align: right; }
+
+/* ── Історія ─────────────────────────────────────────────────── */
+.bonus-history-card {
+    background: white;
+    border: 1px solid #f0f0f0;
+    border-radius: 14px;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.bonus-history-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.bonus-history-empty {
+    font-family: 'Cormorant Garamond', serif;
+    color: #aaa;
+    font-size: 0.95rem;
+    text-align: center;
+    padding: 20px 0;
+}
+
+.bonus-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.bonus-history-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid #f5f5f5;
+}
+
+.bonus-history-row:last-child { border-bottom: none; }
+
+.bonus-hist-icon {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.bonus-hist-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+.bonus-hist-amount {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.bonus-hist-amount.plus  { color: #27ae60; }
+.bonus-hist-amount.minus { color: #e74c3c; }
+
+.bonus-hist-desc {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.bonus-hist-date {
+    font-size: 0.8rem;
+    color: #aaa;
+}
+
+.bonus-expires-note {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.85rem;
+    color: #aaa;
+    text-align: center;
+    margin-top: 4px;
+    border-top: 1px solid #f5f5f5;
+    padding-top: 8px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   КОШИК — блок "Використати бонуси"
+   Додати в кінець cart.css
+   ══════════════════════════════════════════════════════════════ */
+
+.bonus-use-block {
+    background: #f0fafa;
+    border: 1px solid #C1ECE4;
+    border-radius: 10px;
+    padding: 0.8rem 1rem;
+    margin: 0.6rem 0;
+}
+
+.bonus-use-label {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    cursor: pointer;
+}
+
+.bonus-use-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #3AA6B9;
+    flex-shrink: 0;
+}
+
+.bonus-use-icon {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    opacity: 0.85;
+}
+
+.bonus-use-text {
+    flex: 1;
+}
+
+.bonus-use-text strong {
+    display: block;
+    font-size: 1rem;
+    color: #1a1a1a;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+.bonus-use-text small {
+    font-size: 0.85rem;
+    color: #666;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+.bonus-use-amount {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #27ae60;
+    white-space: nowrap;
+}

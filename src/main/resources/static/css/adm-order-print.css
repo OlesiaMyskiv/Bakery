@@ -1,0 +1,215 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    background: white;
+    color: #1a1a1a;
+    padding: 32px 40px;
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+/* Шапка */
+.print-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2px solid #1a1a1a;
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+}
+
+.print-logo {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.print-order-num {
+    font-size: 1.1rem;
+    color: #555;
+    text-align: right;
+}
+
+.print-order-num strong {
+    display: block;
+    font-size: 1.4rem;
+    color: #1a1a1a;
+}
+
+/* Дедлайн — великий і помітний */
+.print-deadline-block {
+    background: #1a1a1a;
+    color: white;
+    border-radius: 12px;
+    padding: 16px 24px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.print-deadline-label {
+    font-size: 0.9rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.7;
+}
+
+.print-deadline-value {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+/* Клієнт */
+.print-client-block {
+    display: flex;
+    gap: 32px;
+    margin-bottom: 24px;
+    background: #f8f6f3;
+    border-radius: 10px;
+    padding: 14px 18px;
+}
+
+.print-field { display: flex; flex-direction: column; gap: 2px; }
+.print-field-label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: #888; }
+.print-field-value { font-size: 1.05rem; font-weight: 700; }
+
+/* Склад замовлення */
+.print-section-title {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #888;
+    margin-bottom: 8px;
+}
+
+.print-items {
+    border: 1.5px solid #1a1a1a;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.print-item-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e8e8e8;
+}
+
+.print-item-row:last-child { border-bottom: none; }
+
+/* Обгортка фото — фіксований розмір з обрізкою */
+.print-img-wrap {
+    width: 72px;
+    height: 64px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #f0ece8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.print-item-img {
+    width: 72px;
+    height: 64px;
+    object-fit: cover;
+    display: block;
+    flex-shrink: 0;
+}
+
+.print-item-img-placeholder {
+    font-size: 1.6rem;
+}
+
+@media print {
+    .print-img-wrap {
+        width: 72px !important;
+        height: 64px !important;
+        overflow: hidden !important;
+        flex-shrink: 0 !important;
+    }
+    .print-item-img {
+        width: 72px !important;
+        height: 64px !important;
+        object-fit: cover !important;
+    }
+    .print-item-row { page-break-inside: avoid; }
+    .print-deadline-block { page-break-after: avoid; }
+    /* Заборонені будь-які інші img на сторінці від розтягування */
+    img:not(.print-item-img) { display: none; }
+}
+
+.print-item-name { font-size: 1.1rem; font-weight: 700; }
+.print-item-qty  { font-size: 1rem; color: #555; margin-top: 2px; }
+
+/* Нижній блок */
+.print-bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.print-bottom-block {
+    background: #f8f6f3;
+    border-radius: 10px;
+    padding: 12px 16px;
+}
+
+/* Коментар */
+.print-comment {
+    border: 1.5px dashed #aaa;
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    font-size: 1rem;
+    color: #555;
+    font-style: italic;
+}
+
+/* Підпис */
+.print-footer {
+    border-top: 1px solid #e0e0e0;
+    padding-top: 14px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: #aaa;
+}
+
+/* Кнопки (не друкуються) */
+.no-print {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    display: flex; gap: 10px;
+}
+
+.btn-print-now {
+    background: #1a1a1a; color: white;
+    border: none; border-radius: 10px;
+    padding: 12px 28px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem; font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-close-print {
+    background: white; color: #1a1a1a;
+    border: 1.5px solid #1a1a1a; border-radius: 10px;
+    padding: 12px 20px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem; cursor: pointer;
+}
+
+@media print {
+    .no-print { display: none !important; }
+    body { padding: 16px 20px; }
+}

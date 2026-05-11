@@ -1,0 +1,166 @@
+/* ══════════════════════════════════════════════════════════════
+   ДОДАТИ В КІНЕЦЬ assortment.css
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Кнопка "Додати в список бажань" ────────────────────────── */
+.wishlist-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.4rem 0.6rem 0.4rem 0.8rem;
+    border-top: 1px solid #f5f0ec;
+    cursor: pointer;
+    background: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    width: 100%;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+}
+
+.wishlist-btn:hover { background: #fff5f6; }
+
+.wishlist-label {
+    font-size: 0.85rem;
+    color: #DF7481;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+/* ── SVG серце ───────────────────────────────────────────────── */
+.heart-icon {
+    flex-shrink: 0;
+    transition: transform 0.2s ease, fill 0.2s ease;
+    fill: none;
+    stroke: #DF7481;
+}
+
+.heart-icon.heart-active {
+    fill: #DF7481;
+}
+
+/* Пульс при кліку */
+@keyframes heartPulse {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.4); }
+    70%  { transform: scale(0.9); }
+    100% { transform: scale(1); }
+}
+
+.heart-icon.heart-pulse {
+    animation: heartPulse 0.4s ease;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ДОДАТИ В КІНЕЦЬ profile.css  (список бажань у профілі)
+   ══════════════════════════════════════════════════════════════ */
+
+.wishlist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.2rem;
+}
+
+.wishlist-item-card {
+    background: white;
+    border: 1px solid #f0e8e0;
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.wishlist-item-img-wrap {
+    height: 180px;
+    overflow: hidden;
+    background: #faf3ee;
+}
+
+.wishlist-item-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.wishlist-item-img-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+}
+
+.wishlist-item-body {
+    padding: 0.9rem 1rem 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    flex: 1;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+.wishlist-item-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.wishlist-item-weight, .wishlist-item-price {
+    font-size: 0.95rem;
+    color: #666;
+}
+
+.wishlist-item-discount {
+    font-size: 0.9rem;
+    color: #3a7a3a;
+    font-weight: 700;
+}
+
+.wishlist-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    border-top: 1px solid #f0ece8;
+    padding-top: 0.6rem;
+}
+
+/* Кнопка "додати в корзину" — стиль як в асортименті */
+.wishlist-add-cart-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.4rem 0.5rem 0.4rem 0.7rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.9rem;
+    color: #4a8a9a;
+}
+
+.wishlist-add-cart-btn:hover .btn-circle { background: #4a8a9a; }
+
+/* Кнопка видалення з бажань */
+.wishlist-remove-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.wishlist-remove-btn .heart-icon {
+    fill: #DF7481;
+    stroke: #DF7481;
+}
+
+.wishlist-remove-btn:hover .heart-icon {
+    fill: none;
+}

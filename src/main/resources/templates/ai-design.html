@@ -55,10 +55,39 @@
                 <p>Тут з'явиться ваш дизайн після генерації</p>
             </div>
 
-            <img th:if="${generatedImageUrl != null}"
-                 th:src="${generatedImageUrl}"
-                 alt="Ваш торт"
-                 class="generated-image">
+            <div th:if="${generatedImageUrl != null}" class="ai-result-wrap">
+                <img th:src="${generatedImageUrl}"
+                     alt="Ваш торт"
+                     class="generated-image"
+                     th:id="'ai-generated-img'"
+                     th:attr="data-url=${generatedImageUrl}">
+
+                <div class="ai-result-price">
+                    ШІ-дизайн торта — <strong>1000 грн</strong>
+                </div>
+
+                <div class="ai-result-actions">
+                    <!-- Додати в корзину -->
+                    <button class="ai-btn-cart" th:attr="data-image-url=${generatedImageUrl}" onclick="addAiDesignToCart(this.dataset.imageUrl, 'ШІ-дизайн торта')">
+                        <span class="btn-text">додати в корзину</span>
+                        <div class="btn-line-circle">
+                            <div class="btn-line"></div>
+                            <div class="btn-circle"></div>
+                        </div>
+                    </button>
+
+                    <!-- Додати в список бажань -->
+                    <button class="ai-btn-wishlist" id="aiWishlistBtn"
+                            th:attr="data-image-url=${generatedImageUrl}" onclick="toggleAiWishlist(this.dataset.imageUrl)">
+                        <span class="ai-wishlist-label">Додати в список бажань</span>
+                        <svg class="heart-icon" width="22" height="22" viewBox="0 0 24 24"
+                             fill="none" stroke="#DF7481" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
         </div>
 
     </section>
@@ -119,5 +148,42 @@
     }
 </script>
 
+<script src="/js/cart.js"></script>
+<script src="/js/wishlist.js"></script>
+<script th:inline="javascript">
+    function toggleAiWishlist(imageUrl) {
+        var item = {
+            id:            'ai_design_' + Date.now(),
+            type:          'AI_DESIGN',
+            productId:     null,
+            name:          'ШІ-дизайн торта',
+            imagePath:     imageUrl,
+            priceUnit:     'грн/шт',
+            unitPrice:     1000,
+            discountPrice: null,
+            quantity:      1,
+            unit:          'шт',
+            urgency:       null,
+            aiImageUrl:    imageUrl,
+            description:   'Ваш унікальний ШІ-дизайн торта'
+        };
+
+        // Використовуємо фіксований id для AI дизайну (щоб можна було видалити)
+        item.id = 'ai_' + imageUrl.split('/').pop().split('.')[0];
+
+        var added = toggleWishlist(item);
+        var btn   = document.getElementById('aiWishlistBtn');
+        if (btn) {
+            var heart = btn.querySelector('.heart-icon');
+            if (heart) {
+                heart.classList.toggle('heart-active', added);
+                heart.classList.add('heart-pulse');
+                setTimeout(function() { heart.classList.remove('heart-pulse'); }, 400);
+            }
+            var label = btn.querySelector('.ai-wishlist-label');
+            if (label) label.textContent = added ? 'В списку бажань' : 'Додати в список бажань';
+        }
+    }
+</script>
 </body>
 </html>

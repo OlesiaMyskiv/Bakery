@@ -85,7 +85,7 @@
                             th:text="${orderCountMap != null and orderCountMap[u.id] != null ? orderCountMap[u.id] : 0}">0</td>
                         <td style="text-align:center;"
                             th:text="${activeCountMap != null and activeCountMap[u.id] != null ? activeCountMap[u.id] : 0}">0</td>
-                        <td th:text="${totalSpentMap != null and totalSpentMap[u.id] != null ? totalSpentMap[u.id] + ' грн' : '0 грн'}">0 грн</td>
+                        <td th:text="${totalSumMap != null and totalSumMap[u.id] != null ? totalSumMap[u.id] + ' грн' : '0 грн'}">0 грн</td>
                         <td>
                             <!-- Кнопка Історія — дизайн як на фото -->
                             <button class="btn-history-modal"

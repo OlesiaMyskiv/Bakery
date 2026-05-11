@@ -74,12 +74,10 @@ function renderConstructor() {
                 <div class="drag-handle" title="Потягніть">&#8597;</div>
                 <div class="cake-layer-row">
                     <button class="arrow-btn" onclick="changeLayer(${index}, -1)">&#8592;</button>
-                    
                     <div class="layer-image-container">
                         <img src="${selectedItem.image || ''}" alt="${selectedItem.name}" style="${imgStyle} display: ${selectedItem.image ? 'block' : 'none'};">
                         <div style="width: 100%; height: ${blockHeight}; background-color: ${selectedItem.color}; display: ${selectedItem.image ? 'none' : 'block'}; margin: 0; padding: 0;"></div>
                     </div>
-
                     <button class="arrow-btn" onclick="changeLayer(${index}, 1)">&#8594;</button>
                 </div>
             </div>
@@ -107,45 +105,33 @@ function renderConstructor() {
     calculatePrice();
 }
 
-// Функція додавання шару (тепер вона ще й закриває вікно!)
 function addNewLayer(type, title, selectedIndex) {
     const newLayer = { type: type, title: title, selectedIndex: selectedIndex };
     const insertIndex = currentCake.length > 1 ? currentCake.length - 1 : currentCake.length;
     currentCake.splice(insertIndex, 0, newLayer);
-    closeIngredientsModal(); // Закриваємо попап
+    closeIngredientsModal();
     renderConstructor();
 }
 
-// Функції для відкриття/закриття красивого вікна
 function openIngredientsModal() { document.getElementById('ingredientsModal').style.display = 'flex'; }
 function closeIngredientsModal() { document.getElementById('ingredientsModal').style.display = 'none'; }
 
-// Будуємо 3 колонки у вікні
 function buildModalMenu() {
     const colSponge = document.getElementById('modal-col-sponge');
     const colCream = document.getElementById('modal-col-cream');
     const colFilling = document.getElementById('modal-col-filling');
 
-    // Очищаємо колонки (залишаємо тільки заголовки)
     colSponge.innerHTML = '<div class="ingredients-category-title">🎂 Бісквіти</div>';
     colCream.innerHTML = '<div class="ingredients-category-title">🍦 Креми</div>';
     colFilling.innerHTML = '<div class="ingredients-category-title">🍒 Начинки</div>';
 
-    // Наповнюємо Бісквіти
     ingredients.sponge.forEach((item, index) => {
-        const safeName = item.name.replace(/'/g, "\\'");
         colSponge.insertAdjacentHTML('beforeend', `<button class="ingredient-btn" onclick="addNewLayer('sponge', 'Бісквіт', ${index})">${item.name}</button>`);
     });
-
-    // Наповнюємо Креми
     ingredients.cream.forEach((item, index) => {
-        const safeName = item.name.replace(/'/g, "\\'");
         colCream.insertAdjacentHTML('beforeend', `<button class="ingredient-btn" onclick="addNewLayer('cream', 'Крем', ${index})">${item.name}</button>`);
     });
-
-    // Наповнюємо Начинки
     ingredients.filling.forEach((item, index) => {
-        const safeName = item.name.replace(/'/g, "\\'");
         colFilling.insertAdjacentHTML('beforeend', `<button class="ingredient-btn" onclick="addNewLayer('filling', 'Начинка', ${index})">${item.name}</button>`);
     });
 }
@@ -179,16 +165,130 @@ function changeLayer(layerIndex, direction) {
     renderConstructor();
 }
 
+// ── ЦІНА: середнє pricePerKg × вага × 5 ──────────────────────────────────────
 function calculatePrice() {
     const guests = parseInt(document.getElementById('guests-count').value) || 1;
-    const weightKg = (guests * 0.25).toFixed(2);
+    const weightKg = parseFloat((guests * 0.12 + 0.15).toFixed(2));
     document.getElementById('recommended-weight').innerText = weightKg + ' кг';
-    let totalBasePrice = 0;
-    currentCake.forEach(layer => { totalBasePrice += ingredients[layer.type][layer.selectedIndex].pricePerKg; });
-    document.getElementById('total-price').innerText = Math.round((totalBasePrice / currentCake.length) * weightKg).toLocaleString('uk-UA') + ' грн';
+
+    let totalPricePerKg = 0;
+    currentCake.forEach(layer => {
+        totalPricePerKg += ingredients[layer.type][layer.selectedIndex].pricePerKg;
+    });
+    const avgPricePerKg = totalPricePerKg / currentCake.length;
+    const total = Math.round(avgPricePerKg * weightKg * 5);
+
+    document.getElementById('total-price').innerText = total.toLocaleString('uk-UA') + ' грн';
+}
+
+// ── CANVAS: зливаємо шари в одне зображення ───────────────────────────────────
+function buildCakeImage(width = 450) {
+    return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        const CANVAS_WIDTH = width;
+
+        // Розраховуємо висоту кожного шару
+        const layerHeights = currentCake.map(layer => {
+            if (layer.type === 'sponge') return 120;
+            if (layer.type === 'filling') return 60;
+            return 40;
+        });
+
+        const totalHeight = layerHeights.reduce((a, b) => a + b, 0);
+        canvas.width = CANVAS_WIDTH;
+        canvas.height = totalHeight;
+
+        const ctx = canvas.getContext('2d');
+        const layers = currentCake.map((layer, i) => ({
+            item: ingredients[layer.type][layer.selectedIndex],
+            height: layerHeights[i]
+        }));
+
+        let loadedCount = 0;
+        let currentY = 0;
+
+        // Малюємо шари по черзі зверху вниз
+        function drawNext(index) {
+            if (index >= layers.length) {
+                resolve(canvas.toDataURL('image/png'));
+                return;
+            }
+
+            const { item, height } = layers[index];
+            const y = currentY;
+            currentY += height;
+
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+
+            img.onload = () => {
+                ctx.drawImage(img, 0, y, CANVAS_WIDTH, height);
+                drawNext(index + 1);
+            };
+
+            img.onerror = () => {
+                // Якщо картинка не завантажилась — малюємо кольоровий прямокутник
+                ctx.fillStyle = item.color;
+                ctx.fillRect(0, y, CANVAS_WIDTH, height);
+                drawNext(index + 1);
+            };
+
+            img.src = item.image;
+        }
+
+        drawNext(0);
+    });
+}
+
+// ── ДОДАТИ В КОШИК ────────────────────────────────────────────────────────────
+async function addCakeToCart() {
+    const btn = document.querySelector('.add-to-cart-btn');
+    btn.disabled = true;
+    btn.innerText = 'Зберігаємо...';
+
+    try {
+        // 220px — компактно для кошика і localStorage
+        const imageDataUrl = await buildCakeImage(220);
+
+        const guests = parseInt(document.getElementById('guests-count').value) || 1;
+        const weightKg = parseFloat((guests * 0.12 + 0.15).toFixed(2));
+
+        let totalPricePerKg = 0;
+        currentCake.forEach(layer => {
+            totalPricePerKg += ingredients[layer.type][layer.selectedIndex].pricePerKg;
+        });
+        const avgPricePerKg = totalPricePerKg / currentCake.length;
+        const total = Math.round(avgPricePerKg * weightKg * 5);
+
+        // Формуємо опис складу
+        const composition = currentCake.map((layer, i) => {
+            const item = ingredients[layer.type][layer.selectedIndex];
+            return `${layer.title}: ${item.name}`;
+        }).join(' | ');
+
+        // Викликаємо addConstructorToCart з cart.js
+        var guestsLabel = guests + ' осіб · ' + weightKg + ' кг';
+        addConstructorToCart(imageDataUrl, composition, total, guestsLabel);
+
+        btn.innerText = 'Додано ✓';
+        btn.style.backgroundColor = '#4CAF50';
+
+        setTimeout(() => {
+            window.location.href = '/cart';
+        }, 800);
+
+    } catch (e) {
+        console.error(e);
+        btn.disabled = false;
+        btn.innerText = 'Додати в кошик';
+        alert('Помилка при збереженні. Спробуйте ще раз.');
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     renderConstructor();
-    buildModalMenu(); // Запускаємо побудову вікна
+    buildModalMenu();
+
+    // Прив'язуємо кнопку "Додати в кошик"
+    document.querySelector('.add-to-cart-btn').addEventListener('click', addCakeToCart);
 });

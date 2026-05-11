@@ -10,6 +10,7 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" th:href="@{/css/header.css}">
     <link rel="stylesheet" th:href="@{/css/cart.css}">
+    <link rel="stylesheet" th:href="@{/css/bonus.css}">
 </head>
 <body>
 
@@ -47,6 +48,10 @@
                 <div class="summary-row" id="militaryRow" style="color:#3a7a3a;">
                     <span>🇺🇦 Солодощі для ЗСУ:</span>
                     <span id="militaryAmount" style="display:none;">+ 100 грн</span>
+                </div>
+                <div class="summary-row" id="bonusDiscountRow" style="display:none;color:#3a7a3a;">
+                    <span>Знижка бонусами:</span>
+                    <span id="bonusDiscountAmount">- 0 грн</span>
                 </div>
                 <div class="summary-row total-row">
                     <span>Разом до сплати:</span>
@@ -138,6 +143,20 @@
                             </div>
                         </label>
                     </div>
+
+                    <!-- Використати бонуси -->
+                    <div class="bonus-use-block" id="bonusUseBlock" style="display:none;">
+                        <label class="bonus-use-label">
+                            <input type="checkbox" id="bonusCheckbox" onchange="toggleBonusUse()">
+                            <img src="/img/bonus-coin.svg" class="bonus-use-icon" alt="">
+                            <div class="bonus-use-text">
+                                <strong>Використати бонуси</strong>
+                                <small id="bonusUseHint">У вас 0 бонусів</small>
+                            </div>
+                            <span class="bonus-use-amount" id="bonusUseAmount"></span>
+                        </label>
+                    </div>
+                    <input type="hidden" name="useBonuses" id="useBonusesField" value="0">
 
                     <!-- Кнопка -->
                     <button type="submit" class="checkout-btn" id="checkoutBtn" disabled>

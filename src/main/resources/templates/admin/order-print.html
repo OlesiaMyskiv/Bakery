@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Замовлення №<span th:text="${order.id}"></span></title>
+    <link rel="stylesheet" th:href="@{/css/adm-order-print.css}">
+
+</head>
+<body>
+
+<!-- Шапка -->
+<div class="print-header">
+    <div class="print-logo">Cake House</div>
+    <div class="print-order-num">
+        <strong>Замовлення №<span th:text="${order.id}"></span></strong>
+        <span th:text="${order.createdAt != null ? #temporals.format(order.createdAt,'dd.MM.yyyy') : ''}"></span>
+    </div>
+</div>
+
+<!-- Дедлайн -->
+<div class="print-deadline-block">
+    <div class="print-deadline-label">Дедлайн — готово до</div>
+    <div class="print-deadline-value"
+         th:text="${order.deadline != null ? #temporals.format(order.deadline,'dd.MM.yyyy  HH:mm') : '—'}">
+    </div>
+</div>
+
+<!-- Клієнт -->
+<div class="print-client-block">
+    <div class="print-field">
+        <span class="print-field-label">Клієнт</span>
+        <span class="print-field-value" th:text="${order.user != null ? order.user.username : '—'}"></span>
+    </div>
+    <div class="print-field">
+        <span class="print-field-label">Телефон</span>
+        <span class="print-field-value" th:text="${order.user != null ? order.user.phone : '—'}"></span>
+    </div>
+    <div class="print-field">
+        <span class="print-field-label">Доставка</span>
+        <span class="print-field-value" th:text="${order.address ?: '—'}"></span>
+    </div>
+</div>
+
+<!-- Склад замовлення -->
+<div class="print-section-title">Склад замовлення</div>
+<div class="print-items"
+     th:with="rawItems=${order.composition != null ? order.composition : ''},
+              items=${#strings.contains(rawItems,'|') ? #strings.arraySplit(rawItems,'|') : #strings.arraySplit(rawItems,';')}">
+
+    <div th:each="item, stat : ${items}" class="print-item-row">
+        <!-- Фото -->
+        <div class="print-img-wrap" th:if="${stat.index == 0}">
+            <img th:if="${order.aiImageUrl != null}"
+                 th:src="${order.aiImageUrl}" class="print-item-img" alt="">
+            <img th:if="${order.aiImageUrl == null and order.constructorImg != null}"
+                 th:src="${order.constructorImg}" class="print-item-img" alt="">
+            <img th:if="${order.aiImageUrl == null and order.constructorImg == null and order.firstImagePath != null}"
+                 th:src="${order.firstImagePath}" class="print-item-img" alt="">
+            <span th:if="${order.aiImageUrl == null and order.constructorImg == null and order.firstImagePath == null}"
+                  class="print-item-img-placeholder">🎂</span>
+        </div>
+        <div class="print-img-wrap" th:unless="${stat.index == 0}"
+             th:id="'print-ph-' + ${stat.index}">
+            <span class="print-item-img-placeholder">🎂</span>
+        </div>
+
+        <span th:if="${stat.index == 0 and order.imagesJson != null}"
+              th:attr="data-images-json=${order.imagesJson}"
+              id="print-images-data" style="display:none;"></span>
+
+        <!-- Назва і кількість -->
+        <div th:with="trimmed=${#strings.trim(item)}">
+            <div class="print-item-name"
+                 th:text="${#strings.contains(trimmed,' — ') ? #strings.substringBefore(trimmed,' — ') : trimmed}"></div>
+            <div class="print-item-qty"
+                 th:if="${#strings.contains(trimmed,' — ')}"
+                 th:text="${#strings.substringAfter(trimmed,' — ')}"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Нижній блок: вага + сума -->
+<div class="print-bottom-grid">
+    <div class="print-bottom-block" th:if="${order.weightKg != null}">
+        <div class="print-field-label">Вага торта</div>
+        <div class="print-field-value" th:text="${order.weightKg} + ' кг'"></div>
+    </div>
+    <div class="print-bottom-block">
+        <div class="print-field-label">Сума</div>
+        <div class="print-field-value" th:text="${order.price} + ' грн'"></div>
+    </div>
+    <div class="print-bottom-block">
+        <div class="print-field-label">Оплата</div>
+        <div class="print-field-value"
+             th:text="${order.paymentStatus != null ? order.paymentStatus.label : '—'}"></div>
+    </div>
+    <div class="print-bottom-block">
+        <div class="print-field-label">Статус</div>
+        <div class="print-field-value"
+             th:text="${order.orderStatus != null ? order.orderStatus.name() : '—'}"></div>
+    </div>
+</div>
+
+<!-- Коментар -->
+<div class="print-comment" th:if="${order.comment != null and !#strings.isEmpty(order.comment)}">
+    💬 <strong>Коментар клієнта:</strong>
+    <span th:text="${order.comment}"></span>
+</div>
+
+<!-- Підпис -->
+<div class="print-footer">
+    <span>Cake House — кондитерська</span>
+    <span th:text="'Роздруковано: ' + ${#temporals.format(#temporals.createNow(),'dd.MM.yyyy HH:mm')}"></span>
+</div>
+
+<!-- Кнопки (не друкуються) -->
+<div class="no-print">
+    <button class="btn-close-print" onclick="window.close()">✕ Закрити</button>
+    <button class="btn-print-now" onclick="window.print()">🖨 Роздрукувати</button>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        // ── Крок 1: підставляємо всі фото з imagesJson ────────────
+        var newImgs = []; // зберігаємо нові img щоб чекати їх завантаження
+
+        var dataEl = document.getElementById('print-images-data');
+        if (dataEl) {
+            try {
+                var images = JSON.parse(dataEl.getAttribute('data-images-json'));
+                images.forEach(function(imgSrc, idx) {
+                    if (idx === 0) return; // перший — вже в HTML через th:src
+                    var ph = document.getElementById('print-ph-' + idx);
+                    if (!ph) return;
+
+                    var src = imgSrc;
+                    // Солодощі для ЗСУ — завжди energy_ua.png
+                    if (!src || src === 'null' || src === '/img/2.png') {
+                        var row = ph.closest('.print-item-row');
+                        if (row && row.textContent.indexOf('Солодощі для ЗСУ') !== -1) {
+                            src = '/img/energy_ua.png';
+                        }
+                    }
+                    if (src && src !== 'null') {
+                        ph.innerHTML = '';
+                        var img = document.createElement('img');
+                        img.src = src;
+                        img.className = 'print-item-img';
+                        ph.style.background = 'none';
+                        ph.appendChild(img);
+                        newImgs.push(img);
+                    }
+                });
+            } catch(e) {}
+        }
+
+        // ── Крок 2: також перевіряємо плейсхолдери на ЗСУ без imagesJson ──
+        document.querySelectorAll('.print-img-wrap').forEach(function(wrap) {
+            if (wrap.querySelector('img')) return; // вже є фото
+            var row = wrap.closest('.print-item-row');
+            if (row && row.textContent.indexOf('Солодощі для ЗСУ') !== -1) {
+                wrap.innerHTML = '';
+                var img = document.createElement('img');
+                img.src = '/img/energy_ua.png';
+                img.className = 'print-item-img';
+                wrap.appendChild(img);
+                newImgs.push(img);
+            }
+        });
+
+        // ── Крок 3: чекаємо поки ВСІ фото завантажаться (старі + нові) ──
+        // Збираємо після підстановки — тому включає нові img
+        setTimeout(function() {
+            var allImgs = document.querySelectorAll('img');
+            var loaded = 0;
+            var total  = allImgs.length;
+
+            function tryPrint() {
+                loaded++;
+                if (loaded >= total) {
+                    setTimeout(function() { window.print(); }, 200);
+                }
+            }
+
+            if (total === 0) {
+                window.print();
+            } else {
+                allImgs.forEach(function(img) {
+                    if (img.complete && img.naturalWidth > 0) { tryPrint(); }
+                    else { img.onload = tryPrint; img.onerror = tryPrint; }
+                });
+            }
+        }, 100); // 100мс щоб DOM оновився після appendChild
+    });
+</script>
+</body>
+</html>

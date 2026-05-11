@@ -1,0 +1,180 @@
+.review-card-admin {
+    background: white;
+    border: 1px solid #f0e8e0;
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    position: relative;
+}
+
+.review-hidden-card {
+    opacity: 0.5;
+    border-color: #e0e0e0;
+}
+
+/* Заголовок картки: аватар + ім'я + дата */
+.rca-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.rca-avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.rca-avatar-placeholder {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: #3AA6B9;
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem; font-weight: 700;
+    flex-shrink: 0;
+}
+
+.rca-author-info { flex: 1; }
+.rca-author-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem; font-weight: 700; color: #1a1a1a;
+}
+.rca-order-date {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.85rem; color: #aaa;
+}
+
+/* Зірки */
+.rca-stars { display: flex; gap: 2px; }
+.rca-stars span { font-size: 20px; }
+
+/* Фото товарів замовлення */
+.rca-order-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid #f5f0ec;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.rca-order-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-bottom: 1px solid #f8f4f0;
+    background: white;
+}
+.rca-order-row:last-child { border-bottom: none; }
+
+.rca-item-img {
+    width: 52px; height: 46px;
+    border-radius: 8px; object-fit: cover; flex-shrink: 0;
+}
+.rca-item-img-placeholder {
+    width: 52px; height: 46px;
+    border-radius: 8px; background: #faf3ee;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; flex-shrink: 0;
+}
+
+.rca-item-info { flex: 1; }
+.rca-item-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem; font-weight: 700; color: #1a1a1a;
+}
+.rca-item-price {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.85rem; color: #888;
+}
+
+/* Текст відгуку */
+.rca-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem; color: #333; line-height: 1.5;
+}
+
+/* Фото від клієнта */
+.rca-client-photo {
+    width: 100%; max-height: 180px;
+    object-fit: cover; border-radius: 10px;
+}
+
+/* Відповідь адміна */
+.rca-reply-wrap {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.rca-reply-input {
+    flex: 1;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    outline: none;
+}
+.rca-reply-input:focus { border-color: #3AA6B9; }
+
+.rca-reply-btn {
+    background: #3AA6B9; color: white;
+    border: none; border-radius: 8px;
+    padding: 8px 16px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem; cursor: pointer;
+    white-space: nowrap;
+}
+.rca-reply-btn:hover { background: #2d8a9e; }
+
+/* Існуюча відповідь адміна */
+.rca-existing-reply {
+    background: #f0f8f9;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.9rem; color: #3AA6B9;
+}
+
+/* Кнопки управління */
+.rca-controls {
+    display: none;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.rca-btn-hide {
+    background: none;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.85rem; cursor: pointer; color: #888;
+}
+.rca-btn-hide:hover { border-color: #e74c3c; color: #e74c3c; }
+
+.rca-btn-delete {
+    background: none;
+    border: 1px solid #fdd;
+    border-radius: 6px;
+    padding: 4px 10px;
+    cursor: pointer; color: #e74c3c;
+}
+.rca-btn-delete:hover { background: #fff5f5; }
+
+/* Бейдж "приховано" */
+.rca-hidden-badge {
+    display: inline-block;
+    background: #f5f5f5; color: #aaa;
+    font-size: 0.75rem; border-radius: 4px;
+    padding: 2px 8px;
+    font-family: 'Cormorant Garamond', serif;
+}

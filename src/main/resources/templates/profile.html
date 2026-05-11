@@ -9,6 +9,7 @@
     <link rel="stylesheet" th:href="@{/css/globals.css}">
     <link rel="stylesheet" th:href="@{/css/header.css}">
     <link rel="stylesheet" th:href="@{/css/profile.css}">
+    <link rel="stylesheet" th:href="@{/css/bonus.css}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
 </head>
 <body>
@@ -124,23 +125,8 @@
                                 <th:block th:each="item, stat : ${items}">
                                     <div class="order-item-row-full">
                                         <div class="order-item-img-wrap">
-                                            <!--
-                                              Логіка фото:
-                                              1. Якщо є imagesJson — беремо фото за індексом
-                                              2. Якщо перший товар і є firstImagePath — показуємо
-                                              3. Інакше — 🎂
-                                              (imagesJson парситься в JS після завантаження)
-                                            -->
-                                            <img th:if="${stat.index == 0 and order.firstImagePath != null}"
-                                                 th:src="${order.firstImagePath}"
-                                                 class="order-item-img" alt=""
-                                                 th:attr="data-order-id=${order.id}, data-item-index=0">
-                                            <div th:unless="${stat.index == 0 and order.firstImagePath != null}"
-                                                 class="order-item-img-placeholder"
-                                                 th:attr="data-order-id=${order.id}, data-item-index=${stat.index}"
+                                            <div class="order-item-img-placeholder"
                                                  th:id="'img-placeholder-' + ${order.id} + '-' + ${stat.index}">🎂</div>
-
-                                            <!-- Прихований JSON фото для JS -->
                                             <span th:if="${stat.index == 0 and order.imagesJson != null}"
                                                   th:attr="data-images-json=${order.imagesJson}"
                                                   th:id="'images-data-' + ${order.id}"
@@ -189,12 +175,14 @@
                                 </button>
                                 <button th:if="${order.orderStatus.name() == 'NEW'}"
                                         class="order-btn-cancel order-btn-cancel-active"
-                                        th:onclick="'cancelOrder(' + ${order.id} + ', false)'">
+                                        th:attr="data-order-id=${order.id}"
+                                        onclick="cancelOrder(parseInt(this.dataset.orderId), false)">
                                     ✕ Скасувати замовлення
                                 </button>
                                 <button th:if="${order.orderStatus.name() == 'IN_PROGRESS'}"
                                         class="order-btn-cancel order-btn-cancel-warning"
-                                        th:onclick="'cancelOrder(' + ${order.id} + ', true)'">
+                                        th:attr="data-order-id=${order.id}"
+                                        onclick="cancelOrder(parseInt(this.dataset.orderId), true)">
                                     ✕ Скасувати замовлення
                                 </button>
                                 <span th:if="${order.orderStatus.name() == 'READY'}" class="order-cancel-disabled">
@@ -240,22 +228,31 @@
                                 <th:block th:each="item, stat : ${items}">
                                     <div class="order-item-row-full">
                                         <div class="order-item-img-wrap">
-                                            <img th:if="${stat.index == 0 and order.aiImageUrl != null}"
-                                                 th:src="${order.aiImageUrl}" class="order-item-img" alt="">
-                                            <img th:if="${stat.index == 0 and order.aiImageUrl == null and order.constructorImg != null}"
-                                                 th:src="${order.constructorImg}" class="order-item-img" alt="">
-                                            <img th:if="${stat.index == 0 and order.aiImageUrl == null and order.constructorImg == null and order.firstImagePath != null}"
-                                                 th:src="${order.firstImagePath}" class="order-item-img" alt="">
-                                            <div th:if="${stat.index != 0 or (order.aiImageUrl == null and order.constructorImg == null and order.firstImagePath == null)}"
-                                                 class="order-item-img-placeholder">🎂</div>
+                                            <div class="order-item-img-placeholder"
+                                                 th:id="'img-placeholder-h' + ${order.id} + '-' + ${stat.index}">🎂</div>
+                                            <span th:if="${stat.index == 0 and order.imagesJson != null}"
+                                                  th:attr="data-images-json=${order.imagesJson}"
+                                                  th:id="'images-data-h' + ${order.id}"
+                                                  style="display:none;"></span>
                                         </div>
                                         <div class="order-item-info">
                                             <th:block th:with="trimmed=${#strings.trim(item)}">
                                                 <div class="order-item-name"
                                                      th:text="${#strings.contains(trimmed,' — ') ? #strings.substringBefore(trimmed,' — ') : trimmed}"></div>
-                                                <div class="order-item-price"
-                                                     th:if="${#strings.contains(trimmed,' — ')}"
-                                                     th:text="${#strings.substringAfter(trimmed,' — ')}"></div>
+                                                <!-- Ціна/склад після " — " -->
+                                                <th:block th:if="${#strings.contains(trimmed,' — ')}"
+                                                          th:with="afterDash=${#strings.substringAfter(trimmed,' — ')}">
+                                                    <!-- Якщо є " | " — це склад конструктора, показуємо стовпчиком -->
+                                                    <th:block th:if="${#strings.contains(afterDash,' | ')}">
+                                                        <div class="order-item-price constructor-layer"
+                                                             th:each="layer : ${#strings.arraySplit(afterDash,' | ')}"
+                                                             th:text="${#strings.trim(layer)}"></div>
+                                                    </th:block>
+                                                    <!-- Звичайний товар — один рядок -->
+                                                    <div class="order-item-price"
+                                                         th:unless="${#strings.contains(afterDash,' | ')}"
+                                                         th:text="${afterDash}"></div>
+                                                </th:block>
                                             </th:block>
                                         </div>
                                     </div>
@@ -282,20 +279,288 @@
 
             <!-- Список бажань -->
             <div id="wishlist" class="tab-content">
-                <h2 class="content-title">Список бажань</h2>
-                <div class="empty-state"><p>Ваш список бажань порожній.</p></div>
+                <h2 class="content-title" style="text-align:center;">Список бажань</h2>
+                <div id="wishlistContainer">
+                    <div class="empty-state"><p>Ваш список бажань порожній.<br>
+                        <a href="/assortment" style="color:#3AA6B9;">Перейти до асортименту</a></p>
+                    </div>
+                </div>
             </div>
 
             <!-- Відгуки -->
             <div id="reviews" class="tab-content">
-                <h2 class="content-title">Мої відгуки</h2>
-                <div class="empty-state"><p>Ви ще не залишали відгуків.</p></div>
+                <h2 class="content-title" style="text-align:center;">Мої відгуки</h2>
+
+                <!-- Очікують вашої оцінки -->
+                <div th:if="${pendingReviewOrders != null and not pendingReviewOrders.empty}">
+                    <h3 class="reviews-section-title">Очікують вашої оцінки (<span th:text="${#lists.size(pendingReviewOrders)}"></span>)</h3>
+                    <div class="orders-list">
+                        <div class="order-card" th:each="order : ${pendingReviewOrders}">
+
+                            <!-- Заголовок -->
+                            <div class="order-card-header">
+                                <span class="order-num">№ <span th:text="${order.id}"></span></span>
+                                <span class="order-date" th:if="${order.createdAt != null}"
+                                      th:text="${#temporals.format(order.createdAt, 'dd.MM.yyyy')}"></span>
+                            </div>
+
+                            <!-- Товари — такі самі як в Історії -->
+                            <div class="order-items-list"
+                                 th:with="rawItems=${order.composition != null ? order.composition : ''},
+                                          items=${#strings.contains(rawItems,'|') ? #strings.arraySplit(rawItems,'|') : #strings.arraySplit(rawItems,';')}">
+                                <th:block th:each="item, stat : ${items}">
+                                    <div class="order-item-row-full">
+                                        <div class="order-item-img-wrap">
+                                            <div class="order-item-img-placeholder"
+                                                 th:id="'img-placeholder-p' + ${order.id} + '-' + ${stat.index}">🎂</div>
+                                            <span th:if="${stat.index == 0 and order.imagesJson != null}"
+                                                  th:attr="data-images-json=${order.imagesJson}"
+                                                  th:id="'images-data-p' + ${order.id}"
+                                                  style="display:none;"></span>
+                                        </div>
+                                        <div class="order-item-info">
+                                            <th:block th:with="trimmed=${#strings.trim(item)}">
+                                                <div class="order-item-name"
+                                                     th:text="${#strings.contains(trimmed,' — ') ? #strings.substringBefore(trimmed,' — ') : trimmed}"></div>
+                                                <!-- Ціна/склад після " — " -->
+                                                <th:block th:if="${#strings.contains(trimmed,' — ')}"
+                                                          th:with="afterDash=${#strings.substringAfter(trimmed,' — ')}">
+                                                    <!-- Якщо є " | " — це склад конструктора, показуємо стовпчиком -->
+                                                    <th:block th:if="${#strings.contains(afterDash,' | ')}">
+                                                        <div class="order-item-price constructor-layer"
+                                                             th:each="layer : ${#strings.arraySplit(afterDash,' | ')}"
+                                                             th:text="${#strings.trim(layer)}"></div>
+                                                    </th:block>
+                                                    <!-- Звичайний товар — один рядок -->
+                                                    <div class="order-item-price"
+                                                         th:unless="${#strings.contains(afterDash,' | ')}"
+                                                         th:text="${afterDash}"></div>
+                                                </th:block>
+                                            </th:block>
+                                        </div>
+                                    </div>
+                                </th:block>
+                            </div>
+
+                            <!-- Кнопка ОЦІНИТИ -->
+                            <div class="order-card-actions" style="margin-top:12px;">
+                                <button class="rpc-btn" th:attr="data-order-id=${order.id}"
+                                        onclick="openReviewModal(parseInt(this.dataset.orderId))">
+                                    ОЦІНИТИ
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Мої опубліковані відгуки -->
+                <div th:if="${myReviews != null and not myReviews.empty}">
+                    <h3 class="reviews-section-title" style="margin-top:30px;">Мої опубліковані відгуки (<span th:text="${#lists.size(myReviews)}"></span>)</h3>
+                    <div class="reviews-list">
+                        <div class="order-card" th:each="rev : ${myReviews}" style="position:relative;">
+
+                            <!-- Заголовок -->
+                            <div class="order-card-header">
+                                <span class="order-num">№ <span th:text="${rev.order != null ? rev.order.id : ''}"></span></span>
+                                <div class="rev-stars" style="margin-left:auto;">
+                                    <span th:each="i : ${#numbers.sequence(1, 5)}"
+                                          th:classappend="${i <= rev.rating} ? ' star-filled' : ' star-empty'"
+                                          class="rev-star">★</span>
+                                </div>
+                                <span class="order-date" th:text="${rev.createdAt != null ? #temporals.format(rev.createdAt, 'dd.MM.yyyy') : ''}"></span>
+                            </div>
+
+                            <!-- Товари як в Історії -->
+                            <div th:if="${rev.order != null}" class="order-items-list"
+                                 th:with="rawItems=${rev.order.composition != null ? rev.order.composition : ''},
+                                          items=${#strings.contains(rawItems,'|') ? #strings.arraySplit(rawItems,'|') : #strings.arraySplit(rawItems,';')}">
+                                <th:block th:each="item, stat : ${items}">
+                                    <div class="order-item-row-full">
+                                        <div class="order-item-img-wrap">
+                                            <img th:if="${stat.index == 0 and rev.order.firstImagePath != null}"
+                                                 th:src="${rev.order.firstImagePath}"
+                                                 class="order-item-img" alt=""
+                                                 th:attr="data-order-id=${'r'+rev.id}, data-item-index=0">
+                                            <div th:unless="${stat.index == 0 and rev.order.firstImagePath != null}"
+                                                 class="order-item-img-placeholder"
+                                                 th:attr="data-order-id=${'r'+rev.id}, data-item-index=${stat.index}"
+                                                 th:id="'img-placeholder-r' + ${rev.id} + '-' + ${stat.index}">🎂</div>
+                                            <span th:if="${stat.index == 0 and rev.order.imagesJson != null}"
+                                                  th:attr="data-images-json=${rev.order.imagesJson}"
+                                                  th:id="'images-data-r' + ${rev.id}"
+                                                  style="display:none;"></span>
+                                        </div>
+                                        <div class="order-item-info">
+                                            <th:block th:with="trimmed=${#strings.trim(item)}">
+                                                <div class="order-item-name"
+                                                     th:text="${#strings.contains(trimmed,' — ') ? #strings.substringBefore(trimmed,' — ') : trimmed}"></div>
+                                                <!-- Ціна/склад після " — " -->
+                                                <th:block th:if="${#strings.contains(trimmed,' — ')}"
+                                                          th:with="afterDash=${#strings.substringAfter(trimmed,' — ')}">
+                                                    <!-- Якщо є " | " — це склад конструктора, показуємо стовпчиком -->
+                                                    <th:block th:if="${#strings.contains(afterDash,' | ')}">
+                                                        <div class="order-item-price constructor-layer"
+                                                             th:each="layer : ${#strings.arraySplit(afterDash,' | ')}"
+                                                             th:text="${#strings.trim(layer)}"></div>
+                                                    </th:block>
+                                                    <!-- Звичайний товар — один рядок -->
+                                                    <div class="order-item-price"
+                                                         th:unless="${#strings.contains(afterDash,' | ')}"
+                                                         th:text="${afterDash}"></div>
+                                                </th:block>
+                                            </th:block>
+                                        </div>
+                                    </div>
+                                </th:block>
+                            </div>
+
+                            <!-- Текст відгуку -->
+                            <div style="padding:10px 0 4px;font-family:'Cormorant Garamond',serif;">
+                                <div class="rev-text" th:text="${rev.text}"></div>
+                                <div class="rev-admin-reply" th:if="${rev.adminReply != null}">
+                                    <span style="color:#3AA6B9;font-weight:bold;">Відповідь кондитерської: </span>
+                                    <span th:text="${rev.adminReply}"></span>
+                                </div>
+                            </div>
+
+                            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                                <div class="rpc-date" th:text="${rev.createdAt != null ? #temporals.format(rev.createdAt, 'dd.MM.yyyy') : ''}"></div>
+                                <div class="rev-stars">
+                                    <span th:each="i : ${#numbers.sequence(1, 5)}"
+                                          th:classappend="${i <= rev.rating} ? ' star-filled' : ' star-empty'"
+                                          class="rev-star">★</span>
+                                </div>
+                                <div class="rev-text" th:text="${rev.text}"></div>
+                                <div class="rev-admin-reply" th:if="${rev.adminReply != null}">
+                                    <span style="color:#3AA6B9;font-weight:bold;">Відповідь кондитерської: </span>
+                                    <span th:text="${rev.adminReply}"></span>
+                                </div>
+                            </div>
+                            <button class="rev-delete-btn" th:attr="data-rev-id=${rev.id}" onclick="deleteReview(parseInt(this.dataset.revId))" title="Видалити відгук">
+                                <img src="/img/recycle-icon.svg" class="rev-delete-icon" alt="Видалити">
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${(pendingReviewOrders == null or pendingReviewOrders.empty) and (myReviews == null or myReviews.empty)}" class="empty-state">
+                    <p>Ви ще не залишали відгуків.</p>
+                </div>
             </div>
 
             <!-- Бонуси -->
             <div id="bonuses" class="tab-content">
-                <h2 class="content-title">Мої бонуси</h2>
-                <div class="empty-state"><p>У вас 0 бонусів.</p></div>
+                <h2 class="content-title" style="text-align:center;">Мої бонуси</h2>
+
+                <th:block th:if="${bonusDashboard != null}" th:with="d=${bonusDashboard}">
+
+                    <!-- Баланс -->
+                    <div class="bonus-balance-card">
+                        <div class="bonus-balance-left">
+                            <img src="/img/bonus-coin.svg" class="bonus-icon-lg" alt="">
+                            <span class="bonus-balance-label">Поточний баланс</span>
+                        </div>
+                        <div class="bonus-balance-amount">
+                            <span class="bonus-amount-num" th:text="${d.balance}">0</span>
+                            <span class="bonus-amount-label">БОНУСІВ</span>
+                        </div>
+                    </div>
+
+                    <!-- Як це працює -->
+                    <div class="bonus-info-block">
+                        <strong>Як це працює?</strong>
+                        <span th:text="'Ми повертаємо ' + ${d.currentCashback} + '% від суми кожного замовлення бонусами. 1 бонус = 1 гривня знижки (до 30% замовлення).'"></span>
+                    </div>
+
+                    <!-- Прогрес + Історія -->
+                    <div class="bonus-main-grid">
+
+                        <!-- Прогрес до наступного рівня -->
+                        <div class="bonus-progress-card">
+                            <div class="bonus-progress-title"
+                                 th:text="${d.isMaxLevel} ? 'Максимальний рівень!' : ('Прогрес до рівня ' + d.nextLevel)">
+                            </div>
+
+                            <div class="bonus-levels-row">
+                                <span class="bonus-level-name" th:text="${d.currentLevel}"></span>
+                                <span class="bonus-level-name" th:if="${!d.isMaxLevel}" th:text="${d.nextLevel}"></span>
+                                <span class="bonus-level-name" th:if="${d.isMaxLevel}">Шеф-пекар</span>
+                            </div>
+
+                            <div class="bonus-progress-bar-wrap">
+                                <div class="bonus-progress-bar-fill"
+                                     th:style="'width:' + ${d.progress} + '%'"></div>
+                                <span class="bonus-progress-pct" th:text="${d.progress} + '%'"></span>
+                            </div>
+
+                            <div class="bonus-to-next" th:if="${!d.isMaxLevel}"
+                                 th:text="'До рівня ' + ${d.nextLevel} + ' залишилось замовлень на ' + ${d.toNextLevel} + ' грн'">
+                            </div>
+                            <div class="bonus-to-next" th:if="${d.isMaxLevel}">
+                                Ви на найвищому рівні — кешбек 10%!
+                            </div>
+
+                            <!-- Всі рівні -->
+                            <div class="bonus-levels-list">
+                                <div class="bonus-level-row">
+                                    <span class="bll-name">Ласун</span>
+                                    <span class="bll-range">0 – 300 грн</span>
+                                    <span class="bll-cashback">3%</span>
+                                </div>
+                                <div class="bonus-level-row">
+                                    <span class="bll-name">Гурман</span>
+                                    <span class="bll-range">300 – 800 грн</span>
+                                    <span class="bll-cashback">5%</span>
+                                </div>
+                                <div class="bonus-level-row">
+                                    <span class="bll-name">Майстер тіста</span>
+                                    <span class="bll-range">800 – 1500 грн</span>
+                                    <span class="bll-cashback">7%</span>
+                                </div>
+                                <div class="bonus-level-row">
+                                    <span class="bll-name">Шеф-пекар</span>
+                                    <span class="bll-range">1500+ грн</span>
+                                    <span class="bll-cashback">10%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Історія бонусів -->
+                        <div class="bonus-history-card">
+                            <div class="bonus-history-title">Історія бонусів</div>
+
+                            <div th:if="${d.history.empty}" class="bonus-history-empty">
+                                Поки немає операцій
+                            </div>
+
+                            <div class="bonus-history-list" th:unless="${d.history.empty}">
+                                <div class="bonus-history-row" th:each="t : ${d.history}">
+                                    <img th:if="${t.amount > 0}" src="/img/bonus-plus.svg"
+                                         class="bonus-hist-icon" alt="+">
+                                    <img th:unless="${t.amount > 0}" src="/img/bonus-minus.svg"
+                                         class="bonus-hist-icon" alt="-">
+                                    <div class="bonus-hist-info">
+                                        <div class="bonus-hist-amount"
+                                             th:classappend="${t.amount > 0} ? ' plus' : ' minus'"
+                                             th:text="${t.amount > 0 ? '+' : ''} + ${t.amount}"></div>
+                                        <div class="bonus-hist-desc" th:text="${t.description}"></div>
+                                        <div class="bonus-hist-date" th:text="${t.date}"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bonus-expires-note">
+                                Бонуси діють 6 місяців з моменту нарахування
+                            </div>
+                        </div>
+
+                    </div>
+                </th:block>
+
+                <div th:if="${bonusDashboard == null}" class="empty-state">
+                    <p>Бонусна система завантажується...</p>
+                </div>
             </div>
 
             <!-- ══ ЧАТ З МЕНЕДЖЕРОМ ══════════════════════════════════════ -->
@@ -361,9 +626,54 @@
     </div>
 </div>
 
+<!-- ══ МОДАЛКА ВІДГУКУ ═══════════════════════════════════════════════════ -->
+<div id="reviewModal" class="modal-overlay" style="display:none;">
+    <div class="modal-content" style="max-width:580px;width:94%;border-radius:16px;padding:32px 28px;background:#fff;">
+        <h2 style="font-family:'Cormorant Garamond',serif;font-size:28px;margin:0 0 18px;color:#333;">Залишити відгук</h2>
+
+        <!-- Блок товару -->
+        <div class="rev-modal-order" id="revModalOrder" style="display:flex;gap:14px;align-items:center;border:1.5px solid #3AA6B9;border-radius:12px;padding:12px 16px;margin-bottom:20px;">
+            <img id="revModalImg" src="" alt="" style="width:80px;height:80px;object-fit:cover;border-radius:8px;display:none;">
+            <div id="revModalImgPlaceholder" style="width:80px;height:80px;display:flex;align-items:center;justify-content:center;font-size:34px;border-radius:8px;background:#f8f8f8;">🎂</div>
+            <div>
+                <div id="revModalTitle" style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700;color:#3AA6B9;text-transform:uppercase;"></div>
+                <div id="revModalOrderNum" style="font-family:'Cormorant Garamond',serif;font-size:15px;color:#666;margin-top:2px;"></div>
+                <div id="revModalDate" style="font-family:'Cormorant Garamond',serif;font-size:14px;color:#aaa;margin-top:2px;"></div>
+            </div>
+        </div>
+
+        <!-- Зірки -->
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+            <span style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:#333;">Ваша оцінка:</span>
+            <div id="revStars" style="display:flex;gap:4px;">
+                <span class="rev-modal-star" data-val="1" style="font-size:38px;cursor:pointer;color:#e0c4c4;">★</span>
+                <span class="rev-modal-star" data-val="2" style="font-size:38px;cursor:pointer;color:#e0c4c4;">★</span>
+                <span class="rev-modal-star" data-val="3" style="font-size:38px;cursor:pointer;color:#e0c4c4;">★</span>
+                <span class="rev-modal-star" data-val="4" style="font-size:38px;cursor:pointer;color:#e0c4c4;">★</span>
+                <span class="rev-modal-star" data-val="5" style="font-size:38px;cursor:pointer;color:#e0c4c4;">★</span>
+            </div>
+        </div>
+
+        <!-- Текст -->
+        <textarea id="revText" placeholder="Поділіться вашими враженнями..."
+                  style="width:100%;min-height:160px;border:1.5px solid #ddd;border-radius:10px;padding:14px;font-family:'Cormorant Garamond',serif;font-size:17px;resize:vertical;box-sizing:border-box;outline:none;"></textarea>
+
+        <!-- Кнопки -->
+        <div style="display:flex;gap:12px;margin-top:20px;align-items:center;flex-wrap:wrap;">
+            <label class="rpc-btn" style="cursor:pointer;background:#3AA6B9;">
+                Додати фото
+                <input type="file" id="revPhoto" accept="image/*" style="display:none;">
+            </label>
+            <span id="revPhotoName" style="font-size:15px;color:#aaa;font-family:'Cormorant Garamond',serif;"></span>
+            <div style="flex:1;"></div>
+            <button onclick="closeReviewModal()" style="background:#e0e0e0;color:#555;border:none;border-radius:24px;padding:10px 24px;font-size:16px;cursor:pointer;font-family:'Cormorant Garamond',serif;">Скасувати</button>
+            <button onclick="submitReview()" class="rpc-btn">ВІДПРАВИТИ</button>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script>
-
 
     function cancelOrder(orderId) {
         if (!confirm('Скасувати замовлення №' + orderId + '?')) return;
@@ -375,7 +685,6 @@
         })
             .then(function(r) {
                 if (r.ok) {
-                    // Перезавантажуємо сторінку щоб оновити список
                     window.location.reload();
                 } else {
                     alert('Не вдалося скасувати замовлення');
@@ -391,12 +700,134 @@
         document.querySelectorAll('.tab-link').forEach(function(el) { el.classList.remove('active'); });
         document.getElementById(tabId).classList.add('active');
         document.getElementById('link-' + tabId).classList.add('active');
+        // Рендеримо wishlist при відкритті вкладки
+        if (tabId === 'wishlist' && typeof renderWishlistPage === 'function') {
+            renderWishlistPage();
+        }
 
-        // НОВИЙ КОД: Якщо відкрили чат - ховаємо кружечок і миттєво вантажимо нові повідомлення
         if (tabId === 'chat') {
             document.getElementById('chat-unread-dot').style.display = 'none';
             if (chatInited) loadChatMessages();
         }
+    }
+
+    // ── Відгуки ──────────────────────────────────────────────────────────────
+    var currentReviewOrderId = null;
+    var currentRating = 0;
+
+    function openReviewModal(orderId) {
+        currentReviewOrderId = orderId;
+        currentRating = 0;
+        document.getElementById('revText').value = '';
+        document.getElementById('revPhoto').value = '';
+        document.getElementById('revPhotoName').textContent = '';
+        updateStars(0);
+
+        fetch('/api/orders/' + orderId + '/review-info', { credentials: 'include' })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (d.error) { alert(d.error); return; }
+
+                var name = d.composition || 'Замовлення';
+                if (name.includes(' — ')) name = name.substring(0, name.indexOf(' — '));
+                if (name.includes('|')) name = name.substring(0, name.indexOf('|')).trim();
+                document.getElementById('revModalTitle').textContent = name;
+                document.getElementById('revModalOrderNum').textContent = 'Замовлення №' + d.orderId;
+                var dateStr = '';
+                if (d.createdAt) {
+                    var parts = d.createdAt.substring(0, 10).split('-');
+                    dateStr = parts[2] + '.' + parts[1] + '.' + parts[0];
+                }
+                document.getElementById('revModalDate').textContent = dateStr;
+
+                var img = document.getElementById('revModalImg');
+                var ph  = document.getElementById('revModalImgPlaceholder');
+                if (d.image) {
+                    img.src = d.image;
+                    img.style.display = 'block';
+                    ph.style.display  = 'none';
+                } else {
+                    img.style.display = 'none';
+                    ph.style.display  = 'flex';
+                }
+
+                document.getElementById('reviewModal').style.display = 'flex';
+            })
+            .catch(function() { alert('Не вдалося завантажити дані замовлення'); });
+    }
+
+    function closeReviewModal() {
+        document.getElementById('reviewModal').style.display = 'none';
+        currentReviewOrderId = null;
+    }
+
+    // Stars
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.rev-modal-star').forEach(function(star) {
+            star.addEventListener('click', function() {
+                currentRating = parseInt(this.getAttribute('data-val'));
+                updateStars(currentRating);
+            });
+            star.addEventListener('mouseover', function() {
+                updateStars(parseInt(this.getAttribute('data-val')));
+            });
+            star.addEventListener('mouseout', function() {
+                updateStars(currentRating);
+            });
+        });
+
+        document.getElementById('revPhoto').addEventListener('change', function() {
+            document.getElementById('revPhotoName').textContent = this.files[0] ? this.files[0].name : '';
+        });
+    });
+
+    function updateStars(val) {
+        document.querySelectorAll('.rev-modal-star').forEach(function(s) {
+            s.style.color = parseInt(s.getAttribute('data-val')) <= val ? '#e8829a' : '#e0c4c4';
+        });
+    }
+
+    function submitReview() {
+        if (!currentReviewOrderId) return;
+        if (currentRating === 0) { alert('Будь ласка, поставте оцінку'); return; }
+        var text = document.getElementById('revText').value.trim();
+        if (!text) { alert('Будь ласка, напишіть відгук'); return; }
+
+        var fd = new FormData();
+        fd.append('orderId', currentReviewOrderId);
+        fd.append('rating', currentRating);
+        fd.append('text', text);
+        var photoFile = document.getElementById('revPhoto').files[0];
+        if (photoFile) fd.append('photo', photoFile);
+
+        fetch('/api/reviews', {
+            method: 'POST',
+            credentials: 'include',
+            body: fd
+        })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (d.success) {
+                    closeReviewModal();
+                    window.location.reload();
+                } else {
+                    alert(d.error || 'Помилка збереження відгуку');
+                }
+            })
+            .catch(function() { alert('Помилка з\'єднання'); });
+    }
+
+    function deleteReview(reviewId) {
+        if (!confirm('Видалити цей відгук?')) return;
+        fetch('/api/reviews/' + reviewId, {
+            method: 'DELETE',
+            credentials: 'include'
+        })
+            .then(function(r) {
+                if (r.ok) window.location.reload();
+                else alert('Не вдалося видалити відгук');
+            })
+            .catch(function() { alert('Помилка з\'єднання'); });
     }
 
     // ── Чат ──────────────────────────────────────────────────────────────────
@@ -408,7 +839,6 @@
         if (chatInited) return;
         chatInited = true;
 
-        // Для залогіненого юзера — просто отримуємо/створюємо сесію
         fetch('/api/chat/session', {
             method: 'POST',
             credentials: 'include',
@@ -426,7 +856,6 @@
                     '<div class="profile-chat-empty">Помилка підключення до чату</div>';
             });
 
-        // Enter для відправки
         document.getElementById('profileChatTa').addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); profileChatSend(); }
         });
@@ -513,43 +942,23 @@
     cropCancelBtn.addEventListener('click', function() { imageInput.value = ''; closeModal(); });
     function closeModal() { cropperModal.style.display = 'none'; if (cropper) { cropper.destroy(); cropper = null; } }
 
-    // ── Перевірка непрочитаних повідомлень у фоні ────────────────────────────
+    // ── Перевірка непрочитаних ────────────────────────────────────────────────
     function checkUnreadStatus() {
-        // Якщо вкладка чату вже відкрита - ми не показуємо кружечок,
         if (document.getElementById('chat').classList.contains('active')) {
             document.getElementById('chat-unread-dot').style.display = 'none';
             return;
         }
-
-        // Для неавторизованих гостей треба передати guestToken.
-        // Оскільки це сторінка профілю, юзер точно залогінений, тому guestToken не обов'язковий.
-        // Але якщо ви використовуєте цей код і на інших сторінках, де може бути гість,
-        // то треба буде додати ?guestToken=...
-
-        fetch('/api/chat/unread', {
-            method: 'GET', // Змінено на GET
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' }
-        })
-            .then(function(r) {
-                if (!r.ok) throw new Error("Network error");
-                return r.json();
-            })
+        fetch('/api/chat/unread', { method: 'GET', credentials: 'include', headers: { 'Content-Type': 'application/json' } })
+            .then(function(r) { if (!r.ok) throw new Error("Network error"); return r.json(); })
             .then(function(data) {
                 var dot = document.getElementById('chat-unread-dot');
-                if (data.unread) {
-                    dot.style.display = 'block';
-                } else {
-                    dot.style.display = 'none';
-                }
+                dot.style.display = data.unread ? 'block' : 'none';
             })
             .catch(function(e) { console.error("Помилка перевірки статусу чату:", e); });
     }
 
-    // Запускаємо перевірку одразу при завантаженні сторінки
     document.addEventListener("DOMContentLoaded", function() {
         checkUnreadStatus();
-        // І повторюємо кожні 5 секунд
         setInterval(checkUnreadStatus, 5000);
     });
 
@@ -566,8 +975,6 @@
                         imgEl.className = 'order-item-img';
                         imgEl.alt = '';
                         placeholder.parentNode.replaceChild(imgEl, placeholder);
-                    } else if (idx === 0) {
-                        // Перший товар — якщо є firstImagePath вже показано через th:if
                     }
                 });
             } catch(e) {}
@@ -576,5 +983,7 @@
 
 </script>
 
+<script src="/js/cart.js"></script>
+<script src="/js/wishlist.js"></script>
 </body>
 </html>

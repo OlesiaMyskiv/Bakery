@@ -10,6 +10,7 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" th:href="@{/css/admin.css}">
     <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/adm-orders.css}">
 </head>
 <body>
 
@@ -109,10 +110,23 @@
                         </td>
                         <td>
                             <span th:text="${order.composition}"></span>
-                            <!-- Кнопка деталей -->
+                            <!-- Кнопка деталей — відкриває модалку -->
                             <br>
                             <button class="btn-details"
-                                    th:onclick="'toggleDetails(' + ${order.id} + ')'">
+                                    th:attr="data-order-id=${order.id},
+                                             data-composition=${order.composition},
+                                             data-client=${order.user != null ? order.user.username : ''},
+                                             data-phone=${order.user != null ? order.user.phone : ''},
+                                             data-deadline=${order.deadline != null ? #temporals.format(order.deadline,'dd.MM.yyyy HH:mm') : ''},
+                                             data-address=${order.address},
+                                             data-price=${order.price},
+                                             data-payment=${order.paymentStatus != null ? order.paymentStatus.label : ''},
+                                             data-weight=${order.weightKg},
+                                             data-comment=${order.comment},
+                                             data-first-img=${order.firstImagePath},
+                                             data-ai-img=${order.aiImageUrl},
+                                             data-images-json=${order.imagesJson}"
+                                    onclick="openOrderModal(this)">
                                 Деталі замовлення №<span th:text="${order.id}"></span>
                             </button>
                         </td>
@@ -167,57 +181,6 @@
                             </form>
                         </td>
                     </tr>
-
-                    <!-- РЯДОК ДЕТАЛЕЙ (прихований спочатку) -->
-                    <tr th:each="order : ${orders}"
-                        th:id="'details-' + ${order.id}"
-                        class="order-details-row" style="display:none;">
-                        <td colspan="7">
-                            <div class="order-details-box">
-                                <div class="details-header">
-                                    <span>Деталі замовлення №<strong th:text="${order.id}"></strong></span>
-                                    <div style="display:flex;gap:8px;">
-                                        <button class="btn-print"
-                                                th:onclick="'printOrder(' + ${order.id} + ')'">
-                                            Друкувати на кухню
-                                        </button>
-                                        <button class="btn-check">Чек</button>
-                                    </div>
-                                </div>
-                                <div class="details-grid">
-                                    <div class="details-left">
-                                        <img th:if="${order.constructorImg != null}"
-                                             th:src="${order.constructorImg}"
-                                             class="detail-img" alt="Конструктор">
-                                        <div class="detail-info">
-                                            <p><strong>Інформація:</strong></p>
-                                            <p th:if="${order.weightKg != null}"
-                                               th:text="${order.weightKg} + ' кілограм'"></p>
-                                            <p>ДЕДЛАЙН:
-                                                <span class="deadline-pill"
-                                                      th:text="${order.deadline != null ? #temporals.format(order.deadline,'dd.MM, HH:mm') : '—'}"></span>
-                                            </p>
-                                            <p th:if="${order.address != null}">
-                                                Адреса доставки: <span th:text="${order.address}"></span>
-                                            </p>
-                                            <p th:if="${order.comment != null}">
-                                                Коментар клієнта:
-                                                <span class="comment-box" th:text="${order.comment}"></span>
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div class="details-right">
-                                        <p class="detail-label">Згенерований ШІ дизайн</p>
-                                        <img th:if="${order.aiImageUrl != null}"
-                                             th:src="${order.aiImageUrl}"
-                                             class="detail-img" alt="ШІ дизайн">
-                                        <span th:if="${order.aiImageUrl == null}"
-                                              class="text-muted">Не використовувався</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
                     </tbody>
                 </table>
             </div>
@@ -225,15 +188,255 @@
     </main>
 </div>
 
+
+<!-- ══ МОДАЛЬНЕ ВІКНО ДЕТАЛЕЙ ЗАМОВЛЕННЯ ══════════════════════ -->
+<div id="orderModalOverlay" class="order-modal-overlay" onclick="closeOrderModal(event)">
+    <div class="order-modal-box">
+        <!-- Шапка -->
+        <div class="order-modal-header">
+            <span class="order-modal-title" id="modalTitle">Замовлення №</span>
+            <button class="order-modal-close" onclick="closeOrderModal()">✕</button>
+        </div>
+
+        <!-- Тіло -->
+        <div class="order-modal-body">
+
+            <!-- Товари -->
+            <div id="modalItems" class="order-modal-items"></div>
+
+            <!-- Інфо сітка -->
+            <div class="order-modal-info-grid">
+                <div class="omi-block">
+                    <div class="omi-label">Клієнт</div>
+                    <div class="omi-value" id="modalClient"></div>
+                </div>
+                <div class="omi-block">
+                    <div class="omi-label">Телефон</div>
+                    <div class="omi-value" id="modalPhone"></div>
+                </div>
+                <div class="omi-block">
+                    <div class="omi-label">Дедлайн</div>
+                    <div class="omi-value omi-deadline" id="modalDeadline"></div>
+                </div>
+                <div class="omi-block">
+                    <div class="omi-label">Доставка</div>
+                    <div class="omi-value" id="modalAddress"></div>
+                </div>
+                <div class="omi-block">
+                    <div class="omi-label">Сума</div>
+                    <div class="omi-value" id="modalPrice"></div>
+                </div>
+                <div class="omi-block">
+                    <div class="omi-label">Оплата</div>
+                    <div class="omi-value" id="modalPayment"></div>
+                </div>
+                <div class="omi-block" id="modalWeightBlock" style="display:none;">
+                    <div class="omi-label">Вага</div>
+                    <div class="omi-value" id="modalWeight"></div>
+                </div>
+                <div class="omi-block" id="modalCommentBlock" style="display:none;">
+                    <div class="omi-label">Коментар</div>
+                    <div class="omi-value" id="modalComment"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Футер: кнопки -->
+        <div class="order-modal-footer">
+            <button class="order-modal-btn-bakers" id="modalBakersBtn">
+                🧑‍🍳 Передати пекарям
+            </button>
+            <button class="order-modal-btn-close" onclick="closeOrderModal()">
+                Закрити
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* ── Модальне вікно ──────────────────────────────────────────── */
+    .order-modal-overlay {
+        display: none;
+        position: fixed; top:0; left:0; width:100%; height:100%;
+        background: rgba(0,0,0,0.45);
+        z-index: 3000;
+        align-items: center; justify-content: center;
+    }
+    .order-modal-overlay.open { display: flex; }
+
+    .order-modal-box {
+        background: white;
+        border-radius: 20px;
+        width: 94%; max-width: 620px;
+        max-height: 88vh;
+        display: flex; flex-direction: column;
+        box-shadow: 0 24px 64px rgba(0,0,0,0.18);
+        overflow: hidden;
+        font-family: 'Cormorant Garamond', serif;
+    }
+
+    .order-modal-header {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 18px 24px;
+        border-bottom: 1px solid #f0ece8;
+        flex-shrink: 0;
+    }
+    .order-modal-title {
+        font-size: 1.3rem; font-weight: 700; color: #1a1a1a;
+    }
+    .order-modal-close {
+        background: none; border: none; font-size: 1.2rem;
+        color: #aaa; cursor: pointer; padding: 0;
+    }
+    .order-modal-close:hover { color: #e74c3c; }
+
+    .order-modal-body {
+        overflow-y: auto; padding: 20px 24px;
+        display: flex; flex-direction: column; gap: 16px;
+        flex: 1;
+    }
+
+    /* Товари */
+    .order-modal-items {
+        display: flex; flex-direction: column;
+        border: 1px solid #f0ece8; border-radius: 12px; overflow: hidden;
+    }
+    .omi-item-row {
+        display: flex; align-items: center; gap: 12px;
+        padding: 10px 14px; border-bottom: 1px solid #f8f4f0;
+    }
+    .omi-item-row:last-child { border-bottom: none; }
+    .omi-item-img {
+        width: 58px; height: 52px; border-radius: 8px;
+        object-fit: cover; flex-shrink: 0;
+    }
+    .omi-item-img-placeholder {
+        width: 58px; height: 52px; border-radius: 8px;
+        background: #faf3ee; display: flex;
+        align-items: center; justify-content: center;
+        font-size: 1.6rem; flex-shrink: 0;
+    }
+    .omi-item-name { font-weight: 700; font-size: 1rem; color: #1a1a1a; }
+    .omi-item-price { font-size: 0.88rem; color: #888; }
+
+    /* Інфо сітка */
+    .order-modal-info-grid {
+        display: grid; grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    .omi-block {
+        background: #faf8f5; border-radius: 10px; padding: 10px 14px;
+    }
+    .omi-label { font-size: 0.78rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.06em; }
+    .omi-value { font-size: 1rem; color: #1a1a1a; font-weight: 600; margin-top: 2px; }
+    .omi-deadline { color: #e8829a; font-size: 1.1rem; font-weight: 700; }
+
+    /* Футер */
+    .order-modal-footer {
+        display: flex; gap: 10px; padding: 16px 24px;
+        border-top: 1px solid #f0ece8; flex-shrink: 0;
+    }
+    .order-modal-btn-bakers {
+        flex: 1; padding: 12px;
+        background: #3AA6B9; color: white;
+        border: none; border-radius: 10px;
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 1rem; font-weight: 700; cursor: pointer;
+    }
+    .order-modal-btn-bakers:hover { background: #2d8a9e; }
+    .order-modal-btn-close {
+        padding: 12px 24px;
+        background: none; border: 1px solid #e0e0e0;
+        border-radius: 10px; color: #888;
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 1rem; cursor: pointer;
+    }
+    .order-modal-btn-close:hover { border-color: #aaa; }
+</style>
+
 <script th:src="@{/js/admin.js}"></script>
 <script>
-    function toggleDetails(id) {
-        var row = document.getElementById('details-' + id);
-        row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+    var currentModalOrderId = null;
+
+    function openOrderModal(btn) {
+        var d = btn.dataset;
+        currentModalOrderId = d.orderId;
+
+        document.getElementById('modalTitle').textContent = 'Замовлення №' + d.orderId;
+        document.getElementById('modalClient').textContent  = d.client  || '—';
+        document.getElementById('modalPhone').textContent   = d.phone   || '—';
+        document.getElementById('modalDeadline').textContent = d.deadline || '—';
+        document.getElementById('modalAddress').textContent = d.address  || '—';
+        document.getElementById('modalPrice').textContent   = (d.price   || '0') + ' грн';
+        document.getElementById('modalPayment').textContent = d.payment  || '—';
+
+        var wb = document.getElementById('modalWeightBlock');
+        var wv = document.getElementById('modalWeight');
+        if (d.weight && d.weight !== 'null') {
+            wb.style.display = ''; wv.textContent = d.weight + ' кг';
+        } else { wb.style.display = 'none'; }
+
+        var cb = document.getElementById('modalCommentBlock');
+        var cv = document.getElementById('modalComment');
+        if (d.comment && d.comment !== 'null') {
+            cb.style.display = ''; cv.textContent = d.comment;
+        } else { cb.style.display = 'none'; }
+
+        // Товари з imagesJson або firstImagePath
+        var itemsEl = document.getElementById('modalItems');
+        itemsEl.innerHTML = '';
+        var raw = d.composition || '';
+        var items = raw.includes(' | ') ? raw.split(' | ') : raw.split(';');
+        var images = [];
+        try { images = JSON.parse(d.imagesJson || '[]'); } catch(e) {}
+
+        items.forEach(function(item, idx) {
+            item = item.trim();
+            if (!item) return;
+            var parts = item.split(' — ');
+            var name  = parts[0] || item;
+            var price = parts[1] || '';
+
+            // Спочатку беремо з imagesJson, для idx=0 — firstImg або aiImg
+            var imgSrc = images[idx] || (idx === 0 ? (d.aiImg && d.aiImg !== 'null' ? d.aiImg : (d.firstImg && d.firstImg !== 'null' ? d.firstImg : null)) : null);
+            // Солодощі для ЗСУ — завжди energy_ua.png
+            if (name.indexOf('Солодощі для ЗСУ') !== -1 || name.indexOf('🇺🇦') !== -1) {
+                imgSrc = '/img/energy_ua.png';
+            }
+            var imgHtml = (imgSrc && imgSrc !== 'null' && imgSrc !== '')
+                ? '<img src="' + imgSrc + '" class="omi-item-img" alt="">'
+                : '<div class="omi-item-img-placeholder">🎂</div>';
+
+            itemsEl.innerHTML +=
+                '<div class="omi-item-row">'
+                + imgHtml
+                + '<div><div class="omi-item-name">' + esc(name) + '</div>'
+                + (price ? '<div class="omi-item-price">' + esc(price) + '</div>' : '')
+                + '</div></div>';
+        });
+
+        // Кнопка "Передати пекарям"
+        document.getElementById('modalBakersBtn').onclick = function() {
+            window.open('/admin/orders/' + currentModalOrderId + '/print', '_blank');
+        };
+
+        document.getElementById('orderModalOverlay').classList.add('open');
+        document.body.style.overflow = 'hidden';
     }
-    function printOrder(id) {
-        window.open('/admin/orders/' + id + '/print', '_blank');
+
+    function closeOrderModal(e) {
+        if (e && e.target !== document.getElementById('orderModalOverlay')) return;
+        document.getElementById('orderModalOverlay').classList.remove('open');
+        document.body.style.overflow = '';
     }
+
+    function esc(s) {
+        return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // Стара функція toggleDetails більше не потрібна
+    function toggleDetails(id) {}
+    function printOrder(id) { window.open('/admin/orders/' + id + '/print', '_blank'); }
 </script>
 </body>
 </html>

@@ -55,17 +55,34 @@
 
 <!-- Лічильник кошика — оновлюється на всіх сторінках -->
 <script>
+    // Оновлюємо badge кошика одразу при завантаженні будь-якої сторінки
     (function() {
         try {
             var cart  = JSON.parse(localStorage.getItem('cakeCart')) || [];
             var total = cart.reduce(function(s, c) { return s + (parseFloat(c.quantity) || 0); }, 0);
+            var rounded = Math.round(total);
             var badge = document.getElementById('cartBadge');
-            if (badge && total > 0) {
-                badge.textContent = Math.round(total);
-                badge.style.display = 'flex';
+            if (badge) {
+                if (rounded > 0) {
+                    badge.textContent = rounded;
+                    badge.style.display = 'flex';
+                } else {
+                    badge.textContent = '';
+                    badge.style.display = 'none';
+                }
             }
         } catch(e) {}
     })();
+
+    // Якщо щойно оформили замовлення — очищуємо кошик і badge
+    if (sessionStorage.getItem('justOrdered') === '1') {
+        try {
+            localStorage.removeItem('cakeCart');
+            sessionStorage.removeItem('justOrdered');
+            var badge = document.getElementById('cartBadge');
+            if (badge) { badge.textContent = ''; badge.style.display = 'none'; }
+        } catch(e) {}
+    }
 </script>
 
 <script th:src="@{/js/chat.js}" defer></script>

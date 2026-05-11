@@ -498,3 +498,41 @@
     .cart-layout { flex-direction: column; }
     .cart-summary-col { width: 100%; position: static; }
 }
+
+/* ── Конструктор: вертикальне фото ──────────────────────────── */
+.cart-item[data-type="CONSTRUCTOR"] .cart-item-img {
+    width: 70px;
+    height: 110px;   /* вище — бо шари вертикальні */
+}
+
+.cart-item[data-type="CONSTRUCTOR"] .cart-item-img img {
+    object-fit: cover;
+    object-position: center;
+}
+/* ── Іконка видалення в кошику ───────────────────────────────── */
+.cart-item-remove {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    transition: background 0.2s;
+}
+
+.cart-item-remove:hover {
+    background: #fff0f0;
+}
+
+.cart-remove-icon {
+    width: 20px;
+    height: 20px;
+    opacity: 0.4;
+    transition: opacity 0.2s;
+}
+
+.cart-item-remove:hover .cart-remove-icon {
+    opacity: 1;
+    filter: invert(40%) sepia(80%) saturate(500%) hue-rotate(320deg);
+}

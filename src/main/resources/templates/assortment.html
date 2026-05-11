@@ -179,6 +179,18 @@
                                     <div class="btn-circle"></div>
                                 </div>
                             </div>
+
+                            <!-- Кнопка "Додати в список бажань" -->
+                            <button class="wishlist-btn"
+                                    th:attr="data-product-id=${p.id},data-name=${p.name},data-catalog-type=${p.catalogType.name()},data-image-path=${p.imagePath != null ? p.imagePath : ''},data-price-unit=${p.priceUnit},data-price=${p.price},data-discounted-price=${p.hasDiscount() ? p.discountedPrice : ''},data-min-weight=${p.minWeightKg},data-unit=${p.catalogType.name() == 'FLAVOR' ? 'кг' : 'шт'},data-urgency=${p.urgency != null ? p.urgency.name() : ''}"
+                                    onclick="event.preventDefault(); var d=this.dataset; toggleWishlistFromCard(this, parseInt(d.productId), d.name, d.catalogType, d.imagePath, d.priceUnit, parseFloat(d.price), d.discountedPrice ? parseFloat(d.discountedPrice) : null, parseFloat(d.minWeight), d.unit, d.urgency)">
+                                <span class="wishlist-label">Додати в список бажань</span>
+                                <svg class="heart-icon" width="22" height="22" viewBox="0 0 24 24"
+                                     fill="none" stroke="#DF7481" stroke-width="2"
+                                     stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                                </svg>
+                            </button>
                         </div>
                     </a>
                 </th:block>
@@ -218,6 +230,7 @@
     document.addEventListener('DOMContentLoaded', function(){ updateRange(); });
 </script>
 <script src="/js/cart.js"></script>
+<script src="/js/wishlist.js"></script>
 <script>
     function cartAddFromCard(el) {
         var d = el.dataset;

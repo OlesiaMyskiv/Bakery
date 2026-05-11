@@ -109,15 +109,15 @@ function addAiDesignToCart(imageUrl, description) {
 /**
  * Додає конструктор торта в кошик.
  */
-function addConstructorToCart(constructorImg, description, price) {
+function addConstructorToCart(constructorImg, description, price, guestsLabel) {
     var id = 'constructor_' + Date.now();
     addToCart({
         id:            id,
         type:          'CONSTRUCTOR',
         productId:     null,
-        name:          'Торт з конструктора',
+        name:          'Авторський торт',
         imagePath:     constructorImg,
-        priceUnit:     'грн/шт',
+        priceUnit:     guestsLabel || 'грн',
         unitPrice:     price || 0,
         discountPrice: null,
         quantity:      1,
@@ -195,12 +195,13 @@ function hasDesignWithoutFlavor(cart) {
 
 function updateCartBadge() {
     var cart = getCart();
-    var total = cart.reduce(function(s, c) { return s + c.quantity; }, 0);
-    var badge = document.getElementById('cartBadge');
-    if (badge) {
-        badge.textContent = total > 0 ? Math.round(total) : '';
-        badge.style.display = total > 0 ? 'flex' : 'none';
-    }
+    var total = cart.reduce(function(s, c) { return s + (parseFloat(c.quantity) || 0); }, 0);
+    var rounded = Math.round(total);
+    // Оновлюємо всі badges на сторінці
+    document.querySelectorAll('#cartBadge, .cart-badge').forEach(function(badge) {
+        badge.textContent = rounded > 0 ? rounded : '';
+        badge.style.display = rounded > 0 ? 'flex' : 'none';
+    });
 }
 
 // ── Сповіщення ────────────────────────────────────────────────────────────────
@@ -274,7 +275,7 @@ function renderCartPage() {
             var minVal     = item.unit === 'кг' ? '0.5' : '1';
             var isKg       = item.unit === 'кг';
 
-            html += '<div class="cart-item" data-id="' + item.id + '">';
+            html += '<div class="cart-item" data-id="' + item.id + '" data-type="' + item.type + '">';
 
             // Фото
             html += '<div class="cart-item-img">';
@@ -290,7 +291,13 @@ function renderCartPage() {
             html += '<div class="cart-item-name">' + item.name + '</div>';
 
             if (item.description) {
-                html += '<div class="cart-item-desc">' + item.description + '</div>';
+                var desc = item.description;
+                // Для конструктора — показуємо тільки перші 2 шари
+                if (item.type === 'CONSTRUCTOR') {
+                    var parts = desc.split(' | ');
+                    desc = parts.slice(0, 2).join(' | ') + (parts.length > 2 ? ' + ще ' + (parts.length - 2) : '');
+                }
+                html += '<div class="cart-item-desc">' + desc + '</div>';
             }
 
             // Ціна
@@ -314,7 +321,7 @@ function renderCartPage() {
             // Підсумок + видалити
             html += '<div class="cart-item-right">';
             html += '<div class="cart-item-subtotal" id="subtotal_' + item.id + '">' + subtotal + ' грн</div>';
-            html += '<button class="cart-item-remove" onclick="removeFromCart(\'' + item.id + '\')" type="button" title="Видалити">🗑</button>';
+            html += '<button class="cart-item-remove" onclick="removeFromCart(\'' + item.id + '\')" type="button" title="Видалити"><img src="/img/recycle-icon.svg" class="cart-remove-icon" alt="Видалити" style="width:20px;height:20px;opacity:0.45;"></button>';
             html += '</div>';
 
             html += '</div>'; // cart-item
@@ -412,11 +419,69 @@ function simulatePayment() {
     }, 1800);
 }
 
+// ── Бонуси ────────────────────────────────────────────────────────────────────
+
+var userBonusBalance = 0;
+
+function loadBonusBalance() {
+    fetch('/api/bonus-balance', { credentials: 'include' })
+        .then(function(r) { return r.ok ? r.json() : { balance: 0 }; })
+        .then(function(data) {
+            userBonusBalance = data.balance || 0;
+            var block = document.getElementById('bonusUseBlock');
+            var hint  = document.getElementById('bonusUseHint');
+            if (block && userBonusBalance > 0) {
+                block.style.display = 'block';
+                if (hint) hint.textContent = 'У вас ' + userBonusBalance + ' бонусів';
+            }
+        })
+        .catch(function() {});
+}
+
+function toggleBonusUse() {
+    var cb = document.getElementById('bonusCheckbox');
+    var cart = getCart();
+    var isV  = window.IS_VERIFIED === true;
+    var base = calcCartTotal(cart, isV);
+    var milCheck = document.getElementById('militaryCheckbox');
+    if (milCheck && milCheck.checked) base += 100;
+
+    var discRow    = document.getElementById('bonusDiscountRow');
+    var discAmount = document.getElementById('bonusDiscountAmount');
+    var finalEl    = document.getElementById('cartTotalFinal');
+    var useBonuses = document.getElementById('useBonusesField');
+
+    if (cb && cb.checked) {
+        var maxBonus  = Math.floor(base * 0.30); // 30% від суми
+        var toSpend   = Math.min(userBonusBalance, maxBonus);
+        if (discRow)    discRow.style.display = 'flex';
+        if (discAmount) discAmount.textContent = '- ' + toSpend + ' грн';
+        if (finalEl)    finalEl.textContent = Math.round(base - toSpend) + ' грн';
+        if (useBonuses) useBonuses.value = toSpend;
+        var amountEl = document.getElementById('bonusUseAmount');
+        if (amountEl)   amountEl.textContent = '- ' + toSpend + ' грн';
+    } else {
+        if (discRow)    discRow.style.display = 'none';
+        if (finalEl)    finalEl.textContent = Math.round(base) + ' грн';
+        if (useBonuses) useBonuses.value = 0;
+        var amountEl = document.getElementById('bonusUseAmount');
+        if (amountEl)   amountEl.textContent = '';
+    }
+}
+
 // ── Ініціалізація ─────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Якщо щойно оформили замовлення (є параметр ?ordered=1) — очищуємо кошик
+    if (window.location.search.indexOf('ordered=1') !== -1 ||
+        sessionStorage.getItem('justOrdered') === '1') {
+        clearCart();
+        sessionStorage.removeItem('justOrdered');
+    }
+
     updateCartBadge();
     renderCartPage();
+    loadBonusBalance();
 
     // Чекбокс солодощів для ЗСУ
     var milCheck = document.getElementById('militaryCheckbox');

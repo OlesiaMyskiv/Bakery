@@ -10,6 +10,7 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" th:href="@{/css/admin.css}">
     <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/adm-reviews.css}">
 </head>
 <body>
 
@@ -26,7 +27,7 @@
                     <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
                 </svg>
             </div>
-            <div class="sidebar-name" th:text="${adminUser != null ? adminUser.username : 'Адмін'}">Анна</div>
+            <div class="sidebar-name" th:text="${adminUser != null ? adminUser.username : 'Адмін'}"></div>
             <div class="sidebar-role">СУПЕРАДМІН</div>
         </div>
         <nav class="sidebar-nav">
@@ -35,9 +36,9 @@
             <a th:href="@{/admin/verification}" class="sidebar-link">Верифікація</a>
             <a th:href="@{/admin/assortment}"   class="sidebar-link">Асортимент</a>
             <a th:href="@{/admin/reviews}"      class="sidebar-link active">Відгуки</a>
-            <a th:href="@{/admin/chats}"        class="sidebar-link" style="display: flex; align-items: center; justify-content: space-between;">
+            <a th:href="@{/admin/chats}"        class="sidebar-link" style="display:flex;align-items:center;justify-content:space-between;">
                 <span>Чати</span>
-                <span id="admin-global-unread-dot" class="ca-unread-dot" style="display: none; margin: 0;"></span>
+                <span id="admin-global-unread-dot" class="ca-unread-dot" style="display:none;margin:0;"></span>
             </a>
             <a th:href="@{/logout}"             class="sidebar-link sidebar-exit">Вихід</a>
         </nav>
@@ -45,101 +46,179 @@
 
     <main class="admin-content">
         <div class="admin-card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h1 class="admin-page-title" style="margin:0;">Відгуки</h1>
-                <!-- Кнопка Редагувати/Зберегти -->
-                <button id="editToggle" class="btn-edit-mode" onclick="toggleEditMode()">Редагувати</button>
+
+            <div style="display:flex; justify-content:center; align-items:center; margin-bottom:30px; position:relative; min-height: 50px;">
+                <h1 class="admin-page-title" style="margin:0; text-align:center;">Відгуки
+                    <span style="font-size:1rem;color:#aaa;font-weight:400;"
+                          th:if="${reviews != null}"
+                          th:text="'(' + ${#lists.size(reviews)} + ')'"></span>
+                </h1>
+                <button id="editToggle" class="btn-edit-mode" onclick="toggleEditMode()"
+                        style="position:absolute; right:0; transform: scale(1.3); transform-origin: right center;">
+                    Редагувати
+                </button>
             </div>
 
-            <!-- СІТКА ВІДГУКІВ — як на скріншоті 3 колонки -->
-            <div class="reviews-grid">
 
-                <div th:if="${reviews.empty}" style="grid-column:1/-1; text-align:center; color:#aaa; padding:40px;">
-                    Відгуків ще немає
-                </div>
+            <div th:if="${reviews == null or reviews.empty}"
+                 style="text-align:center;color:#aaa;padding:60px;font-family:'Cormorant Garamond',serif;font-size:1.1rem;">
+                Відгуків ще немає
+            </div>
+
+            <!-- СІТКА ВІДГУКІВ -->
+            <div class="reviews-grid" th:unless="${reviews == null or reviews.empty}">
 
                 <div class="review-card-admin" th:each="r : ${reviews}"
                      th:classappend="${r.hidden} ? ' review-hidden-card'">
 
-                    <!-- Кнопки управління (видно тільки в режимі редагування) -->
-                    <div class="review-controls edit-only" style="display:none;">
-                        <!-- Підняти вище -->
-                        <form th:action="@{/admin/reviews/{id}/moveup(id=${r.id})}" method="post" style="display:inline">
-                            <button class="btn-move" title="Вгору">&#8679;</button>
-                        </form>
-                        <!-- Приховати/Показати -->
-                        <form th:action="@{/admin/reviews/{id}/hide(id=${r.id})}" method="post" style="display:inline">
-                            <button class="btn-delete" title="${r.hidden ? 'Показати' : 'Видалити'}">&#128465;</button>
-                        </form>
-                    </div>
-
-                    <!-- Фото клієнта (аватар) -->
-                    <div class="review-avatar-wrap">
+                    <!-- Заголовок: аватар + ім'я + замовлення + дата -->
+                    <div class="rca-header">
                         <img th:if="${r.user != null and r.user.profilePicturePath != null}"
-                             th:src="${r.user.profilePicturePath}"
-                             class="review-avatar" alt="Фото">
-                        <div th:unless="${r.user != null and r.user.profilePicturePath != null}"
-                             class="review-avatar-placeholder"
-                             th:text="${r.user != null ? #strings.substring(r.user.username,0,1) : '?'}">К</div>
+                             th:src="${r.user.profilePicturePath}" class="rca-avatar" alt=""
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div th:classappend="${r.user != null and r.user.profilePicturePath != null} ? '' : ''"
+                             class="rca-avatar-placeholder"
+                             th:style="${r.user != null and r.user.profilePicturePath != null} ? 'display:none;' : ''"
+                             th:text="${r.user != null ? #strings.substring(r.user.username,0,1) : '?'}"></div>
+                        <div class="rca-author-info">
+                            <div class="rca-author-name" th:text="${r.user != null ? r.user.username : 'Анонім'}"></div>
+                            <div class="rca-order-date">
+                                <span th:if="${r.order != null}">Замовлення №<span th:text="${r.order.id}"></span></span>
+                                <span th:if="${r.createdAt != null}"
+                                      th:text="${' · ' + #temporals.format(r.createdAt,'dd.MM.yyyy')}"></span>
+                                <span th:if="${r.hidden}" class="rca-hidden-badge">приховано</span>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Ім'я -->
-                    <div class="review-author-name"
-                         th:text="${r.user != null ? r.user.username : 'Анонім'}">Катерина</div>
+                    <!-- Зірки -->
+                    <div class="rca-stars">
+                        <span th:each="i : ${#numbers.sequence(1,5)}"
+                              th:style="${i <= r.rating} ? 'color:#e8829a;' : 'color:#e0c4c4;'">★</span>
+                    </div>
+
+                    <!-- Фото товарів замовлення -->
+                    <div th:if="${r.order != null}"
+                         class="rca-order-items"
+                         th:with="rawItems=${r.order.composition != null ? r.order.composition : ''},
+                                  items=${#strings.contains(rawItems,'|') ? #strings.arraySplit(rawItems,'|') : #strings.arraySplit(rawItems,';')}">
+
+                        <div th:each="item, stat : ${items}" class="rca-order-row">
+                            <!-- Фото: перший товар — реальне, решта — плейсхолдер -->
+                            <div th:if="${stat.index == 0}">
+                                <img th:if="${r.order.aiImageUrl != null}"
+                                     th:src="${r.order.aiImageUrl}" class="rca-item-img" alt="">
+                                <img th:if="${r.order.aiImageUrl == null and r.order.constructorImg != null}"
+                                     th:src="${r.order.constructorImg}" class="rca-item-img" alt="">
+                                <img th:if="${r.order.aiImageUrl == null and r.order.constructorImg == null and r.order.firstImagePath != null}"
+                                     th:src="${r.order.firstImagePath}" class="rca-item-img" alt="">
+                                <div th:if="${r.order.aiImageUrl == null and r.order.constructorImg == null and r.order.firstImagePath == null}"
+                                     class="rca-item-img-placeholder">🎂</div>
+                            </div>
+                            <div th:unless="${stat.index == 0}"
+                                 class="rca-item-img-placeholder"
+                                 th:id="'ra-placeholder-' + ${r.id} + '-' + ${stat.index}">🎂</div>
+
+                            <span th:if="${stat.index == 0 and r.order.imagesJson != null}"
+                                  th:attr="data-images-json=${r.order.imagesJson}"
+                                  th:id="'ra-images-' + ${r.id}"
+                                  style="display:none;"></span>
+
+                            <!-- Назва і ціна -->
+                            <div class="rca-item-info">
+                                <th:block th:with="trimmed=${#strings.trim(item)}">
+                                    <div class="rca-item-name"
+                                         th:text="${#strings.contains(trimmed,' — ') ? #strings.substringBefore(trimmed,' — ') : trimmed}"></div>
+                                    <div class="rca-item-price"
+                                         th:if="${#strings.contains(trimmed,' — ')}"
+                                         th:text="${#strings.substringAfter(trimmed,' — ')}"></div>
+                                </th:block>
+                            </div>
+                        </div>
+
+                    </div>
 
                     <!-- Текст відгуку -->
-                    <div class="review-text-block" th:text="${r.text}"></div>
+                    <div class="rca-text" th:text="${r.text}"></div>
 
-                    <!-- Фото від клієнта (якщо є) -->
-                    <img th:if="${r.photoPath != null}"
-                         th:src="${r.photoPath}"
-                         class="review-photo" alt="Фото торта">
+                    <!-- Фото від клієнта -->
+                    <div th:if="${r.photoPath != null}" style="display:flex;flex-direction:column;gap:4px;">
+                        <div style="font-family:'Cormorant Garamond',serif;font-size:0.85rem;color:#aaa;">
+                            Фото від клієнта:
+                        </div>
+                        <img th:src="${r.photoPath}"
+                             class="rca-client-photo" alt="Фото від клієнта"
+                             style="cursor:pointer;" onclick="window.open(this.src,'_blank')">
+                    </div>
 
-                    <!-- Поле відповіді адміна -->
-                    <div class="review-reply-area">
-                        <form th:action="@{/admin/reviews/{id}/reply(id=${r.id})}" method="post">
+                    <!-- Існуюча відповідь -->
+                    <div class="rca-existing-reply" th:if="${r.adminReply != null}">
+                        Відповідь: <span th:text="${r.adminReply}"></span>
+                    </div>
+
+                    <!-- Поле відповіді -->
+                    <form class="rca-reply-wrap" th:action="@{/admin/reviews/{id}/reply(id=${r.id})}" method="post">
+                        <input type="hidden" name="filter" th:value="${filter}">
+                        <input type="text" name="reply" class="rca-reply-input"
+                               th:value="${r.adminReply}"
+                               placeholder="Відповісти клієнту...">
+                        <button type="submit" class="rca-reply-btn">Надіслати</button>
+                    </form>
+
+                    <!-- Кнопки управління (тільки в режимі редагування) -->
+                    <div class="rca-controls edit-only">
+                        <form th:action="@{/admin/reviews/{id}/hide(id=${r.id})}" method="post" style="display:inline;">
                             <input type="hidden" name="filter" th:value="${filter}">
-                            <input th:if="${r.adminReply != null}"
-                                   type="text" name="reply"
-                                   class="reply-input"
-                                   th:value="${r.adminReply}"
-                                   placeholder="Відповісти...">
-                            <input th:if="${r.adminReply == null}"
-                                   type="text" name="reply"
-                                   class="reply-input"
-                                   placeholder="Відповісти...">
-                            <button type="submit" class="reply-submit-btn" style="display:none;"
-                                    th:id="'submit-' + ${r.id}">&#10003;</button>
+                            <button type="submit" class="rca-btn-hide"
+                                    th:text="${r.hidden} ? 'Показати' : 'Приховати'"></button>
+                        </form>
+                        <form th:action="@{/admin/reviews/{id}/delete(id=${r.id})}" method="post" style="display:inline;">
+                            <input type="hidden" name="filter" th:value="${filter}">
+                            <button type="submit" class="rca-btn-delete" title="Видалити">
+                                <img src="/img/recycle-icon.svg" style="width:16px;height:16px;" alt="Видалити">
+                            </button>
                         </form>
                     </div>
-                </div>
 
+                </div>
             </div>
         </div>
     </main>
 </div>
 
 <script th:src="@{/js/admin.js}"></script>
-
 <script>
+    // Підставляємо фото з imagesJson для всіх товарів
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('[id^="ra-images-"]').forEach(function(el) {
+            var reviewId = el.id.replace('ra-images-', '');
+            try {
+                var images = JSON.parse(el.getAttribute('data-images-json'));
+                images.forEach(function(imgSrc, idx) {
+                    if (idx === 0) return; // перший вже показаний через th:src
+                    var placeholder = document.getElementById('ra-placeholder-' + reviewId + '-' + idx);
+                    if (placeholder && imgSrc) {
+                        var imgEl = document.createElement('img');
+                        imgEl.src = imgSrc;
+                        imgEl.className = 'rca-item-img';
+                        imgEl.alt = '';
+                        placeholder.parentNode.replaceChild(imgEl, placeholder);
+                    }
+                });
+            } catch(e) {}
+        });
+    });
+
+    // Режим редагування
     var editMode = false;
     function toggleEditMode() {
         editMode = !editMode;
         var btn = document.getElementById('editToggle');
-        var controls = document.querySelectorAll('.edit-only');
-        var submitBtns = document.querySelectorAll('.reply-submit-btn');
-
-        if (editMode) {
-            btn.textContent = 'Зберегти';
-            btn.style.color = '#3AA6B9';
-            controls.forEach(function(el) { el.style.display = 'flex'; });
-            submitBtns.forEach(function(el) { el.style.display = 'inline-block'; });
-        } else {
-            btn.textContent = 'Редагувати';
-            btn.style.color = '';
-            controls.forEach(function(el) { el.style.display = 'none'; });
-            submitBtns.forEach(function(el) { el.style.display = 'none'; });
-        }
+        document.querySelectorAll('.edit-only').forEach(function(el) {
+            el.style.display = editMode ? 'flex' : 'none';
+        });
+        btn.textContent = editMode ? 'Зберегти' : 'Редагувати';
+        btn.style.color  = editMode ? '#3AA6B9' : '';
     }
 </script>
 </body>

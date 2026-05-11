@@ -839,3 +839,349 @@
     background: #fce4ec;
     color: #c62828;
 }
+
+/* ══ ВІДГУКИ ══════════════════════════════════════════════════════════════ */
+.reviews-section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #333;
+    margin: 0 0 16px;
+}
+
+.reviews-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* Картка "Очікує оцінки" */
+.review-pending-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border: 1.5px solid #ddd;
+    border-radius: 14px;
+    padding: 14px 18px;
+    background: #fff;
+}
+
+.rpc-img-wrap {
+    flex-shrink: 0;
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.rpc-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.rpc-img-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    background: #f8f8f8;
+    border-radius: 10px;
+}
+
+.rpc-info {
+    flex: 1;
+}
+
+.rpc-order-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px;
+    color: #888;
+    margin-bottom: 2px;
+}
+
+.rpc-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #3AA6B9;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+}
+
+.rpc-date {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 14px;
+    color: #aaa;
+    margin-bottom: 10px;
+}
+
+.rpc-btn {
+    display: inline-block;
+    background: #3AA6B9;
+    color: #fff;
+    border: none;
+    border-radius: 24px;
+    padding: 9px 28px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.rpc-btn:hover {
+    background: #2c8fa0;
+}
+
+/* Картка опублікованого відгуку */
+.review-published-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    border: 1.5px solid #ddd;
+    border-radius: 14px;
+    padding: 14px 18px;
+    background: #fff;
+}
+
+.rev-stars {
+    display: flex;
+    gap: 2px;
+    margin: 6px 0;
+}
+
+.rev-star {
+    font-size: 26px;
+}
+
+.star-filled { color: #e8829a; }
+.star-empty  { color: #e0c4c4; }
+
+.rev-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 17px;
+    color: #444;
+    line-height: 1.5;
+}
+
+.rev-admin-reply {
+    margin-top: 8px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px;
+    color: #666;
+    border-left: 3px solid #3AA6B9;
+    padding-left: 10px;
+}
+
+.rev-delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    flex-shrink: 0;
+    padding: 4px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.rev-delete-btn:hover {
+    background: #fff0f0;
+}
+
+.rev-delete-icon {
+    width: 20px;
+    height: 20px;
+    opacity: 0.4;
+    transition: opacity 0.2s;
+}
+
+.rev-delete-btn:hover .rev-delete-icon {
+    opacity: 1;
+    filter: invert(40%) sepia(80%) saturate(500%) hue-rotate(320deg);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ДОДАТИ В КІНЕЦЬ assortment.css
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Кнопка "Додати в список бажань" ────────────────────────── */
+.wishlist-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.4rem 0.6rem 0.4rem 0.8rem;
+    border-top: 1px solid #f5f0ec;
+    cursor: pointer;
+    background: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    width: 100%;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+}
+
+.wishlist-btn:hover { background: #fff5f6; }
+
+.wishlist-label {
+    font-size: 0.85rem;
+    color: #DF7481;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+/* ── SVG серце ───────────────────────────────────────────────── */
+.heart-icon {
+    flex-shrink: 0;
+    transition: transform 0.2s ease, fill 0.2s ease;
+    fill: none;
+    stroke: #DF7481;
+}
+
+.heart-icon.heart-active {
+    fill: #DF7481;
+}
+
+/* Пульс при кліку */
+@keyframes heartPulse {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.4); }
+    70%  { transform: scale(0.9); }
+    100% { transform: scale(1); }
+}
+
+.heart-icon.heart-pulse {
+    animation: heartPulse 0.4s ease;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ДОДАТИ В КІНЕЦЬ profile.css  (список бажань у профілі)
+   ══════════════════════════════════════════════════════════════ */
+
+.wishlist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.2rem;
+}
+
+.wishlist-item-card {
+    background: white;
+    border: 1px solid #f0e8e0;
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.wishlist-item-img-wrap {
+    height: 180px;
+    overflow: hidden;
+    background: #faf3ee;
+}
+
+.wishlist-item-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.wishlist-item-img-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+}
+
+.wishlist-item-body {
+    padding: 0.9rem 1rem 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    flex: 1;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+.wishlist-item-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.wishlist-item-weight, .wishlist-item-price {
+    font-size: 0.95rem;
+    color: #666;
+}
+
+.wishlist-item-discount {
+    font-size: 0.9rem;
+    color: #3a7a3a;
+    font-weight: 700;
+}
+
+.wishlist-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    border-top: 1px solid #f0ece8;
+    padding-top: 0.6rem;
+}
+
+/* Кнопка "додати в корзину" — стиль як в асортименті */
+.wishlist-add-cart-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.4rem 0.5rem 0.4rem 0.7rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.9rem;
+    color: #4a8a9a;
+}
+
+.wishlist-add-cart-btn:hover .btn-circle { background: #4a8a9a; }
+
+/* Кнопка видалення з бажань */
+.wishlist-remove-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.wishlist-remove-btn .heart-icon {
+    fill: #DF7481;
+    stroke: #DF7481;
+}
+
+.wishlist-remove-btn:hover .heart-icon {
+    fill: none;
+}
+/* ── Шари конструктора — стовпчиком ─────────────────────────── */
+.constructor-layer {
+    font-size: 0.88rem;
+    color: #888;
+    padding: 1px 0;
+    line-height: 1.4;
+}
+
+.constructor-layer::before {
+    content: "· ";
+    color: #3AA6B9;
+}
