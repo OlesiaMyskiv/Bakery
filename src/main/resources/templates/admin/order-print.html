@@ -43,41 +43,16 @@
 
 <!-- Склад замовлення -->
 <div class="print-section-title">Склад замовлення</div>
-<div class="print-items"
-     th:with="rawItems=${order.composition != null ? order.composition : ''},
-              items=${#strings.contains(rawItems,'|') ? #strings.arraySplit(rawItems,'|') : #strings.arraySplit(rawItems,';')}">
-
-    <div th:each="item, stat : ${items}" class="print-item-row">
-        <!-- Фото -->
-        <div class="print-img-wrap" th:if="${stat.index == 0}">
-            <img th:if="${order.aiImageUrl != null}"
-                 th:src="${order.aiImageUrl}" class="print-item-img" alt="">
-            <img th:if="${order.aiImageUrl == null and order.constructorImg != null}"
-                 th:src="${order.constructorImg}" class="print-item-img" alt="">
-            <img th:if="${order.aiImageUrl == null and order.constructorImg == null and order.firstImagePath != null}"
-                 th:src="${order.firstImagePath}" class="print-item-img" alt="">
-            <span th:if="${order.aiImageUrl == null and order.constructorImg == null and order.firstImagePath == null}"
-                  class="print-item-img-placeholder">🎂</span>
-        </div>
-        <div class="print-img-wrap" th:unless="${stat.index == 0}"
-             th:id="'print-ph-' + ${stat.index}">
-            <span class="print-item-img-placeholder">🎂</span>
-        </div>
-
-        <span th:if="${stat.index == 0 and order.imagesJson != null}"
-              th:attr="data-images-json=${order.imagesJson}"
-              id="print-images-data" style="display:none;"></span>
-
-        <!-- Назва і кількість -->
-        <div th:with="trimmed=${#strings.trim(item)}">
-            <div class="print-item-name"
-                 th:text="${#strings.contains(trimmed,' — ') ? #strings.substringBefore(trimmed,' — ') : trimmed}"></div>
-            <div class="print-item-qty"
-                 th:if="${#strings.contains(trimmed,' — ')}"
-                 th:text="${#strings.substringAfter(trimmed,' — ')}"></div>
-        </div>
-    </div>
+<div class="print-items" id="printItemsContainer">
+    <!-- рендериться через JS нижче -->
 </div>
+<span id="print-composition-raw"
+      th:attr="data-composition=${order.composition},
+               data-images-json=${order.imagesJson},
+               data-ai-img=${order.aiImageUrl},
+               data-constructor-img=${order.constructorImg},
+               data-first-img=${order.firstImagePath}"
+      style="display:none;"></span>
 
 <!-- Нижній блок: вага + сума -->
 <div class="print-bottom-grid">
@@ -121,77 +96,118 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        var rawEl = document.getElementById('print-composition-raw');
+        if (!rawEl) return;
 
-        // ── Крок 1: підставляємо всі фото з imagesJson ────────────
-        var newImgs = []; // зберігаємо нові img щоб чекати їх завантаження
+        var composition = rawEl.getAttribute('data-composition') || '';
+        var imagesJson  = rawEl.getAttribute('data-images-json') || '[]';
+        var aiImg       = rawEl.getAttribute('data-ai-img');
+        var constrImg   = rawEl.getAttribute('data-constructor-img');
+        var firstImg    = rawEl.getAttribute('data-first-img');
 
-        var dataEl = document.getElementById('print-images-data');
-        if (dataEl) {
-            try {
-                var images = JSON.parse(dataEl.getAttribute('data-images-json'));
-                images.forEach(function(imgSrc, idx) {
-                    if (idx === 0) return; // перший — вже в HTML через th:src
-                    var ph = document.getElementById('print-ph-' + idx);
-                    if (!ph) return;
+        var images = [];
+        try { images = JSON.parse(imagesJson); } catch(e) {}
 
-                    var src = imgSrc;
-                    // Солодощі для ЗСУ — завжди energy_ua.png
-                    if (!src || src === 'null' || src === '/img/2.png') {
-                        var row = ph.closest('.print-item-row');
-                        if (row && row.textContent.indexOf('Солодощі для ЗСУ') !== -1) {
-                            src = '/img/energy_ua.png';
-                        }
-                    }
-                    if (src && src !== 'null') {
-                        ph.innerHTML = '';
-                        var img = document.createElement('img');
-                        img.src = src;
-                        img.className = 'print-item-img';
-                        ph.style.background = 'none';
-                        ph.appendChild(img);
-                        newImgs.push(img);
-                    }
-                });
-            } catch(e) {}
+        // Розпізнаємо шар: рядок є шаром якщо починається з "Тип: " без " — "
+        var LAYER_TYPES = ['Бісквіт:', 'Крем:', 'Начинка:'];
+        function isLayer(s) {
+            s = s.trim();
+            // новий формат ;;
+            if (s.startsWith(';;')) return true;
+            // старий формат: є тип але немає " — "
+            for (var i = 0; i < LAYER_TYPES.length; i++) {
+                if (s.startsWith(LAYER_TYPES[i]) && s.indexOf(' — ') === -1) return true;
+            }
+            return false;
         }
 
-        // ── Крок 2: також перевіряємо плейсхолдери на ЗСУ без imagesJson ──
-        document.querySelectorAll('.print-img-wrap').forEach(function(wrap) {
-            if (wrap.querySelector('img')) return; // вже є фото
-            var row = wrap.closest('.print-item-row');
-            if (row && row.textContent.indexOf('Солодощі для ЗСУ') !== -1) {
-                wrap.innerHTML = '';
-                var img = document.createElement('img');
-                img.src = '/img/energy_ua.png';
-                img.className = 'print-item-img';
-                wrap.appendChild(img);
-                newImgs.push(img);
+        // Розбиваємо по " | " але зберігаємо ;; всередині рядка
+        var MARKER = '';
+        var safe = composition.replace(/;;/g, MARKER);
+        var parts = safe.includes(' | ') ? safe.split(' | ') : safe.split(';');
+
+        // Групуємо: товар + його шари
+        var groups = [];
+        parts.forEach(function(raw) {
+            raw = raw.replace(new RegExp(MARKER, 'g'), ';;').trim();
+            if (!raw) return;
+
+            if (isLayer(raw)) {
+                // Додаємо до останньої групи
+                if (groups.length > 0) {
+                    groups[groups.length - 1].layers.push(raw.replace(/^;;/, '').trim());
+                }
+            } else {
+                // Новий формат з ;; в середині рядка
+                var layers = [];
+                if (raw.indexOf(';;') !== -1) {
+                    var layersStr = raw.substring(raw.indexOf(';;') + 2);
+                    raw = raw.substring(0, raw.indexOf(';;')).trim();
+                    layers = layersStr.split(';;').map(function(l){ return l.trim(); }).filter(Boolean);
+                }
+                groups.push({ raw: raw, layers: layers });
             }
         });
 
-        // ── Крок 3: чекаємо поки ВСІ фото завантажаться (старі + нові) ──
-        // Збираємо після підстановки — тому включає нові img
+        var container = document.getElementById('printItemsContainer');
+        container.innerHTML = '';
+
+        groups.forEach(function(g, idx) {
+            var namePart  = g.raw;
+            var pricePart = '';
+            if (g.raw.indexOf(' — ') !== -1) {
+                namePart  = g.raw.substring(0, g.raw.indexOf(' — '));
+                pricePart = g.raw.substring(g.raw.indexOf(' — ') + 3);
+            }
+
+            // Фото
+            var imgSrc = images[idx] || null;
+            if (!imgSrc && idx === 0) {
+                imgSrc = (aiImg && aiImg !== 'null') ? aiImg
+                    : (constrImg && constrImg !== 'null') ? constrImg
+                        : (firstImg && firstImg !== 'null') ? firstImg : null;
+            }
+            if (namePart.indexOf('Солодощі для ЗСУ') !== -1 || namePart.indexOf('🇺🇦') !== -1) {
+                imgSrc = '/img/energy_ua.png';
+            }
+
+            var imgHtml = imgSrc && imgSrc !== 'null'
+                ? '<img src="' + imgSrc + '" class="print-item-img" alt="">'
+                : '<span class="print-item-img-placeholder">🎂</span>';
+
+            // Шари
+            var layersHtml = '';
+            if (g.layers.length > 0) {
+                layersHtml = '<ol class="print-layers-list">';
+                g.layers.forEach(function(l, li) {
+                    layersHtml += '<li>' + l + '</li>';
+                });
+                layersHtml += '</ol>';
+            }
+
+            var row = document.createElement('div');
+            row.className = 'print-item-row';
+            row.innerHTML =
+                '<div class="print-img-wrap">' + imgHtml + '</div>' +
+                '<div>' +
+                '<div class="print-item-name">' + namePart + '</div>' +
+                (pricePart ? '<div class="print-item-qty">' + pricePart + '</div>' : '') +
+                layersHtml +
+                '</div>';
+            container.appendChild(row);
+        });
+
+        // Чекаємо фото і друкуємо
         setTimeout(function() {
             var allImgs = document.querySelectorAll('img');
-            var loaded = 0;
-            var total  = allImgs.length;
-
-            function tryPrint() {
-                loaded++;
-                if (loaded >= total) {
-                    setTimeout(function() { window.print(); }, 200);
-                }
-            }
-
-            if (total === 0) {
-                window.print();
-            } else {
-                allImgs.forEach(function(img) {
-                    if (img.complete && img.naturalWidth > 0) { tryPrint(); }
-                    else { img.onload = tryPrint; img.onerror = tryPrint; }
-                });
-            }
-        }, 100); // 100мс щоб DOM оновився після appendChild
+            var loaded = 0, total = allImgs.length;
+            function tryPrint() { if (++loaded >= total) setTimeout(function(){ window.print(); }, 200); }
+            if (total === 0) { window.print(); }
+            else { allImgs.forEach(function(img) {
+                if (img.complete && img.naturalWidth > 0) tryPrint();
+                else { img.onload = tryPrint; img.onerror = tryPrint; }
+            }); }
+        }, 150);
     });
 </script>
 </body>

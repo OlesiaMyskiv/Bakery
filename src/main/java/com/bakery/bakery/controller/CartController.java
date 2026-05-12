@@ -141,6 +141,15 @@ public class CartController {
             composition.append(name).append(" — ").append(qty).append(" ").append(unit)
                     .append(" × ").append((int) price).append(" грн = ").append(subtotal).append(" грн");
 
+            // Для авторського торту (CONSTRUCTOR) — додаємо деталі складу через ";;"
+            if ("CONSTRUCTOR".equals(type)) {
+                String desc = String.valueOf(item.getOrDefault("description", ""));
+                if (!desc.isEmpty() && !"null".equals(desc)) {
+                    // Замінюємо " | " між шарами на ";;" щоб не плутати з роздільником товарів
+                    composition.append(";;").append(desc.replace(" | ", ";;"));
+                }
+            }
+
             // Вага тільки для FLAVOR (кг), не для конструктора чи дизайнів
             if ("FLAVOR".equals(type) && "кг".equals(unit)) {
                 totalWeight = (totalWeight == null ? 0 : totalWeight) + qty;

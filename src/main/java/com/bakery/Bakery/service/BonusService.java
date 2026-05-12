@@ -57,11 +57,17 @@ public class BonusService {
      */
     @Transactional(readOnly = true)
     public int getTotalSpent(Long userId) {
-        return bonusRepo.findByUserIdOrderByCreatedAtDesc(userId).stream()
-                .filter(t -> t.getType() == BonusTransaction.TransactionType.EARNED)
-                .filter(t -> t.getOrder() != null)
-                .mapToInt(t -> t.getOrder().getPrice() != null ? t.getOrder().getPrice() : 0)
-                .sum();
+        // Рахуємо суму унікальних замовлень (один раз кожне)
+        Set<Long> seenOrderIds = new HashSet<>();
+        int total = 0;
+        for (BonusTransaction t : bonusRepo.findByUserIdOrderByCreatedAtDesc(userId)) {
+            if (t.getType() == BonusTransaction.TransactionType.EARNED
+                    && t.getOrder() != null
+                    && seenOrderIds.add(t.getOrder().getId())) {
+                total += t.getOrder().getPrice() != null ? t.getOrder().getPrice() : 0;
+            }
+        }
+        return total;
     }
 
     /**
@@ -115,6 +121,11 @@ public class BonusService {
      */
     @Transactional
     public BonusTransaction earnForOrder(User user, Order order) {
+        // Захист від подвійного нарахування за одне замовлення
+        if (bonusRepo.existsByOrderIdAndType(order.getId(), BonusTransaction.TransactionType.EARNED)) {
+            return null;
+        }
+
         int totalSpent = getTotalSpent(user.getId());
         BonusLevel level = getCurrentLevel(totalSpent);
 

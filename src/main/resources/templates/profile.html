@@ -123,18 +123,27 @@
                                items=${#strings.contains(rawItems,'|') ? #strings.arraySplit(rawItems,'|') : #strings.arraySplit(rawItems,';')}">
 
                                 <th:block th:each="item, stat : ${items}">
-                                    <div class="order-item-row-full">
+                                    <div class="order-item-row-full"
+                                         th:unless="${#strings.startsWith(#strings.trim(item),';;') or
+                                             (#strings.startsWith(#strings.trim(item),'Бісквіт:') and not #strings.contains(item,' — ')) or
+                                             (#strings.startsWith(#strings.trim(item),'Крем:') and not #strings.contains(item,' — ')) or
+                                             (#strings.startsWith(#strings.trim(item),'Начинка:') and not #strings.contains(item,' — '))}"
+                                         th:with="trimItem=${#strings.contains(item,';;')?#strings.substringBefore(item,';;'):item},
+                                                  layersStr=${#strings.contains(item,';;')?#strings.substringAfter(item,';;'):''}">
                                         <div class="order-item-img-wrap">
                                             <div class="order-item-img-placeholder"
                                                  th:id="'img-placeholder-' + ${order.id} + '-' + ${stat.index}">🎂</div>
-                                            <span th:if="${stat.index == 0 and order.imagesJson != null}"
-                                                  th:attr="data-images-json=${order.imagesJson}"
+                                            <span th:if="${stat.index == 0}"
+                                                  th:attr="data-images-json=${order.imagesJson},
+                                                           data-ai-img=${order.aiImageUrl},
+                                                           data-constructor-img=${order.constructorImg},
+                                                           data-first-img=${order.firstImagePath}"
                                                   th:id="'images-data-' + ${order.id}"
                                                   style="display:none;"></span>
                                         </div>
 
                                         <div class="order-item-info">
-                                            <th:block th:with="trimmed=${#strings.trim(item)}">
+                                            <th:block th:with="trimmed=${#strings.trim(trimItem)}">
                                                 <div class="order-item-name"
                                                      th:text="${#strings.contains(trimmed,' — ') ? #strings.substringBefore(trimmed,' — ') : trimmed}">
                                                 </div>
@@ -142,6 +151,13 @@
                                                      th:if="${#strings.contains(trimmed,' — ')}"
                                                      th:text="${#strings.substringAfter(trimmed,' — ')}">
                                                 </div>
+                                                <!-- Шари авторського торту -->
+                                                <ol class="order-layers-list" th:if="${!#strings.isEmpty(layersStr)}">
+                                                    <th:block th:each="layer : ${#strings.arraySplit(layersStr,';;')}">
+                                                        <li th:if="${!#strings.isEmpty(#strings.trim(layer))}"
+                                                            th:text="${#strings.trim(layer)}"></li>
+                                                    </th:block>
+                                                </ol>
                                             </th:block>
                                         </div>
                                     </div>
@@ -226,33 +242,36 @@
                                  th:with="rawItems=${order.composition != null ? order.composition : ''},
                                           items=${#strings.contains(rawItems,'|') ? #strings.arraySplit(rawItems,'|') : #strings.arraySplit(rawItems,';')}">
                                 <th:block th:each="item, stat : ${items}">
-                                    <div class="order-item-row-full">
+                                    <div class="order-item-row-full"
+                                         th:unless="${(#strings.startsWith(#strings.trim(item),';;')) or
+                                             (#strings.startsWith(#strings.trim(item),'Бісквіт:') and not #strings.contains(item,' — ')) or
+                                             (#strings.startsWith(#strings.trim(item),'Крем:') and not #strings.contains(item,' — ')) or
+                                             (#strings.startsWith(#strings.trim(item),'Начинка:') and not #strings.contains(item,' — '))}">
                                         <div class="order-item-img-wrap">
                                             <div class="order-item-img-placeholder"
                                                  th:id="'img-placeholder-h' + ${order.id} + '-' + ${stat.index}">🎂</div>
-                                            <span th:if="${stat.index == 0 and order.imagesJson != null}"
-                                                  th:attr="data-images-json=${order.imagesJson}"
+                                            <span th:if="${stat.index == 0}"
+                                                  th:attr="data-images-json=${order.imagesJson},
+                                                           data-ai-img=${order.aiImageUrl},
+                                                           data-constructor-img=${order.constructorImg},
+                                                           data-first-img=${order.firstImagePath}"
                                                   th:id="'images-data-h' + ${order.id}"
                                                   style="display:none;"></span>
                                         </div>
                                         <div class="order-item-info">
-                                            <th:block th:with="trimmed=${#strings.trim(item)}">
+                                            <th:block th:with="trimmed=${#strings.trim(item)},
+                                                               mainPart=${#strings.contains(trimmed,';;')?#strings.substringBefore(trimmed,';;'):trimmed},
+                                                               layersStr=${#strings.contains(trimmed,';;')?#strings.substringAfter(trimmed,';;'):''}">
                                                 <div class="order-item-name"
-                                                     th:text="${#strings.contains(trimmed,' — ') ? #strings.substringBefore(trimmed,' — ') : trimmed}"></div>
-                                                <!-- Ціна/склад після " — " -->
-                                                <th:block th:if="${#strings.contains(trimmed,' — ')}"
-                                                          th:with="afterDash=${#strings.substringAfter(trimmed,' — ')}">
-                                                    <!-- Якщо є " | " — це склад конструктора, показуємо стовпчиком -->
-                                                    <th:block th:if="${#strings.contains(afterDash,' | ')}">
-                                                        <div class="order-item-price constructor-layer"
-                                                             th:each="layer : ${#strings.arraySplit(afterDash,' | ')}"
-                                                             th:text="${#strings.trim(layer)}"></div>
-                                                    </th:block>
-                                                    <!-- Звичайний товар — один рядок -->
-                                                    <div class="order-item-price"
-                                                         th:unless="${#strings.contains(afterDash,' | ')}"
-                                                         th:text="${afterDash}"></div>
-                                                </th:block>
+                                                     th:text="${#strings.contains(mainPart,' — ') ? #strings.substringBefore(mainPart,' — ') : mainPart}"></div>
+                                                <div class="order-item-price"
+                                                     th:if="${#strings.contains(mainPart,' — ')}"
+                                                     th:text="${#strings.substringAfter(mainPart,' — ')}"></div>
+                                                <ol class="order-layers-list" th:if="${!#strings.isEmpty(layersStr)}">
+                                                    <li th:each="layer : ${#strings.arraySplit(layersStr,';;')}"
+                                                        th:if="${!#strings.isEmpty(#strings.trim(layer))}"
+                                                        th:text="${#strings.trim(layer)}"></li>
+                                                </ol>
                                             </th:block>
                                         </div>
                                     </div>
@@ -309,33 +328,36 @@
                                  th:with="rawItems=${order.composition != null ? order.composition : ''},
                                           items=${#strings.contains(rawItems,'|') ? #strings.arraySplit(rawItems,'|') : #strings.arraySplit(rawItems,';')}">
                                 <th:block th:each="item, stat : ${items}">
-                                    <div class="order-item-row-full">
+                                    <div class="order-item-row-full"
+                                         th:unless="${(#strings.startsWith(#strings.trim(item),';;')) or
+                                             (#strings.startsWith(#strings.trim(item),'Бісквіт:') and not #strings.contains(item,' — ')) or
+                                             (#strings.startsWith(#strings.trim(item),'Крем:') and not #strings.contains(item,' — ')) or
+                                             (#strings.startsWith(#strings.trim(item),'Начинка:') and not #strings.contains(item,' — '))}">
                                         <div class="order-item-img-wrap">
                                             <div class="order-item-img-placeholder"
                                                  th:id="'img-placeholder-p' + ${order.id} + '-' + ${stat.index}">🎂</div>
-                                            <span th:if="${stat.index == 0 and order.imagesJson != null}"
-                                                  th:attr="data-images-json=${order.imagesJson}"
+                                            <span th:if="${stat.index == 0}"
+                                                  th:attr="data-images-json=${order.imagesJson},
+                                                           data-ai-img=${order.aiImageUrl},
+                                                           data-constructor-img=${order.constructorImg},
+                                                           data-first-img=${order.firstImagePath}"
                                                   th:id="'images-data-p' + ${order.id}"
                                                   style="display:none;"></span>
                                         </div>
                                         <div class="order-item-info">
-                                            <th:block th:with="trimmed=${#strings.trim(item)}">
+                                            <th:block th:with="trimmed=${#strings.trim(item)},
+                                                               mainPart=${#strings.contains(trimmed,';;')?#strings.substringBefore(trimmed,';;'):trimmed},
+                                                               layersStr=${#strings.contains(trimmed,';;')?#strings.substringAfter(trimmed,';;'):''}">
                                                 <div class="order-item-name"
-                                                     th:text="${#strings.contains(trimmed,' — ') ? #strings.substringBefore(trimmed,' — ') : trimmed}"></div>
-                                                <!-- Ціна/склад після " — " -->
-                                                <th:block th:if="${#strings.contains(trimmed,' — ')}"
-                                                          th:with="afterDash=${#strings.substringAfter(trimmed,' — ')}">
-                                                    <!-- Якщо є " | " — це склад конструктора, показуємо стовпчиком -->
-                                                    <th:block th:if="${#strings.contains(afterDash,' | ')}">
-                                                        <div class="order-item-price constructor-layer"
-                                                             th:each="layer : ${#strings.arraySplit(afterDash,' | ')}"
-                                                             th:text="${#strings.trim(layer)}"></div>
-                                                    </th:block>
-                                                    <!-- Звичайний товар — один рядок -->
-                                                    <div class="order-item-price"
-                                                         th:unless="${#strings.contains(afterDash,' | ')}"
-                                                         th:text="${afterDash}"></div>
-                                                </th:block>
+                                                     th:text="${#strings.contains(mainPart,' — ') ? #strings.substringBefore(mainPart,' — ') : mainPart}"></div>
+                                                <div class="order-item-price"
+                                                     th:if="${#strings.contains(mainPart,' — ')}"
+                                                     th:text="${#strings.substringAfter(mainPart,' — ')}"></div>
+                                                <ol class="order-layers-list" th:if="${!#strings.isEmpty(layersStr)}">
+                                                    <li th:each="layer : ${#strings.arraySplit(layersStr,';;')}"
+                                                        th:if="${!#strings.isEmpty(#strings.trim(layer))}"
+                                                        th:text="${#strings.trim(layer)}"></li>
+                                                </ol>
                                             </th:block>
                                         </div>
                                     </div>
@@ -376,39 +398,41 @@
                                  th:with="rawItems=${rev.order.composition != null ? rev.order.composition : ''},
                                           items=${#strings.contains(rawItems,'|') ? #strings.arraySplit(rawItems,'|') : #strings.arraySplit(rawItems,';')}">
                                 <th:block th:each="item, stat : ${items}">
-                                    <div class="order-item-row-full">
+                                    <div class="order-item-row-full"
+                                         th:unless="${(#strings.startsWith(#strings.trim(item),';;')) or
+                                             (#strings.startsWith(#strings.trim(item),'Бісквіт:') and not #strings.contains(item,' — ')) or
+                                             (#strings.startsWith(#strings.trim(item),'Крем:') and not #strings.contains(item,' — ')) or
+                                             (#strings.startsWith(#strings.trim(item),'Начинка:') and not #strings.contains(item,' — '))}">
                                         <div class="order-item-img-wrap">
-                                            <img th:if="${stat.index == 0 and rev.order.firstImagePath != null}"
-                                                 th:src="${rev.order.firstImagePath}"
-                                                 class="order-item-img" alt=""
-                                                 th:attr="data-order-id=${'r'+rev.id}, data-item-index=0">
-                                            <div th:unless="${stat.index == 0 and rev.order.firstImagePath != null}"
+                                            <!-- idx=0: фото відгуку → фото товару з imagesJson; інші — з imagesJson -->
+                                            <img th:if="${stat.index == 0 and rev.photoPath != null}"
+                                                 th:src="${rev.photoPath}"
+                                                 class="order-item-img" alt="">
+                                            <div th:unless="${stat.index == 0 and rev.photoPath != null}"
                                                  class="order-item-img-placeholder"
-                                                 th:attr="data-order-id=${'r'+rev.id}, data-item-index=${stat.index}"
                                                  th:id="'img-placeholder-r' + ${rev.id} + '-' + ${stat.index}">🎂</div>
-                                            <span th:if="${stat.index == 0 and rev.order.imagesJson != null}"
-                                                  th:attr="data-images-json=${rev.order.imagesJson}"
+                                            <span th:if="${stat.index == 0}"
+                                                  th:attr="data-images-json=${rev.order.imagesJson},
+                                                           data-ai-img=${rev.order.aiImageUrl},
+                                                           data-constructor-img=${rev.order.constructorImg},
+                                                           data-first-img=${rev.order.firstImagePath}"
                                                   th:id="'images-data-r' + ${rev.id}"
                                                   style="display:none;"></span>
                                         </div>
                                         <div class="order-item-info">
-                                            <th:block th:with="trimmed=${#strings.trim(item)}">
+                                            <th:block th:with="trimmed=${#strings.trim(item)},
+                                                               mainPart=${#strings.contains(trimmed,';;')?#strings.substringBefore(trimmed,';;'):trimmed},
+                                                               layersStr=${#strings.contains(trimmed,';;')?#strings.substringAfter(trimmed,';;'):''}">
                                                 <div class="order-item-name"
-                                                     th:text="${#strings.contains(trimmed,' — ') ? #strings.substringBefore(trimmed,' — ') : trimmed}"></div>
-                                                <!-- Ціна/склад після " — " -->
-                                                <th:block th:if="${#strings.contains(trimmed,' — ')}"
-                                                          th:with="afterDash=${#strings.substringAfter(trimmed,' — ')}">
-                                                    <!-- Якщо є " | " — це склад конструктора, показуємо стовпчиком -->
-                                                    <th:block th:if="${#strings.contains(afterDash,' | ')}">
-                                                        <div class="order-item-price constructor-layer"
-                                                             th:each="layer : ${#strings.arraySplit(afterDash,' | ')}"
-                                                             th:text="${#strings.trim(layer)}"></div>
-                                                    </th:block>
-                                                    <!-- Звичайний товар — один рядок -->
-                                                    <div class="order-item-price"
-                                                         th:unless="${#strings.contains(afterDash,' | ')}"
-                                                         th:text="${afterDash}"></div>
-                                                </th:block>
+                                                     th:text="${#strings.contains(mainPart,' — ') ? #strings.substringBefore(mainPart,' — ') : mainPart}"></div>
+                                                <div class="order-item-price"
+                                                     th:if="${#strings.contains(mainPart,' — ')}"
+                                                     th:text="${#strings.substringAfter(mainPart,' — ')}"></div>
+                                                <ol class="order-layers-list" th:if="${!#strings.isEmpty(layersStr)}">
+                                                    <li th:each="layer : ${#strings.arraySplit(layersStr,';;')}"
+                                                        th:if="${!#strings.isEmpty(#strings.trim(layer))}"
+                                                        th:text="${#strings.trim(layer)}"></li>
+                                                </ol>
                                             </th:block>
                                         </div>
                                     </div>
@@ -424,19 +448,6 @@
                                 </div>
                             </div>
 
-                            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-                                <div class="rpc-date" th:text="${rev.createdAt != null ? #temporals.format(rev.createdAt, 'dd.MM.yyyy') : ''}"></div>
-                                <div class="rev-stars">
-                                    <span th:each="i : ${#numbers.sequence(1, 5)}"
-                                          th:classappend="${i <= rev.rating} ? ' star-filled' : ' star-empty'"
-                                          class="rev-star">★</span>
-                                </div>
-                                <div class="rev-text" th:text="${rev.text}"></div>
-                                <div class="rev-admin-reply" th:if="${rev.adminReply != null}">
-                                    <span style="color:#3AA6B9;font-weight:bold;">Відповідь кондитерської: </span>
-                                    <span th:text="${rev.adminReply}"></span>
-                                </div>
-                            </div>
                             <button class="rev-delete-btn" th:attr="data-rev-id=${rev.id}" onclick="deleteReview(parseInt(this.dataset.revId))" title="Видалити відгук">
                                 <img src="/img/recycle-icon.svg" class="rev-delete-icon" alt="Видалити">
                             </button>
@@ -503,22 +514,26 @@
 
                             <!-- Всі рівні -->
                             <div class="bonus-levels-list">
-                                <div class="bonus-level-row">
+                                <div class="bonus-level-row" th:classappend="${d.currentLevel == 'Ласун'} ? ' bll-active'">
+                                    <span class="bll-icon"><img src="/img/donut-icon.svg" alt="" class="bll-svg"></span>
                                     <span class="bll-name">Ласун</span>
                                     <span class="bll-range">0 – 300 грн</span>
                                     <span class="bll-cashback">3%</span>
                                 </div>
-                                <div class="bonus-level-row">
+                                <div class="bonus-level-row" th:classappend="${d.currentLevel == 'Гурман'} ? ' bll-active'">
+                                    <span class="bll-icon"><img src="/img/croissant-icon.svg" alt="" class="bll-svg"></span>
                                     <span class="bll-name">Гурман</span>
                                     <span class="bll-range">300 – 800 грн</span>
                                     <span class="bll-cashback">5%</span>
                                 </div>
-                                <div class="bonus-level-row">
+                                <div class="bonus-level-row" th:classappend="${d.currentLevel == 'Майстер тіста'} ? ' bll-active'">
+                                    <span class="bll-icon"><img src="/img/baking-tray-icon.svg" alt="" class="bll-svg"></span>
                                     <span class="bll-name">Майстер тіста</span>
                                     <span class="bll-range">800 – 1500 грн</span>
                                     <span class="bll-cashback">7%</span>
                                 </div>
-                                <div class="bonus-level-row">
+                                <div class="bonus-level-row" th:classappend="${d.currentLevel == 'Шеф-пекар'} ? ' bll-active'">
+                                    <span class="bll-icon"><img src="/img/crown-icon.svg" alt="" class="bll-svg"></span>
                                     <span class="bll-name">Шеф-пекар</span>
                                     <span class="bll-range">1500+ грн</span>
                                     <span class="bll-cashback">10%</span>
@@ -964,20 +979,50 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('[id^="images-data-"]').forEach(function(el) {
-            var orderId = el.id.replace('images-data-', '');
+            var orderId   = el.id.replace('images-data-', '');
+            var aiImg     = el.getAttribute('data-ai-img');
+            var constrImg = el.getAttribute('data-constructor-img');
+            var firstImg  = el.getAttribute('data-first-img');
+
+            // Захист від рядка "null" з Thymeleaf
+            function notNull(v) { return v && v !== 'null' && v !== '/img/2.png'; }
+
+            var raw = el.getAttribute('data-images-json');
+            var images = [];
             try {
-                var images = JSON.parse(el.getAttribute('data-images-json'));
-                images.forEach(function(imgSrc, idx) {
-                    var placeholder = document.getElementById('img-placeholder-' + orderId + '-' + idx);
-                    if (placeholder && imgSrc && imgSrc !== '/img/2.png') {
-                        var imgEl = document.createElement('img');
-                        imgEl.src = imgSrc;
-                        imgEl.className = 'order-item-img';
-                        imgEl.alt = '';
-                        placeholder.parentNode.replaceChild(imgEl, placeholder);
-                    }
-                });
+                var parsed = JSON.parse(raw);
+                if (Array.isArray(parsed)) images = parsed;
             } catch(e) {}
+
+            var placeholders = document.querySelectorAll('[id^="img-placeholder-' + orderId + '-"]');
+
+            placeholders.forEach(function(placeholder) {
+                var idParts = placeholder.id.split('-');
+                var idx = parseInt(idParts[idParts.length - 1]);
+
+                var imgSrc = notNull(images[idx]) ? images[idx] : null;
+
+                // Fallback для idx=0
+                if (!imgSrc && idx === 0) {
+                    imgSrc = notNull(aiImg) ? aiImg
+                        : notNull(constrImg) ? constrImg
+                            : notNull(firstImg) ? firstImg : null;
+                }
+
+                // Солодощі ЗСУ
+                var row = placeholder.closest('.order-item-row-full');
+                if (row && row.textContent.indexOf('Солодощі для ЗСУ') !== -1) {
+                    imgSrc = '/img/energy_ua.png';
+                }
+
+                if (imgSrc) {
+                    var imgEl = document.createElement('img');
+                    imgEl.src = imgSrc;
+                    imgEl.className = 'order-item-img';
+                    imgEl.alt = '';
+                    placeholder.parentNode.replaceChild(imgEl, placeholder);
+                }
+            });
         });
     });
 

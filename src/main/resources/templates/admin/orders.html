@@ -147,38 +147,40 @@
                                       th:text="${order.orderStatus.label}"></span>
                         </td>
                         <td>
-                            <!-- Нові → Взяти в роботу -->
-                            <form th:if="${currentStatus.name() == 'NEW'}"
-                                  th:action="@{/admin/orders/{id}/status(id=${order.id})}"
-                                  method="post" style="display:inline">
-                                <input type="hidden" name="status" value="IN_PROGRESS">
-                                <input type="hidden" name="currentStatus" value="NEW">
-                                <button class="btn-take">Взяти в роботу</button>
-                            </form>
-                            <!-- Готуються → В процесі / До видачі -->
-                            <form th:if="${currentStatus.name() == 'IN_PROGRESS'}"
-                                  th:action="@{/admin/orders/{id}/status(id=${order.id})}"
-                                  method="post" style="display:inline">
-                                <input type="hidden" name="status" value="READY">
-                                <input type="hidden" name="currentStatus" value="IN_PROGRESS">
-                                <button class="btn-ready">До видачі</button>
-                            </form>
-                            <!-- Готові → Виконано -->
-                            <form th:if="${currentStatus.name() == 'READY'}"
-                                  th:action="@{/admin/orders/{id}/status(id=${order.id})}"
-                                  method="post" style="display:inline">
-                                <input type="hidden" name="status" value="DONE">
-                                <input type="hidden" name="currentStatus" value="READY">
-                                <button class="btn-done">Виконано</button>
-                            </form>
-                            <!-- Скасувати (для нових і в процесі) -->
-                            <form th:if="${currentStatus.name() == 'NEW' or currentStatus.name() == 'IN_PROGRESS'}"
-                                  th:action="@{/admin/orders/{id}/status(id=${order.id})}"
-                                  method="post" style="display:inline; margin-left:4px">
-                                <input type="hidden" name="status" value="CANCELLED">
-                                <input type="hidden" th:name="currentStatus" th:value="${currentStatus.name()}">
-                                <button class="btn-cancel">Скасувати</button>
-                            </form>
+                            <div class="action-col">
+                                <!-- Нові → Взяти в роботу -->
+                                <form th:if="${currentStatus.name() == 'NEW'}"
+                                      th:action="@{/admin/orders/{id}/status(id=${order.id})}"
+                                      method="post">
+                                    <input type="hidden" name="status" value="IN_PROGRESS">
+                                    <input type="hidden" name="currentStatus" value="NEW">
+                                    <button class="btn-take">Взяти в роботу</button>
+                                </form>
+                                <!-- Готуються → До видачі -->
+                                <form th:if="${currentStatus.name() == 'IN_PROGRESS'}"
+                                      th:action="@{/admin/orders/{id}/status(id=${order.id})}"
+                                      method="post">
+                                    <input type="hidden" name="status" value="READY">
+                                    <input type="hidden" name="currentStatus" value="IN_PROGRESS">
+                                    <button class="btn-ready">До видачі</button>
+                                </form>
+                                <!-- Готові → Виконано -->
+                                <form th:if="${currentStatus.name() == 'READY'}"
+                                      th:action="@{/admin/orders/{id}/status(id=${order.id})}"
+                                      method="post">
+                                    <input type="hidden" name="status" value="DONE">
+                                    <input type="hidden" name="currentStatus" value="READY">
+                                    <button class="btn-done">Виконано</button>
+                                </form>
+                                <!-- Скасувати (для нових і в процесі) -->
+                                <form th:if="${currentStatus.name() == 'NEW' or currentStatus.name() == 'IN_PROGRESS'}"
+                                      th:action="@{/admin/orders/{id}/status(id=${order.id})}"
+                                      method="post">
+                                    <input type="hidden" name="status" value="CANCELLED">
+                                    <input type="hidden" th:name="currentStatus" th:value="${currentStatus.name()}">
+                                    <button class="btn-cancel">Скасувати</button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                     </tbody>
@@ -254,6 +256,17 @@
 </div>
 
 <style>
+    .omi-layers-list {
+        margin: 5px 0 0 16px;
+        padding: 0;
+        font-size: 0.85rem;
+        color: #555;
+        line-height: 1.7;
+    }
+    .omi-layers-list li {
+        padding: 0;
+    }
+
     /* ── Модальне вікно ──────────────────────────────────────────── */
     .order-modal-overlay {
         display: none;
@@ -386,32 +399,70 @@
         var itemsEl = document.getElementById('modalItems');
         itemsEl.innerHTML = '';
         var raw = d.composition || '';
-        var items = raw.includes(' | ') ? raw.split(' | ') : raw.split(';');
         var images = [];
         try { images = JSON.parse(d.imagesJson || '[]'); } catch(e) {}
 
-        items.forEach(function(item, idx) {
-            item = item.trim();
-            if (!item) return;
-            var parts = item.split(' — ');
-            var name  = parts[0] || item;
-            var price = parts[1] || '';
-
-            // Спочатку беремо з imagesJson, для idx=0 — firstImg або aiImg
-            var imgSrc = images[idx] || (idx === 0 ? (d.aiImg && d.aiImg !== 'null' ? d.aiImg : (d.firstImg && d.firstImg !== 'null' ? d.firstImg : null)) : null);
-            // Солодощі для ЗСУ — завжди energy_ua.png
-            if (name.indexOf('Солодощі для ЗСУ') !== -1 || name.indexOf('🇺🇦') !== -1) {
-                imgSrc = '/img/energy_ua.png';
+        // Розпізнаємо чи рядок є шаром конструктора (старий або новий формат)
+        var LAYER_TYPES = ['Бісквіт:', 'Крем:', 'Начинка:'];
+        function isLayer(s) {
+            s = s.trim();
+            if (s.startsWith(';;')) return true;
+            for (var i = 0; i < LAYER_TYPES.length; i++) {
+                if (s.startsWith(LAYER_TYPES[i]) && s.indexOf(' — ') === -1) return true;
             }
+            return false;
+        }
+
+        // Розбиваємо по ' | ' зберігаючи ;; всередині рядків
+        var MARKER = '\x01';
+        var safe = raw.replace(/;;/g, MARKER);
+        var parts = safe.includes(' | ') ? safe.split(' | ') : safe.split(';');
+
+        // Групуємо товари з шарами
+        var groups = [];
+        parts.forEach(function(p) {
+            p = p.replace(new RegExp(MARKER, 'g'), ';;').trim();
+            if (!p) return;
+            if (isLayer(p)) {
+                if (groups.length > 0) groups[groups.length-1].layers.push(p.replace(/^;;/, '').trim());
+            } else {
+                var layers = [];
+                if (p.indexOf(';;') !== -1) {
+                    var ls = p.substring(p.indexOf(';;') + 2);
+                    p = p.substring(0, p.indexOf(';;')).trim();
+                    layers = ls.split(';;').map(function(l){ return l.trim(); }).filter(Boolean);
+                }
+                groups.push({ raw: p, layers: layers });
+            }
+        });
+
+        groups.forEach(function(g, idx) {
+            var name = g.raw, price = '';
+            if (g.raw.indexOf(' — ') !== -1) {
+                name  = g.raw.substring(0, g.raw.indexOf(' — '));
+                price = g.raw.substring(g.raw.indexOf(' — ') + 3);
+            }
+
+            var imgSrc = images[idx] || (idx === 0 ? (d.aiImg && d.aiImg !== 'null' ? d.aiImg : (d.firstImg && d.firstImg !== 'null' ? d.firstImg : null)) : null);
+            if (name.indexOf('Солодощі для ЗСУ') !== -1 || name.indexOf('🇺🇦') !== -1) imgSrc = '/img/energy_ua.png';
+
             var imgHtml = (imgSrc && imgSrc !== 'null' && imgSrc !== '')
                 ? '<img src="' + imgSrc + '" class="omi-item-img" alt="">'
                 : '<div class="omi-item-img-placeholder">🎂</div>';
+
+            var layersHtml = '';
+            if (g.layers.length > 0) {
+                layersHtml = '<ol class="omi-layers-list">';
+                g.layers.forEach(function(l) { layersHtml += '<li>' + esc(l) + '</li>'; });
+                layersHtml += '</ol>';
+            }
 
             itemsEl.innerHTML +=
                 '<div class="omi-item-row">'
                 + imgHtml
                 + '<div><div class="omi-item-name">' + esc(name) + '</div>'
                 + (price ? '<div class="omi-item-price">' + esc(price) + '</div>' : '')
+                + layersHtml
                 + '</div></div>';
         });
 

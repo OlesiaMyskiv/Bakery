@@ -47,14 +47,15 @@
     <main class="admin-content">
         <div class="admin-card">
 
-            <div style="display:flex; justify-content:center; align-items:center; margin-bottom:30px; position:relative; min-height: 50px;">
-                <h1 class="admin-page-title" style="margin:0; text-align:center;">Відгуки
-                    <span style="font-size:1rem;color:#aaa;font-weight:400;"
+            <div class="admin-header-container">
+                <h1 class="admin-page-title">
+                    Відгуки
+                    <span class="reviews-count"
                           th:if="${reviews != null}"
                           th:text="'(' + ${#lists.size(reviews)} + ')'"></span>
                 </h1>
-                <button id="editToggle" class="btn-edit-mode" onclick="toggleEditMode()"
-                        style="position:absolute; right:0; transform: scale(1.3); transform-origin: right center;">
+
+                <button id="editToggle" class="btn-edit-mode" onclick="toggleEditMode()">
                     Редагувати
                 </button>
             </div>
@@ -103,7 +104,14 @@
                          th:with="rawItems=${r.order.composition != null ? r.order.composition : ''},
                                   items=${#strings.contains(rawItems,'|') ? #strings.arraySplit(rawItems,'|') : #strings.arraySplit(rawItems,';')}">
 
-                        <div th:each="item, stat : ${items}" class="rca-order-row">
+                        <div th:each="item, stat : ${items}" class="rca-order-row"
+                             th:unless="${(#strings.startsWith(#strings.trim(item),';;')) or
+                                         (#strings.startsWith(#strings.trim(item),'Бісквіт:') and not #strings.contains(item,' — ')) or
+                                         (#strings.startsWith(#strings.trim(item),'Крем:') and not #strings.contains(item,' — ')) or
+                                         (#strings.startsWith(#strings.trim(item),'Начинка:') and not #strings.contains(item,' — '))}"
+                             th:with="mainPart=${#strings.contains(item,';;')?#strings.substringBefore(item,';;'):item},
+                                      layersStr=${#strings.contains(item,';;')?#strings.substringAfter(item,';;'):''}">
+
                             <!-- Фото: перший товар — реальне, решта — плейсхолдер -->
                             <div th:if="${stat.index == 0}">
                                 <img th:if="${r.order.aiImageUrl != null}"
@@ -124,14 +132,19 @@
                                   th:id="'ra-images-' + ${r.id}"
                                   style="display:none;"></span>
 
-                            <!-- Назва і ціна -->
+                            <!-- Назва, ціна і шари конструктора -->
                             <div class="rca-item-info">
-                                <th:block th:with="trimmed=${#strings.trim(item)}">
+                                <th:block th:with="trimmed=${#strings.trim(mainPart)}">
                                     <div class="rca-item-name"
                                          th:text="${#strings.contains(trimmed,' — ') ? #strings.substringBefore(trimmed,' — ') : trimmed}"></div>
                                     <div class="rca-item-price"
                                          th:if="${#strings.contains(trimmed,' — ')}"
                                          th:text="${#strings.substringAfter(trimmed,' — ')}"></div>
+                                    <ol class="rca-layers-list" th:if="${!#strings.isEmpty(layersStr)}">
+                                        <li th:each="layer : ${#strings.arraySplit(layersStr,';;')}"
+                                            th:if="${!#strings.isEmpty(#strings.trim(layer))}"
+                                            th:text="${#strings.trim(layer)}"></li>
+                                    </ol>
                                 </th:block>
                             </div>
                         </div>
@@ -214,11 +227,19 @@
     function toggleEditMode() {
         editMode = !editMode;
         var btn = document.getElementById('editToggle');
+
         document.querySelectorAll('.edit-only').forEach(function(el) {
             el.style.display = editMode ? 'flex' : 'none';
         });
+
+        // Тепер змінюємо текст та прозорість замість кольору
         btn.textContent = editMode ? 'Зберегти' : 'Редагувати';
-        btn.style.color  = editMode ? '#3AA6B9' : '';
+
+        if (editMode) {
+            btn.style.backgroundColor = '#2d8a9e'; // Колір при режимі збереження
+        } else {
+            btn.style.backgroundColor = '#3AA6B9'; // Повертаємо оригінальний
+        }
     }
 </script>
 </body>

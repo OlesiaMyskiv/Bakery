@@ -153,6 +153,9 @@
 /* ════════════════════════════════════════════════════════════
    ВКЛАДКИ ЗАМОВЛЕНЬ
    ════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════
+   ВКЛАДКИ ЗАМОВЛЕНЬ
+   ════════════════════════════════════════════════════════════ */
 .order-tabs {
     display: flex;
     width: 100%;
@@ -245,6 +248,17 @@
     vertical-align: middle;
 }
 
+/* Колонка "Дія" — кнопки стовпцем */
+.admin-table td:last-child {
+    white-space: nowrap;
+}
+.action-col {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+}
+
 .empty-row {
     text-align: center;
     padding: 50px !important;
@@ -307,30 +321,54 @@
 .btn-reject  { background: #ffebee; color: #c62828; border: none; border-radius: 8px; padding: 8px 16px; font-weight: 700; cursor: pointer; }
 .btn-reject:hover  { background: #ffcdd2; }
 
-.btn-take   { background: #e8a630; color: white; border: none; border-radius: 20px; padding: 6px 16px; font-weight: 700; cursor: pointer; white-space: nowrap; }
-.btn-ready  { background: #3AA6B9; color: white; border: none; border-radius: 20px; padding: 6px 16px; font-weight: 700; cursor: pointer; white-space: nowrap; }
-.btn-done   { background: #27ae60; color: white; border: none; border-radius: 20px; padding: 6px 16px; font-weight: 700; cursor: pointer; white-space: nowrap; }
-.btn-cancel {
-    padding: 13px 44px;
+/* ════════════════════════════════════════════════════════════
+   КНОПКИ ДІЇ В ТАБЛИЦІ — єдиний розмір і стиль
+   ════════════════════════════════════════════════════════════ */
+
+/* Базовий стиль для ВСІХ кнопок у колонках таблиці */
+.btn-take,
+.btn-ready,
+.btn-done,
+.btn-cancel,
+.btn-details {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    min-width: 120px;
+    padding: 0 14px;
     border: none;
-    border-radius: 12px;
-    background: #DF7481;
-    color: white;
+    border-radius: 20px;
     font-family: 'Cormorant Garamond', serif;
-    font-size: 20px;
+    font-size: 14px;
     font-weight: 700;
-    text-decoration: none;
     cursor: pointer;
-    display: inline-block;
+    white-space: nowrap;
     text-align: center;
-    min-width: 200px;
+    transition: all 0.15s ease;
     box-sizing: border-box;
+    text-decoration: none;
 }
 
-.btn-cancel:hover { background: #c55f6d; }
-.btn-cancel:hover {
-    background: #c55f6d;
+.btn-take   { background: #e8a630; color: white; }
+.btn-take:hover { background: #cf9020; }
+
+.btn-ready  { background: #3AA6B9; color: white; }
+.btn-ready:hover { background: #2d8a9e; }
+
+.btn-done   { background: #5bab60; color: white; }
+.btn-done:hover { background: #469b4b; }
+
+.btn-cancel { background: #f2c4c9; color: #8a2030; min-width: 100px; }
+.btn-cancel:hover { background: #e8aab1; }
+
+.btn-details {
+    background: #f0ece8;
+    color: #5a4a40;
+    min-width: 120px;
+    margin-top: 6px;
 }
+.btn-details:hover { background: #e4ddd8; }
 
 .btn-view-doc { color: #4a90e2; text-decoration: none; font-weight: 700; }
 .btn-view-doc:hover { color: #357abd; text-decoration: underline; }
@@ -356,27 +394,35 @@
     font-size: 15px;
 }
 
-.pay-pill, .status-pill {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 14px;
-    font-weight: 700;
-}
-.pay-pill.paid    { background: #d4edda; color: #155724; }
-.pay-pill.pending { background: #f9c9c9; color: #7a2020; }
-
+/* ── Пілюлі таблиці замовлень (однакова висота і форма) ── */
+.pay-pill,
+.status-pill,
 .deadline-pill {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    background: #fde8e8;
-    color: #c0392b;
-    padding: 4px 11px;
+    justify-content: center;
+    gap: 4px;
+    height: 32px;
+    padding: 0 12px;
     border-radius: 20px;
+    font-family: 'Cormorant Garamond', serif;
     font-size: 14px;
     font-weight: 700;
+    white-space: nowrap;
+    box-sizing: border-box;
 }
+
+.pay-pill.paid    { background: #d4edda; color: #1a6630; }
+.pay-pill.pending { background: #f9c9c9; color: #7a2020; }
+
+.deadline-pill { background: #fde8e8; color: #c0392b; }
+
+/* Статуси замовлень */
+.status-pill.status-new          { background: #fde8ef; color: #a0304a; }
+.status-pill.status-in_progress  { background: #fef3e0; color: #9a6200; }
+.status-pill.status-ready        { background: #e0f4f8; color: #1a6e82; }
+.status-pill.status-done         { background: #eaf6eb; color: #2a7a30; }
+.status-pill.status-cancelled    { background: #f0f0f0; color: #666; }
 
 /* ════════════════════════════════════════════════════════════
    ФОРМА ДОДАВАННЯ (АСОРТИМЕНТ)

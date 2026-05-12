@@ -149,6 +149,7 @@ body {
 
 .print-item-name { font-size: 1.1rem; font-weight: 700; }
 .print-item-qty  { font-size: 1rem; color: #555; margin-top: 2px; }
+.print-layers-list { margin: 5px 0 0 18px; padding: 0; font-size: 0.95rem; color: #444; line-height: 1.8; list-style: decimal; }
 
 /* Нижній блок */
 .print-bottom-grid {

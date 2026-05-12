@@ -25,6 +25,9 @@ public interface BonusTransactionRepository extends JpaRepository<BonusTransacti
     // Чи є вже вітальний бонус для цього юзера
     boolean existsByUserIdAndType(Long userId, BonusTransaction.TransactionType type);
 
+    // Чи вже нараховано бонус за конкретне замовлення (захист від подвійного нарахування)
+    boolean existsByOrderIdAndType(Long orderId, BonusTransaction.TransactionType type);
+
     // Чи є бонус на день народження цього року
     @Query("SELECT COUNT(t) > 0 FROM BonusTransaction t WHERE t.user.id = :userId " +
             "AND t.type = 'BIRTHDAY' " +

@@ -94,6 +94,14 @@
     font-family: 'Cormorant Garamond', serif;
     font-size: 0.85rem; color: #888;
 }
+.rca-layers-list {
+    margin: 4px 0 0 16px;
+    padding: 0;
+    font-size: 0.82rem;
+    color: #555;
+    line-height: 1.7;
+    list-style: decimal;
+}
 
 /* Текст відгуку */
 .rca-text {
@@ -177,4 +185,54 @@
     font-size: 0.75rem; border-radius: 4px;
     padding: 2px 8px;
     font-family: 'Cormorant Garamond', serif;
+}
+
+.admin-header-container {
+    display: flex;
+    justify-content: center; /* Центрує заголовок */
+    align-items: center;
+    margin-bottom: 30px;
+    position: relative;      /* Робить цей блок якорем для кнопки */
+    min-height: 50px;
+}
+
+/* Заголовок */
+.admin-page-title {
+    margin: 0;
+    text-align: center;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+/* Кількість у дужках */
+.reviews-count {
+    font-size: 1rem;
+    color: #aaa;
+    font-weight: 400;
+}
+
+/* Кнопка "Редагувати" */
+.btn-edit-mode {
+    position: absolute;      /* Вириваємо з потоку, щоб не заважала центруванню тексту */
+    right: 0;                /* Притискаємо до правого краю контейнера */
+
+    /* Кольори та вигляд */
+    background-color: #3AA6B9;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 14px;
+    cursor: pointer;
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 700;
+
+    /* Збільшення на 30% */
+    transform: scale(1.3);
+    transform-origin: right center; /* Збільшується вліво, не вилазячи за край */
+
+    /* Плавний ефект при наведенні */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-edit-mode:hover {
+    background-color: #2d8a9e; /* Трохи темніший при наведенні */
 }

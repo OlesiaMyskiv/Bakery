@@ -173,8 +173,35 @@
     align-items: center;
     font-family: 'Cormorant Garamond', serif;
     font-size: 0.9rem;
-    padding: 4px 0;
+    padding: 6px 8px;
     border-bottom: 1px dashed #f5f5f5;
+    border-radius: 8px;
+    transition: background 0.15s;
+}
+
+.bonus-level-row.bll-active {
+    background: #f0fafb;
+    border-bottom-color: #d0eef4;
+}
+
+.bonus-level-row.bll-active .bll-name {
+    color: #3AA6B9;
+}
+
+.bll-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-right: 6px;
+}
+
+.bll-svg {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
 }
 
 .bll-name    { color: #1a1a1a; font-weight: 600; flex: 1; }
