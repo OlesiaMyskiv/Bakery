@@ -51,6 +51,8 @@ public class SecurityConfig {
                         .requestMatchers("/favicon.ico").permitAll()
                         .requestMatchers("/api/admin/chat/**").hasAuthority("SUPER_ADMIN")
                         .requestMatchers("/admin/**").hasAuthority("SUPER_ADMIN")
+                        // ── ШІ генерація — тільки залогінені ────────────────
+                        .requestMatchers("/ai-design/generate").authenticated()
                         // ── КОШИК і ЗАМОВЛЕННЯ — тільки залогінені ──────────
                         .requestMatchers("/cart", "/cart/**").authenticated()
                         .requestMatchers("/api/my-orders", "/orders/**", "/profile/**").authenticated()
@@ -65,6 +67,19 @@ public class SecurityConfig {
                             res.sendRedirect(role.equals("SUPER_ADMIN") ? "/admin/orders" : "/profile");
                         })
                         .permitAll()
+                )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            // AJAX/fetch запити отримують 401, звичайні — редірект на /login
+                            String requestedWith = request.getHeader("X-Requested-With");
+                            String accept = request.getHeader("Accept");
+                            if ("XMLHttpRequest".equals(requestedWith)
+                                    || (accept != null && accept.contains("application/json"))) {
+                                response.sendError(401, "Unauthorized");
+                            } else {
+                                response.sendRedirect("/login");
+                            }
+                        })
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")

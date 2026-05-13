@@ -1,252 +1,319 @@
 <!DOCTYPE html>
-<html lang="uk" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="uk" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Асортимент — Cake House</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Love+Light&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Love+Light&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/globals.css}">
-    <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" th:href="@{/css/header.css}">
     <link rel="stylesheet" th:href="@{/css/assortment.css}">
 </head>
 <body>
+
 <header th:replace="~{header :: header}"></header>
+
 <div class="assort-page">
+
+    <!-- ── Вкладки каталогів ──────────────────────────────────────── -->
     <div class="assort-tabs-bar">
-        <th:block th:each="ct : ${catalogTypes}">
-            <a th:href="@{/assortment(catalog=${ct.name()})}" th:text="${ct.label}"
-               th:classappend="${currentCatalog == ct} ? ' active'" class="assort-tab"></a>
-        </th:block>
+        <a th:each="ct : ${catalogTypes}"
+           th:href="@{/assortment(catalog=${ct.name()})}"
+           th:text="${ct.label}"
+           th:classappend="${currentCatalog.name() == ct.name()} ? ' active'"
+           class="assort-tab"></a>
     </div>
+
     <div class="assort-body">
-        <aside class="assort-sidebar" id="filterPanel">
-            <form th:action="@{/assortment}" method="get" id="filterForm">
+
+        <!-- ── Ліва панель фільтрів ──────────────────────────────── -->
+        <aside class="assort-sidebar">
+            <form method="get" th:action="@{/assortment}" id="filterForm">
                 <input type="hidden" name="catalog" th:value="${catalog}">
-                <input type="hidden" name="sort" th:value="${currentSort}">
+
                 <div class="filter-reset-wrap">
-                    <a th:href="@{/assortment(catalog=${catalog})}" class="filter-reset-link">СКИНУТИ</a>
+                    <a th:href="@{/assortment(catalog=${catalog})}" class="filter-reset-link">Скинути фільтри</a>
                 </div>
+
+                <!-- Смак (тільки FLAVOR) -->
                 <th:block th:if="${currentCatalog.name() == 'FLAVOR'}">
                     <div class="filter-section">
-                        <div class="filter-section-title">ОСНОВА СМАКУ</div>
-                        <th:block th:each="fb : ${flavorBases}">
-                            <label class="filter-check-label">
-                                <input type="checkbox" name="flavors" th:value="${fb.name()}" th:checked="${selectedFlavors.contains(fb.name())}">
-                                <span th:text="${fb.label}"></span>
-                            </label>
-                        </th:block>
+                        <div class="filter-section-title">ОСНОВА</div>
+                        <label class="filter-check-label" th:each="fb : ${flavorBases}">
+                            <input type="checkbox" name="flavors" th:value="${fb.name()}"
+                                   th:checked="${selectedFlavors.contains(fb.name())}">
+                            <span th:text="${fb.label}"></span>
+                        </label>
                     </div>
                     <div class="filter-section">
-                        <div class="filter-section-title">ДІЄТИЧНІ ОСОБЛИВОСТІ</div>
-                        <label class="filter-check-label"><input type="checkbox" name="dietary" value="NO_SUGAR" th:checked="${selectedDietary.contains('NO_SUGAR')}">Без цукру</label>
-                        <label class="filter-check-label"><input type="checkbox" name="dietary" value="NO_GLUTEN" th:checked="${selectedDietary.contains('NO_GLUTEN')}">Без глютену</label>
-                        <label class="filter-check-label"><input type="checkbox" name="dietary" value="NO_LACTOSE" th:checked="${selectedDietary.contains('NO_LACTOSE')}">Без лактози</label>
-                        <label class="filter-check-label"><input type="checkbox" name="dietary" value="VEGAN" th:checked="${selectedDietary.contains('VEGAN')}">Веган</label>
+                        <div class="filter-section-title">ОСОБЛИВОСТІ</div>
+                        <label class="filter-check-label">
+                            <input type="checkbox" name="dietary" value="NO_SUGAR"
+                                   th:checked="${selectedDietary.contains('NO_SUGAR')}">
+                            <span>Без цукру</span>
+                        </label>
+                        <label class="filter-check-label">
+                            <input type="checkbox" name="dietary" value="NO_GLUTEN"
+                                   th:checked="${selectedDietary.contains('NO_GLUTEN')}">
+                            <span>Без глютену</span>
+                        </label>
+                        <label class="filter-check-label">
+                            <input type="checkbox" name="dietary" value="NO_LACTOSE"
+                                   th:checked="${selectedDietary.contains('NO_LACTOSE')}">
+                            <span>Без лактози</span>
+                        </label>
+                        <label class="filter-check-label">
+                            <input type="checkbox" name="dietary" value="VEGAN"
+                                   th:checked="${selectedDietary.contains('VEGAN')}">
+                            <span>Веган</span>
+                        </label>
                     </div>
                 </th:block>
+
+                <!-- Подія та для кого (тільки DESIGN) -->
                 <th:block th:if="${currentCatalog.name() == 'DESIGN'}">
                     <div class="filter-section">
                         <div class="filter-section-title">ПОДІЯ</div>
-                        <th:block th:each="ev : ${designEvents}">
-                            <label class="filter-check-label">
-                                <input type="checkbox" name="events" th:value="${ev.name()}" th:checked="${selectedEvents.contains(ev.name())}">
-                                <span th:text="${ev.label}"></span>
-                            </label>
-                        </th:block>
+                        <label class="filter-check-label" th:each="de : ${designEvents}">
+                            <input type="checkbox" name="events" th:value="${de.name()}"
+                                   th:checked="${selectedEvents.contains(de.name())}">
+                            <span th:text="${de.label}"></span>
+                        </label>
                     </div>
                     <div class="filter-section">
                         <div class="filter-section-title">ДЛЯ КОГО</div>
-                        <th:block th:each="df : ${designFors}">
-                            <label class="filter-check-label">
-                                <input type="checkbox" name="designFor" th:value="${df.name()}" th:checked="${selectedDesignFor.contains(df.name())}">
-                                <span th:text="${df.label}"></span>
-                            </label>
-                        </th:block>
+                        <label class="filter-check-label" th:each="df : ${designFors}">
+                            <input type="checkbox" name="designFor" th:value="${df.name()}"
+                                   th:checked="${selectedDesignFor.contains(df.name())}">
+                            <span th:text="${df.label}"></span>
+                        </label>
                     </div>
                 </th:block>
+
+                <!-- Тип виробу (тільки LINE) -->
                 <th:block th:if="${currentCatalog.name() == 'LINE'}">
                     <div class="filter-section">
-                        <div class="filter-section-title">ЛІНІЙКА ВИРОБІВ</div>
-                        <th:block th:each="pl : ${productLines}">
-                            <label class="filter-check-label">
-                                <input type="checkbox" name="lines" th:value="${pl.name()}" th:checked="${selectedLines.contains(pl.name())}">
-                                <span th:text="${pl.label}"></span>
-                            </label>
-                        </th:block>
+                        <div class="filter-section-title">ТИП ВИРОБУ</div>
+                        <label class="filter-check-label" th:each="pl : ${productLines}">
+                            <input type="checkbox" name="lines" th:value="${pl.name()}"
+                                   th:checked="${selectedLines.contains(pl.name())}">
+                            <span th:text="${pl.label}"></span>
+                        </label>
                     </div>
                 </th:block>
+
+                <!-- Терміновість (всі каталоги) -->
                 <div class="filter-section">
-                    <div class="filter-section-title">ТЕРМІНОВІСТЬ</div>
-                    <th:block th:each="u : ${urgencies}">
-                        <label class="filter-check-label">
-                            <input type="checkbox" name="urgency" th:value="${u.name()}" th:checked="${selectedUrgency.contains(u.name())}">
-                            <span th:text="${u.label}"></span>
-                        </label>
-                    </th:block>
+                    <div class="filter-section-title">ГОТОВНІСТЬ</div>
+                    <label class="filter-check-label" th:each="u : ${urgencies}">
+                        <input type="checkbox" name="urgency" th:value="${u.name()}"
+                               th:checked="${selectedUrgency.contains(u.name())}">
+                        <span th:text="${u.label}"></span>
+                    </label>
                 </div>
+
+                <!-- Діапазон цін -->
                 <div class="filter-section">
-                    <div class="filter-section-title">ВАРТІСТЬ</div>
-                    <div class="price-slider-wrap">
-                        <div class="price-range-container" id="priceRangeContainer">
-                            <div class="price-range-track"></div>
-                            <div class="price-range-fill" id="priceRangeFill"></div>
-                            <input type="range" id="rangeMin" min="0" max="5000" step="50" th:value="${minPrice != null ? minPrice : 0}" oninput="updateRange()">
-                            <input type="range" id="rangeMax" min="0" max="5000" step="50" th:value="${maxPrice != null ? maxPrice : 5000}" oninput="updateRange()">
+                    <div class="filter-section-title">ЦІНА (ГРН)</div>
+                    <div class="price-inputs-row">
+                        <div class="price-field">
+                            <label>Від</label>
+                            <input type="number" name="minPrice" th:value="${minPrice}" placeholder="0" min="0">
                         </div>
-                        <div class="price-range-labels"><span>0 грн</span><span>5000 грн</span></div>
-                        <div class="price-inputs-row">
-                            <div class="price-field">
-                                <label for="minPriceInput">Від</label>
-                                <input type="number" name="minPrice" id="minPriceInput" th:value="${minPrice}" placeholder="0" min="0" max="5000" oninput="syncFromInputs()">
-                            </div>
-                            <span class="price-separator">—</span>
-                            <div class="price-field">
-                                <label for="maxPriceInput">До</label>
-                                <input type="number" name="maxPrice" id="maxPriceInput" th:value="${maxPrice}" placeholder="5000" min="0" max="5000" oninput="syncFromInputs()">
-                            </div>
+                        <span class="price-separator">—</span>
+                        <div class="price-field">
+                            <label>До</label>
+                            <input type="number" name="maxPrice" th:value="${maxPrice}" placeholder="∞" min="0">
                         </div>
                     </div>
                 </div>
-                <button type="submit" class="filter-apply-btn">ЗАСТОСУВАТИ</button>
+
+                <button type="submit" class="filter-apply-btn">Застосувати</button>
             </form>
         </aside>
 
+        <!-- ── Права частина: пошук + сортування + товари ────────── -->
         <div class="assort-right">
-            <!-- Пошук ЗЛІВА — сортування СПРАВА -->
+
+            <!-- Топ-бар -->
             <div class="assort-top-bar">
-                <form th:action="@{/assortment}" method="get" class="search-form-inline">
+                <form method="get" th:action="@{/assortment}" class="search-form-inline">
                     <input type="hidden" name="catalog" th:value="${catalog}">
-                    <input type="text" name="q" class="search-input-inline" placeholder="🔍 Пошук..." th:value="${searchQuery}">
+                    <input type="text" name="q" class="search-input-inline"
+                           placeholder="Пошук..." th:value="${searchQuery}">
                 </form>
+
                 <div class="assort-top-spacer"></div>
+
                 <div class="sort-wrap">
                     <span class="sort-label">Сортування:</span>
-                    <a th:href="@{/assortment(catalog=${catalog},sort='price_asc',page=1)}" th:classappend="${currentSort == 'price_asc'} ? ' sort-active'" class="sort-btn">За ціною ↑</a>
-                    <a th:href="@{/assortment(catalog=${catalog},sort='price_desc',page=1)}" th:classappend="${currentSort == 'price_desc'} ? ' sort-active'" class="sort-btn">За ціною ↓</a>
-                    <a th:href="@{/assortment(catalog=${catalog},sort='name_asc',page=1)}" th:classappend="${currentSort == 'name_asc'} ? ' sort-active'" class="sort-btn">А→Я</a>
-                    <a th:href="@{/assortment(catalog=${catalog},sort='name_desc',page=1)}" th:classappend="${currentSort == 'name_desc'} ? ' sort-active'" class="sort-btn">Я→А</a>
+                    <a th:href="@{/assortment(catalog=${catalog}, sort='name_asc')}"
+                       th:classappend="${currentSort == 'name_asc'} ? ' sort-active'"
+                       class="sort-btn">А–Я</a>
+                    <a th:href="@{/assortment(catalog=${catalog}, sort='price_asc')}"
+                       th:classappend="${currentSort == 'price_asc'} ? ' sort-active'"
+                       class="sort-btn">Дешевше</a>
+                    <a th:href="@{/assortment(catalog=${catalog}, sort='price_desc')}"
+                       th:classappend="${currentSort == 'price_desc'} ? ' sort-active'"
+                       class="sort-btn">Дорожче</a>
                 </div>
             </div>
 
-            <div class="assort-count" th:if="${totalItems != null}">
-                Знайдено: <strong th:text="${totalItems}"></strong> товарів
+            <!-- Кількість результатів -->
+            <div class="assort-count">
+                <span th:text="${totalItems}">0</span> товарів
+                <span th:if="${searchQuery != null}" th:text="' за запитом «' + ${searchQuery} + '»'"></span>
             </div>
 
-            <div th:if="${products.empty}" class="assort-empty">😔 Нічого не знайдено. Спробуйте змінити фільтри.</div>
+            <!-- Порожній стан -->
+            <div th:if="${products.empty}" class="assort-empty">
+                🎂 Товарів не знайдено. Спробуйте змінити фільтри.
+            </div>
 
-            <div class="products-grid" th:unless="${products.empty}">
-                <th:block th:each="p : ${products}">
-                    <a th:href="@{/product/{id}(id=${p.id})}" class="product-card">
-                        <div class="product-card-img-wrap">
-                            <img th:if="${p.imagePath != null}" th:src="${p.imagePath}" th:alt="${p.name}" class="product-card-img">
-                            <div th:unless="${p.imagePath != null}" class="product-card-img-placeholder"></div>
-                            <div th:if="${p.hasDiscount()}" class="defenders-badge">
-                                <div class="defenders-text-top">Нашим</div>
-                                <div class="defenders-text-bottom">захисникам</div>
-                            </div>
-                        </div>
-                        <div class="product-card-body">
-                            <h3 class="product-card-name" th:text="${p.name}">Назва</h3>
-                            <div class="product-card-prices">
-                                <div class="price-row">
-                                    <span class="price-label" th:text="${p.minWeightKg} + ' кг'">1 кг</span>
-                                    <span class="price-value" th:text="${p.price} + ' ' + ${p.priceUnit}">700 грн</span>
-                                </div>
-                                <!-- Пільгова ціна — видно всім якщо знижка є -->
-                                <div class="price-row defenders-price-row" th:if="${p.hasDiscount()}">
-                                    <span class="price-label defenders-label">Захисникам</span>
-                                    <span class="price-value defenders-price" th:text="${p.discountedPrice} + ' грн'">560 грн</span>
-                                </div>
-                            </div>
-                            <!-- Кнопка рисочка + кружечок -->
-                            <div class="product-card-btn"
-                                 th:attr="data-product-id=${p.id},
-                                          data-name=${p.name},
-                                          data-type=${p.catalogType.name()},
-                                          data-image=${p.imagePath != null ? p.imagePath : ''},
-                                          data-price-unit=${p.priceUnit},
-                                          data-price=${p.price},
-                                          data-discount=${p.hasDiscount() ? p.discountedPrice : ''},
-                                          data-weight=${p.minWeightKg},
-                                          data-unit=${p.catalogType.name() == 'FLAVOR' ? 'кг' : 'шт'},
-                                          data-urgency=${p.urgency != null ? p.urgency.name() : ''}"
-                                 onclick="event.preventDefault(); cartAddFromCard(this);">
-                                <span class="btn-text">додати в корзину</span>
-                                <div class="btn-line-circle">
-                                    <div class="btn-line"></div>
-                                    <div class="btn-circle"></div>
-                                </div>
-                            </div>
+            <!-- Сітка товарів -->
+            <div th:unless="${products.empty}" class="products-grid">
+                <div class="product-card" th:each="p : ${products}">
 
-                            <!-- Кнопка "Додати в список бажань" -->
-                            <button class="wishlist-btn"
-                                    th:attr="data-product-id=${p.id},data-name=${p.name},data-catalog-type=${p.catalogType.name()},data-image-path=${p.imagePath != null ? p.imagePath : ''},data-price-unit=${p.priceUnit},data-price=${p.price},data-discounted-price=${p.hasDiscount() ? p.discountedPrice : ''},data-min-weight=${p.minWeightKg},data-unit=${p.catalogType.name() == 'FLAVOR' ? 'кг' : 'шт'},data-urgency=${p.urgency != null ? p.urgency.name() : ''}"
-                                    onclick="event.preventDefault(); var d=this.dataset; toggleWishlistFromCard(this, parseInt(d.productId), d.name, d.catalogType, d.imagePath, d.priceUnit, parseFloat(d.price), d.discountedPrice ? parseFloat(d.discountedPrice) : null, parseFloat(d.minWeight), d.unit, d.urgency)">
-                                <span class="wishlist-label">Додати в список бажань</span>
-                                <svg class="heart-icon" width="22" height="22" viewBox="0 0 24 24"
-                                     fill="none" stroke="#DF7481" stroke-width="2"
-                                     stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                                </svg>
-                            </button>
+                    <!-- Фото + посилання на деталі -->
+                    <a th:href="@{/product/{id}(id=${p.id})}" class="product-card-img-wrap"
+                       style="display:block;text-decoration:none;">
+                        <img th:if="${p.imagePath != null}"
+                             th:src="${p.imagePath}" th:alt="${p.name}"
+                             class="product-card-img">
+                        <div th:unless="${p.imagePath != null}"
+                             class="product-card-img-placeholder">🎂</div>
+
+                        <!-- Бейдж знижки ЗСУ -->
+                        <div class="defenders-badge" th:if="${p.hasDiscount()}">
+                            <div class="defenders-text-top">ЗСУ</div>
+                            <div class="defenders-text-bottom"
+                                 th:text="'-' + ${p.discountPercent} + '%'"></div>
                         </div>
                     </a>
-                </th:block>
+
+                    <!-- Тіло картки -->
+                    <div class="product-card-body">
+                        <div class="product-card-name" th:text="${p.name}"></div>
+
+                        <div class="product-card-prices">
+                            <div class="price-row">
+                                <span class="price-label">Ціна:</span>
+                                <span class="price-value"
+                                      th:text="${p.price} + ' ' + ${p.priceUnit}"></span>
+                            </div>
+                            <div class="price-row defenders-price-row"
+                                 th:if="${isVerified and p.hasDiscount()}">
+                                <span class="price-label defenders-label">🇺🇦 Захисникам:</span>
+                                <span class="price-value defenders-price"
+                                      th:text="${p.discountedPrice} + ' ' + ${p.priceUnit}"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Кнопка "Додати в кошик" -->
+                    <button class="product-card-btn"
+                            th:attr="data-product-id=${p.id},
+                                     data-name=${p.name},
+                                     data-type=${p.catalogType.name()},
+                                     data-image=${p.imagePath != null ? p.imagePath : ''},
+                                     data-price-unit=${p.priceUnit},
+                                     data-price=${p.price},
+                                     data-discount=${p.hasDiscount() ? p.discountedPrice : ''},
+                                     data-weight=${p.minWeightKg != null and p.minWeightKg > 0 ? p.minWeightKg : 1},
+                                     data-unit=${p.catalogType.name() == 'FLAVOR' ? 'кг' : 'шт'},
+                                     data-urgency=${p.urgency != null ? p.urgency.name() : ''}"
+                            onclick="handleCartClick(this)">
+                        <span class="btn-text">додати в кошик</span>
+                        <div class="btn-line-circle">
+                            <div class="btn-line"></div>
+                            <div class="btn-circle"></div>
+                        </div>
+                    </button>
+
+                    <!-- Кнопка "Список бажань" -->
+                    <button class="wishlist-btn"
+                            th:attr="data-product-id=${p.id},
+                                     data-name=${p.name},
+                                     data-type=${p.catalogType.name()},
+                                     data-image=${p.imagePath != null ? p.imagePath : ''},
+                                     data-price-unit=${p.priceUnit},
+                                     data-price=${p.price},
+                                     data-discount=${p.hasDiscount() ? p.discountedPrice : ''},
+                                     data-weight=${p.minWeightKg != null and p.minWeightKg > 0 ? p.minWeightKg : 1},
+                                     data-unit=${p.catalogType.name() == 'FLAVOR' ? 'кг' : 'шт'},
+                                     data-urgency=${p.urgency != null ? p.urgency.name() : ''}"
+                            onclick="handleWishlistClick(this)">
+                        <span class="wishlist-label">Додати в список бажань</span>
+                        <svg class="heart-icon" width="22" height="22" viewBox="0 0 24 24"
+                             fill="none" stroke="#DF7481" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
+            <!-- Пагінація -->
             <div class="pagination" th:if="${totalPages > 1}">
-                <a th:if="${currentPage > 1}" th:href="@{/assortment(catalog=${catalog},sort=${currentSort},page=${currentPage - 1})}" class="page-btn">‹</a>
-                <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
-                    <a th:href="@{/assortment(catalog=${catalog},sort=${currentSort},page=${i})}" th:text="${i}" th:classappend="${i == currentPage} ? ' active'" class="page-btn"></a>
-                </th:block>
-                <a th:if="${currentPage < totalPages}" th:href="@{/assortment(catalog=${catalog},sort=${currentSort},page=${currentPage + 1})}" class="page-btn">›</a>
+                <a th:if="${currentPage > 1}"
+                   th:href="@{/assortment(catalog=${catalog}, page=${currentPage - 1}, sort=${currentSort})}"
+                   class="page-btn">←</a>
+
+                <a th:each="i : ${#numbers.sequence(1, totalPages)}"
+                   th:href="@{/assortment(catalog=${catalog}, page=${i}, sort=${currentSort})}"
+                   th:text="${i}"
+                   th:classappend="${i == currentPage} ? ' active'"
+                   class="page-btn"></a>
+
+                <a th:if="${currentPage < totalPages}"
+                   th:href="@{/assortment(catalog=${catalog}, page=${currentPage + 1}, sort=${currentSort})}"
+                   class="page-btn">→</a>
             </div>
         </div>
     </div>
 </div>
 
-<script th:inline="javascript">
-    const MIN = 0, MAX = 5000;
-    function updateRange() {
-        var rMin=document.getElementById('rangeMin'), rMax=document.getElementById('rangeMax');
-        var iMin=document.getElementById('minPriceInput'), iMax=document.getElementById('maxPriceInput');
-        var fill=document.getElementById('priceRangeFill');
-        if (parseInt(rMin.value) > parseInt(rMax.value)) rMin.value = rMax.value;
-        var minVal=parseInt(rMin.value), maxVal=parseInt(rMax.value);
-        iMin.value=minVal; iMax.value=maxVal;
-        var lp=((minVal-MIN)/(MAX-MIN))*100, rp=((maxVal-MIN)/(MAX-MIN))*100;
-        fill.style.left=lp+'%'; fill.style.width=(rp-lp)+'%';
-    }
-    function syncFromInputs() {
-        var iMin=document.getElementById('minPriceInput'), iMax=document.getElementById('maxPriceInput');
-        var rMin=document.getElementById('rangeMin'), rMax=document.getElementById('rangeMax');
-        var minVal=Math.max(MIN,Math.min(parseInt(iMin.value)||MIN,MAX));
-        var maxVal=Math.max(MIN,Math.min(parseInt(iMax.value)||MAX,MAX));
-        if (minVal>maxVal) minVal=maxVal;
-        rMin.value=minVal; rMax.value=maxVal; updateRange();
-    }
-    document.addEventListener('DOMContentLoaded', function(){ updateRange(); });
-</script>
 <script src="/js/cart.js"></script>
 <script src="/js/wishlist.js"></script>
 <script>
-    function cartAddFromCard(el) {
-        var d = el.dataset;
+    function handleCartClick(btn) {
+        var image    = btn.dataset.image    || null;
+        var discount = btn.dataset.discount || null;
+        var urgency  = btn.dataset.urgency  || null;
         addProductToCart(
-            parseInt(d.productId),
-            d.name,
-            d.type,
-            d.image || null,
-            d.priceUnit,
-            parseInt(d.price),
-            d.discount ? parseInt(d.discount) : null,
-            parseFloat(d.weight) || 1,
-            d.unit || 'шт',
-            d.urgency || null
+            parseInt(btn.dataset.productId),
+            btn.dataset.name,
+            btn.dataset.type,
+            image    === '' ? null : image,
+            btn.dataset.priceUnit,
+            parseInt(btn.dataset.price),
+            discount === '' ? null : parseInt(discount),
+            parseFloat(btn.dataset.weight) || 1,
+            btn.dataset.unit,
+            urgency  === '' ? null : urgency
+        );
+    }
+
+    function handleWishlistClick(btn) {
+        var image    = btn.dataset.image    || '';
+        var discount = btn.dataset.discount || null;
+        var urgency  = btn.dataset.urgency  || null;
+        toggleWishlistFromCard(
+            btn,
+            btn.dataset.productId,
+            btn.dataset.name,
+            btn.dataset.type,
+            image    === '' ? null : image,
+            btn.dataset.priceUnit,
+            btn.dataset.price,
+            discount === '' ? null : discount,
+            btn.dataset.weight,
+            btn.dataset.unit,
+            urgency  === '' ? null : urgency
         );
     }
 </script>
+
 </body>
 </html>

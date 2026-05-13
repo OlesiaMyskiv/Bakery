@@ -106,44 +106,61 @@ body {
 
 /* Обгортка фото — фіксований розмір з обрізкою */
 .print-img-wrap {
-    width: 72px;
-    height: 64px;
+    width: 80px;
+    min-height: 64px;
+    height: auto;
     border-radius: 8px;
-    overflow: hidden;
+    overflow: visible;
     flex-shrink: 0;
-    background: #f0ece8;
+    background: transparent;
+    align-self: flex-start;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
 }
 
 .print-item-img {
-    width: 72px;
-    height: 64px;
-    object-fit: cover;
+    width: 80px;
+    height: auto;
+    min-height: 64px;
+    object-fit: contain;
     display: block;
     flex-shrink: 0;
+    border-radius: 8px;
+    border: 1.5px solid #277B8A;
+    background: #fff;
 }
 
 .print-item-img-placeholder {
     font-size: 1.6rem;
 }
 
+/* Друк: cake-preview успадковує стиль з globals.css,
+   тут тільки override для print */
+@media print {
+    .cake-preview {
+        border: 3px solid #277B8A !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}
+
 @media print {
     .print-img-wrap {
-        width: 72px !important;
-        height: 64px !important;
-        overflow: hidden !important;
+        width: 80px !important;
+        min-height: 64px !important;
+        height: auto !important;
+        overflow: visible !important;
         flex-shrink: 0 !important;
     }
     .print-item-img {
-        width: 72px !important;
-        height: 64px !important;
-        object-fit: cover !important;
+        width: 80px !important;
+        height: auto !important;
+        min-height: 64px !important;
+        object-fit: contain !important;
     }
     .print-item-row { page-break-inside: avoid; }
     .print-deadline-block { page-break-after: avoid; }
-    /* Заборонені будь-які інші img на сторінці від розтягування */
     img:not(.print-item-img) { display: none; }
 }
 

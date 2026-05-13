@@ -78,7 +78,7 @@
 
 .omi-item-row {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
     padding: 10px 14px;
     border-bottom: 1px solid #f8f4f0;
@@ -90,14 +90,19 @@
 
 .omi-item-img,
 .omi-item-img-placeholder {
-    width: 58px;
-    height: 52px;
-    border-radius: 8px;
+    width: 72px;
+    min-height: 64px;
+    height: auto;
+    border-radius: 10px;
     flex-shrink: 0;
+    align-self: flex-start;
 }
 
 .omi-item-img {
-    object-fit: cover;
+    object-fit: contain;
+    background: #fff;
+    border: none;
+    display: block;
 }
 
 .omi-item-img-placeholder {

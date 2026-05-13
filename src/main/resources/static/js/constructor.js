@@ -182,57 +182,75 @@ function calculatePrice() {
 }
 
 // ── CANVAS: зливаємо шари в одне зображення ───────────────────────────────────
-function buildCakeImage(width = 450) {
+// Поліфіл для roundRect (Safari, старі браузери)
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+    CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+        if (w < 2*r) r = w/2;
+        if (h < 2*r) r = h/2;
+        this.beginPath();
+        this.moveTo(x+r, y);
+        this.arcTo(x+w, y, x+w, y+h, r);
+        this.arcTo(x+w, y+h, x, y+h, r);
+        this.arcTo(x, y+h, x, y, r);
+        this.arcTo(x, y, x+w, y, r);
+        this.closePath();
+        return this;
+    };
+}
+
+function buildCakeImage(width = 400) {
     return new Promise((resolve) => {
         const canvas = document.createElement('canvas');
-        const CANVAS_WIDTH = width;
 
-        // Розраховуємо висоту кожного шару
+        const GAP = 6;  // відступ між шарами
+
+        // Висоти шарів — широкі та помітні
         const layerHeights = currentCake.map(layer => {
-            if (layer.type === 'sponge') return 120;
-            if (layer.type === 'filling') return 60;
-            return 40;
+            if (layer.type === 'sponge')  return 80;
+            if (layer.type === 'filling') return 40;
+            return 35;
         });
 
-        const totalHeight = layerHeights.reduce((a, b) => a + b, 0);
-        canvas.width = CANVAS_WIDTH;
-        canvas.height = totalHeight;
+        const layersTotal = layerHeights.reduce((a, b) => a + b, 0)
+            + GAP * (currentCake.length - 1);
+        const padV    = 20;  // невеликий відступ зверху/знизу
+        canvas.width  = width;
+        canvas.height = layersTotal + padV * 2;
 
         const ctx = canvas.getContext('2d');
+
+        // Тільки білий фон — рамку малює CSS
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
         const layers = currentCake.map((layer, i) => ({
-            item: ingredients[layer.type][layer.selectedIndex],
+            item:   ingredients[layer.type][layer.selectedIndex],
             height: layerHeights[i]
         }));
 
-        let loadedCount = 0;
-        let currentY = 0;
+        let currentY = padV;
 
-        // Малюємо шари по черзі зверху вниз
         function drawNext(index) {
             if (index >= layers.length) {
                 resolve(canvas.toDataURL('image/png'));
                 return;
             }
-
             const { item, height } = layers[index];
             const y = currentY;
-            currentY += height;
+            currentY += height + GAP;
 
             const img = new Image();
             img.crossOrigin = 'anonymous';
-
             img.onload = () => {
-                ctx.drawImage(img, 0, y, CANVAS_WIDTH, height);
+                // Шар на всю ширину canvas
+                ctx.drawImage(img, 0, y, canvas.width, height);
                 drawNext(index + 1);
             };
-
             img.onerror = () => {
-                // Якщо картинка не завантажилась — малюємо кольоровий прямокутник
-                ctx.fillStyle = item.color;
-                ctx.fillRect(0, y, CANVAS_WIDTH, height);
+                ctx.fillStyle = item.color || '#f0e6d3';
+                ctx.fillRect(0, y, canvas.width, height);
                 drawNext(index + 1);
             };
-
             img.src = item.image;
         }
 
@@ -242,13 +260,19 @@ function buildCakeImage(width = 450) {
 
 // ── ДОДАТИ В КОШИК ────────────────────────────────────────────────────────────
 async function addCakeToCart() {
+    // Перевірка авторизації
+    if (!window.IS_LOGGED_IN) {
+        var modal = document.getElementById('auth-required-modal');
+        if (modal) modal.style.display = 'flex';
+        return;
+    }
     const btn = document.querySelector('.add-to-cart-btn');
     btn.disabled = true;
     btn.innerText = 'Зберігаємо...';
 
     try {
-        // 220px — компактно для кошика і localStorage
-        const imageDataUrl = await buildCakeImage(220);
+        // 400px — достатньо для чіткого відображення
+        const imageDataUrl = await buildCakeImage(400);
 
         const guests = parseInt(document.getElementById('guests-count').value) || 1;
         const weightKg = parseFloat((guests * 0.12 + 0.15).toFixed(2));

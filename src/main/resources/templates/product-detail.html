@@ -313,6 +313,11 @@
     }
 
     function addToCart() {
+        if (!window.IS_LOGGED_IN) {
+            var modal = document.getElementById('auth-required-modal');
+            if (modal) modal.style.display = 'flex';
+            return;
+        }
         var qty, unit;
         if (catalogType === 'DESIGN') {
             qty = 1; unit = 'шт';

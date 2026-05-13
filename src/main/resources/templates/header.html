@@ -12,80 +12,123 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
+<th:block th:fragment="header">
 
-<header class="main-header">
-    <div class="header-container">
-        <div class="header-left">
-            <nav class="main-nav">
-                <ul>
-                    <li><a th:href="@{/assortment}">Асортимент</a></li>
-                    <li><a th:href="@{/constructor}">Конструктор</a></li>
-                </ul>
-            </nav>
+    <header class="main-header">
+        <div class="header-container">
+            <div class="header-left">
+                <nav class="main-nav">
+                    <ul>
+                        <li><a th:href="@{/assortment}">Асортимент</a></li>
+                        <li><a th:href="@{/constructor}">Конструктор</a></li>
+                    </ul>
+                </nav>
+            </div>
+
+            <a th:href="@{/}" class="logo-central">Cake house</a>
+
+            <div class="header-right">
+                <nav class="main-nav">
+                    <ul>
+                        <li><a th:href="@{/ai-design}">ШІ-дизайн</a></li>
+                    </ul>
+                </nav>
+                <div class="header-icons">
+                    <a th:href="@{/login}" sec:authorize="isAnonymous()" class="icon-link">
+                        <img th:src="@{/img/user-icon.svg}" alt="Увійти">
+                    </a>
+                    <a th:href="@{/admin/orders}" sec:authorize="hasAuthority('SUPER_ADMIN')" class="icon-link">
+                        <img th:src="@{/img/user-icon.svg}" alt="Адмін-панель">
+                    </a>
+                    <a th:href="@{/profile}" sec:authorize="isAuthenticated() and !hasAuthority('SUPER_ADMIN')" class="icon-link">
+                        <img th:src="@{/img/user-icon.svg}" alt="Профіль">
+                    </a>
+
+                    <!-- Іконка кошика з лічильником -->
+                    <a th:href="@{/cart}" class="icon-link cart-icon-wrap">
+                        <img th:src="@{/img/cart-icon.svg}" alt="Кошик">
+                        <span class="cart-badge" id="cartBadge"></span>
+                    </a>
+                </div>
+            </div>
         </div>
+    </header>
 
-        <a th:href="@{/}" class="logo-central">Cake house</a>
+    <!-- Глобальна змінна авторизації для JS (надійний спосіб через sec:authorize) -->
+    <span id="auth-status"
+          sec:authorize="isAuthenticated()"
+          data-logged-in="true"
+          style="display:none;"></span>
+    <script>
+        window.IS_LOGGED_IN = document.getElementById('auth-status') !== null
+            && document.getElementById('auth-status').dataset.loggedIn === 'true';
+    </script>
 
-        <div class="header-right">
-            <nav class="main-nav">
-                <ul>
-                    <li><a th:href="@{/ai-design}">ШІ-дизайн</a></li>
-                </ul>
-            </nav>
-            <div class="header-icons">
-                <a th:href="@{/login}" sec:authorize="isAnonymous()" class="icon-link">
-                    <img th:src="@{/img/user-icon.svg}" alt="Увійти">
-                </a>
-                <a th:href="@{/admin/orders}" sec:authorize="hasAuthority('SUPER_ADMIN')" class="icon-link">
-                    <img th:src="@{/img/user-icon.svg}" alt="Адмін-панель">
-                </a>
-                <a th:href="@{/profile}" sec:authorize="isAuthenticated() and !hasAuthority('SUPER_ADMIN')" class="icon-link">
-                    <img th:src="@{/img/user-icon.svg}" alt="Профіль">
-                </a>
-
-                <!-- Іконка кошика з лічильником -->
-                <a th:href="@{/cart}" class="icon-link cart-icon-wrap">
-                    <img th:src="@{/img/cart-icon.svg}" alt="Кошик">
-                    <span class="cart-badge" id="cartBadge"></span>
-                </a>
+    <!-- Модалка авторизації (показується при спробі дії без входу) -->
+    <div id="auth-required-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;">
+        <div style="background:#fff;border-radius:20px;padding:36px 32px;max-width:400px;width:92%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,0.18);font-family:'Cormorant Garamond',serif;">
+            <div style="font-size:2rem;margin-bottom:12px;">🔐</div>
+            <h2 style="font-size:1.6rem;font-weight:700;color:#1a1a1a;margin:0 0 10px;">Потрібна авторизація</h2>
+            <p style="color:#777;font-size:1rem;margin:0 0 28px;line-height:1.5;">Будь ласка, увійдіть або зареєструйтесь, щоб продовжити</p>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+                <a href="/login" style="background:#e8829a;color:white;border:none;border-radius:24px;padding:13px 0;font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:700;cursor:pointer;text-decoration:none;display:block;">Увійти</a>
+                <a href="/register" style="background:#fde8ef;color:#a0304a;border:none;border-radius:24px;padding:13px 0;font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:700;cursor:pointer;text-decoration:none;display:block;">Зареєструватися</a>
+                <button onclick="document.getElementById('auth-required-modal').style.display='none'" style="background:#f5f5f5;color:#888;border:none;border-radius:24px;padding:11px 0;font-family:'Cormorant Garamond',serif;font-size:1rem;cursor:pointer;">Скасувати</button>
             </div>
         </div>
     </div>
-</header>
 
-<!-- Лічильник кошика — оновлюється на всіх сторінках -->
-<script>
-    // Оновлюємо badge кошика одразу при завантаженні будь-якої сторінки
-    (function() {
-        try {
-            var cart  = JSON.parse(localStorage.getItem('cakeCart')) || [];
-            var total = cart.reduce(function(s, c) { return s + (parseFloat(c.quantity) || 0); }, 0);
-            var rounded = Math.round(total);
-            var badge = document.getElementById('cartBadge');
-            if (badge) {
-                if (rounded > 0) {
-                    badge.textContent = rounded;
-                    badge.style.display = 'flex';
-                } else {
-                    badge.textContent = '';
-                    badge.style.display = 'none';
-                }
+    <script>
+        // Глобальна функція перевірки авторизації
+        function requireAuth(callback) {
+            if (window.IS_LOGGED_IN) {
+                if (typeof callback === 'function') callback();
+            } else {
+                var modal = document.getElementById('auth-required-modal');
+                modal.style.display = 'flex';
             }
-        } catch(e) {}
-    })();
+        }
+        // Закрити по кліку на фон
+        document.getElementById('auth-required-modal').addEventListener('click', function(e) {
+            if (e.target === this) this.style.display = 'none';
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') document.getElementById('auth-required-modal').style.display = 'none';
+        });
+    </script>
+    <script>
+        // Оновлюємо badge кошика одразу при завантаженні будь-якої сторінки
+        (function() {
+            try {
+                var cart  = JSON.parse(localStorage.getItem('cakeCart')) || [];
+                var total = cart.reduce(function(s, c) { return s + (parseFloat(c.quantity) || 0); }, 0);
+                var rounded = Math.round(total);
+                var badge = document.getElementById('cartBadge');
+                if (badge) {
+                    if (rounded > 0) {
+                        badge.textContent = rounded;
+                        badge.style.display = 'flex';
+                    } else {
+                        badge.textContent = '';
+                        badge.style.display = 'none';
+                    }
+                }
+            } catch(e) {}
+        })();
 
-    // Якщо щойно оформили замовлення — очищуємо кошик і badge
-    if (sessionStorage.getItem('justOrdered') === '1') {
-        try {
-            localStorage.removeItem('cakeCart');
-            sessionStorage.removeItem('justOrdered');
-            var badge = document.getElementById('cartBadge');
-            if (badge) { badge.textContent = ''; badge.style.display = 'none'; }
-        } catch(e) {}
-    }
-</script>
+        // Якщо щойно оформили замовлення — очищуємо кошик і badge
+        if (sessionStorage.getItem('justOrdered') === '1') {
+            try {
+                localStorage.removeItem('cakeCart');
+                sessionStorage.removeItem('justOrdered');
+                var badge = document.getElementById('cartBadge');
+                if (badge) { badge.textContent = ''; badge.style.display = 'none'; }
+            } catch(e) {}
+        }
+    </script>
 
-<script th:src="@{/js/chat.js}" defer></script>
+    <script th:src="@{/js/chat.js}" defer></script>
 
+</th:block>
 </body>
 </html>

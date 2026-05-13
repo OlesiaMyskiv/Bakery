@@ -114,7 +114,14 @@
     const resultSide = document.querySelector('.result-side');
     const generateBtn = document.querySelector('.btn-generate');
 
-    aiForm.onsubmit = function() {
+    aiForm.onsubmit = function(e) {
+        // Перевірка авторизації
+        if (!window.IS_LOGGED_IN) {
+            e.preventDefault();
+            var modal = document.getElementById('auth-required-modal');
+            if (modal) modal.style.display = 'flex';
+            return false;
+        }
         // Додаємо клас завантаження до контейнера з картинкою
         resultSide.classList.add('is-loading');
 

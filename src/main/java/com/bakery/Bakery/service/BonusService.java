@@ -16,34 +16,26 @@ public class BonusService {
     @Autowired
     private BonusTransactionRepository bonusRepo;
 
-    // ── Рівні ────────────────────────────────────────────────────────────────
-
-    public record BonusLevel(String name, int minSpent, int maxSpent, int cashbackPercent) {}
+    // ── Рівні (межі — кількість бонусів на балансі) ───────────────────────────
+    public record BonusLevel(String name, int minBalance, int maxBalance, int cashbackPercent) {}
 
     private static final List<BonusLevel> LEVELS = List.of(
-            new BonusLevel("Ласун",         0,    300,  3),
-            new BonusLevel("Гурман",        300,  800,  5),
-            new BonusLevel("Майстер тіста", 800,  1500, 7),
+            new BonusLevel("Ласун",         0,    300,              3),
+            new BonusLevel("Гурман",        300,  800,              5),
+            new BonusLevel("Майстер тіста", 800,  1500,             7),
             new BonusLevel("Шеф-пекар",     1500, Integer.MAX_VALUE, 10)
     );
 
     // ── Баланс ────────────────────────────────────────────────────────────────
-
-    /**
-     * Поточний баланс — сума всіх активних нарахувань мінус всі списання.
-     */
     @Transactional(readOnly = true)
     public int getBalance(Long userId) {
         List<BonusTransaction> all = bonusRepo.findByUserIdOrderByCreatedAtDesc(userId);
         LocalDateTime now = LocalDateTime.now();
-
         int balance = 0;
         for (BonusTransaction t : all) {
             if (t.getAmount() < 0) {
-                // Списання завжди враховуємо
                 balance += t.getAmount();
             } else {
-                // Нарахування — тільки якщо не прострочено
                 if (t.getExpiresAt() == null || t.getExpiresAt().isAfter(now)) {
                     balance += t.getAmount();
                 }
@@ -52,12 +44,8 @@ public class BonusService {
         return Math.max(0, balance);
     }
 
-    /**
-     * Загальна сума витрат користувача (для визначення рівня).
-     */
     @Transactional(readOnly = true)
     public int getTotalSpent(Long userId) {
-        // Рахуємо суму унікальних замовлень (один раз кожне)
         Set<Long> seenOrderIds = new HashSet<>();
         int total = 0;
         for (BonusTransaction t : bonusRepo.findByUserIdOrderByCreatedAtDesc(userId)) {
@@ -70,64 +58,46 @@ public class BonusService {
         return total;
     }
 
-    /**
-     * Поточний рівень користувача.
-     */
-    public BonusLevel getCurrentLevel(int totalSpent) {
+    // ── Рівень — ТІЛЬКИ від балансу ───────────────────────────────────────────
+    public BonusLevel getCurrentLevel(int balance) {
         return LEVELS.stream()
-                .filter(l -> totalSpent >= l.minSpent() && totalSpent < l.maxSpent())
+                .filter(l -> balance >= l.minBalance() && balance < l.maxBalance())
                 .findFirst()
                 .orElse(LEVELS.get(LEVELS.size() - 1));
     }
 
-    /**
-     * Наступний рівень (null якщо вже максимальний).
-     */
-    public BonusLevel getNextLevel(int totalSpent) {
+    public BonusLevel getNextLevel(int balance) {
         for (int i = 0; i < LEVELS.size() - 1; i++) {
-            if (totalSpent < LEVELS.get(i + 1).minSpent()) {
+            if (balance < LEVELS.get(i + 1).minBalance()) {
                 return LEVELS.get(i + 1);
             }
         }
-        return null; // вже Шеф-пекар
+        return null;
     }
 
-    /**
-     * Скільки гривень залишилось до наступного рівня.
-     */
-    public int getAmountToNextLevel(int totalSpent) {
-        BonusLevel next = getNextLevel(totalSpent);
+    public int getAmountToNextLevel(int balance) {
+        BonusLevel next = getNextLevel(balance);
         if (next == null) return 0;
-        return next.minSpent() - totalSpent;
+        return next.minBalance() - balance;
     }
 
-    /**
-     * Прогрес у відсотках до наступного рівня.
-     */
-    public int getProgressPercent(int totalSpent) {
-        BonusLevel current = getCurrentLevel(totalSpent);
-        BonusLevel next = getNextLevel(totalSpent);
+    public int getProgressPercent(int balance) {
+        BonusLevel current = getCurrentLevel(balance);
+        BonusLevel next    = getNextLevel(balance);
         if (next == null) return 100;
-        int range = next.minSpent() - current.minSpent();
-        int done  = totalSpent - current.minSpent();
+        int range = next.minBalance() - current.minBalance();
+        int done  = balance           - current.minBalance();
         return Math.min(100, (int) ((double) done / range * 100));
     }
 
     // ── Нарахування ───────────────────────────────────────────────────────────
-
-    /**
-     * Нараховуємо бонуси за виконане замовлення.
-     * Відсоток кешбеку залежить від рівня клієнта.
-     */
     @Transactional
     public BonusTransaction earnForOrder(User user, Order order) {
-        // Захист від подвійного нарахування за одне замовлення
         if (bonusRepo.existsByOrderIdAndType(order.getId(), BonusTransaction.TransactionType.EARNED)) {
             return null;
         }
-
-        int totalSpent = getTotalSpent(user.getId());
-        BonusLevel level = getCurrentLevel(totalSpent);
+        int balance = getBalance(user.getId());
+        BonusLevel level = getCurrentLevel(balance);
 
         int earned = (int) Math.round(order.getPrice() * level.cashbackPercent() / 100.0);
         if (earned <= 0) return null;
@@ -143,14 +113,10 @@ public class BonusService {
         return bonusRepo.save(t);
     }
 
-    /**
-     * Вітальний бонус при реєстрації (50 балів, один раз).
-     */
     @Transactional
     public BonusTransaction giveWelcomeBonus(User user) {
-        if (bonusRepo.existsByUserIdAndType(user.getId(),
-                BonusTransaction.TransactionType.WELCOME)) {
-            return null; // вже нараховано
+        if (bonusRepo.existsByUserIdAndType(user.getId(), BonusTransaction.TransactionType.WELCOME)) {
+            return null;
         }
         BonusTransaction t = new BonusTransaction();
         t.setUser(user);
@@ -162,10 +128,6 @@ public class BonusService {
         return bonusRepo.save(t);
     }
 
-    /**
-     * Бонус на день народження (подвійний кешбек за наступне замовлення).
-     * Нараховуємо 100 балів один раз на рік.
-     */
     @Transactional
     public BonusTransaction giveBirthdayBonus(User user) {
         int year = LocalDate.now().getYear();
@@ -178,54 +140,41 @@ public class BonusService {
         t.setAmount(100);
         t.setDescription("Бонус на день народження");
         t.setCreatedAt(LocalDateTime.now());
-        t.setExpiresAt(LocalDateTime.now().plusMonths(1)); // діє 1 місяць
+        t.setExpiresAt(LocalDateTime.now().plusMonths(1));
         return bonusRepo.save(t);
     }
 
     // ── Списання ──────────────────────────────────────────────────────────────
-
-    /**
-     * Списуємо бонуси при оплаті замовлення.
-     * Максимум 30% від суми замовлення.
-     * Повертає скільки фактично списано.
-     */
     @Transactional
     public int spend(User user, Order order, int requestedAmount) {
-        int balance = getBalance(user.getId());
-        int maxAllowed = (int) Math.floor(order.getPrice() * 0.30); // 30% від замовлення
-        int toSpend = Math.min(requestedAmount, Math.min(balance, maxAllowed));
-
+        int balance    = getBalance(user.getId());
+        int maxAllowed = (int) Math.floor(order.getPrice() * 0.30);
+        int toSpend    = Math.min(requestedAmount, Math.min(balance, maxAllowed));
         if (toSpend <= 0) return 0;
 
         BonusTransaction t = new BonusTransaction();
         t.setUser(user);
         t.setOrder(order);
         t.setType(BonusTransaction.TransactionType.SPENT);
-        t.setAmount(-toSpend); // від'ємне!
+        t.setAmount(-toSpend);
         t.setDescription("Списано за замовлення №" + order.getId());
         t.setCreatedAt(LocalDateTime.now());
         bonusRepo.save(t);
-
         return toSpend;
     }
 
-    // ── Дані для сторінки профілю ─────────────────────────────────────────────
-
-    /**
-     * Повний дашборд бонусів для відображення в профілі.
-     */
+    // ── Дашборд ───────────────────────────────────────────────────────────────
     @Transactional(readOnly = true)
     public Map<String, Object> getDashboard(Long userId) {
-        int balance     = getBalance(userId);
-        int totalSpent  = getTotalSpent(userId);
-        BonusLevel curr = getCurrentLevel(totalSpent);
-        BonusLevel next = getNextLevel(totalSpent);
-        int progress    = getProgressPercent(totalSpent);
-        int toNext      = getAmountToNextLevel(totalSpent);
+        int balance  = getBalance(userId);
+        int spent    = getTotalSpent(userId);
 
-        List<BonusTransaction> history =
-                bonusRepo.findByUserIdOrderByCreatedAtDesc(userId);
+        BonusLevel curr = getCurrentLevel(balance);
+        BonusLevel next = getNextLevel(balance);
+        int progress    = getProgressPercent(balance);
+        int toNext      = getAmountToNextLevel(balance);
 
+        List<BonusTransaction> history = bonusRepo.findByUserIdOrderByCreatedAtDesc(userId);
         List<Map<String, Object>> historyList = history.stream().limit(10)
                 .map(t -> {
                     Map<String, Object> m = new HashMap<>();
@@ -243,7 +192,7 @@ public class BonusService {
 
         Map<String, Object> result = new HashMap<>();
         result.put("balance",         balance);
-        result.put("totalSpent",      totalSpent);
+        result.put("totalSpent",      spent);
         result.put("currentLevel",    curr.name());
         result.put("currentCashback", curr.cashbackPercent());
         result.put("nextLevel",       next != null ? next.name() : null);

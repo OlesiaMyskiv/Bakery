@@ -45,6 +45,12 @@ function saveCart(cart) {
  * @param {Object} item - дані товару
  */
 function addToCart(item) {
+    // Перевірка авторизації
+    if (!window.IS_LOGGED_IN) {
+        var modal = document.getElementById('auth-required-modal');
+        if (modal) modal.style.display = 'flex';
+        return;
+    }
     const cart = getCart();
     const existingIdx = cart.findIndex(function(c) { return c.id === item.id; });
 
@@ -247,7 +253,7 @@ function renderCartPage() {
         DESIGN:      { label: 'Дизайни',          icon: '👑', items: [] },
         LINE:        { label: 'Лінійка виробів',  icon: '🕯', items: [] },
         AI_DESIGN:   { label: 'ШІ-дизайн',        icon: '🤖', items: [] },
-        CONSTRUCTOR: { label: 'Конструктор',       icon: '🏗', items: [] }
+        CONSTRUCTOR: { label: 'Конструктор',       icon: '',   items: [] }
     };
 
     cart.forEach(function(item) {
@@ -266,7 +272,8 @@ function renderCartPage() {
         if (group.items.length === 0) return;
 
         html += '<div class="cart-group">';
-        html += '<div class="cart-group-title">' + group.icon + ' ' + group.label + '</div>';
+        var titleIcon = group.icon ? group.icon + ' ' : '';
+        html += '<div class="cart-group-title">' + titleIcon + group.label + '</div>';
 
         group.items.forEach(function(item) {
             var price      = (isVerified && item.discountPrice) ? item.discountPrice : item.unitPrice;
@@ -278,33 +285,45 @@ function renderCartPage() {
             html += '<div class="cart-item" data-id="' + item.id + '" data-type="' + item.type + '">';
 
             // Фото
-            html += '<div class="cart-item-img">';
-            if (item.imagePath) {
+            if (item.type === 'CONSTRUCTOR' && item.imagePath) {
+                html += '<div class="cake-preview">';
                 html += '<img src="' + item.imagePath + '" alt="' + item.name + '">';
+                html += '</div>';
             } else {
-                html += '<div class="cart-item-img-placeholder">🎂</div>';
+                html += '<div class="cart-item-img">';
+                if (item.imagePath) {
+                    html += '<img src="' + item.imagePath + '" alt="' + item.name + '">';
+                } else {
+                    html += '<div class="cart-item-img-placeholder">🎂</div>';
+                }
+                html += '</div>';
             }
-            html += '</div>';
 
             // Інфо
             html += '<div class="cart-item-info">';
             html += '<div class="cart-item-name">' + item.name + '</div>';
 
-            if (item.description) {
-                var desc = item.description;
-                // Для конструктора — показуємо тільки перші 2 шари
-                if (item.type === 'CONSTRUCTOR') {
-                    var parts = desc.split(' | ');
-                    desc = parts.slice(0, 2).join(' | ') + (parts.length > 2 ? ' + ще ' + (parts.length - 2) : '');
-                }
-                html += '<div class="cart-item-desc">' + desc + '</div>';
+            if (item.type === 'CONSTRUCTOR' && item.description) {
+                var layers = item.description.split(' | ');
+                html += '<ol class="constructor-layers-list">';
+                layers.forEach(function(layer) {
+                    html += '<li>' + layer + '</li>';
+                });
+                html += '</ol>';
+            } else if (item.description) {
+                html += '<div class="cart-item-desc">' + item.description + '</div>';
             }
 
             // Ціна
             html += '<div class="cart-item-price">';
-            html += '<span>' + price + ' ' + item.priceUnit + '</span>';
-            if (isVerified && item.discountPrice) {
-                html += ' <span class="cart-defenders">🇺🇦 Захисникам</span>';
+            if (item.type === 'CONSTRUCTOR') {
+                html += '<span class="constructor-meta">' + item.priceUnit + '</span>';
+                html += '<span class="constructor-price">' + price.toLocaleString('uk-UA') + ' грн</span>';
+            } else {
+                html += '<span>' + price + ' ' + item.priceUnit + '</span>';
+                if (isVerified && item.discountPrice) {
+                    html += ' <span class="cart-defenders">🇺🇦 Захисникам</span>';
+                }
             }
             html += '</div>';
 
@@ -505,19 +524,4 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Радіо оплати — відкриваємо PayPal одразу при виборі "Онлайн"
-    var payRadios = document.querySelectorAll('input[name="paymentMethod"]');
-    payRadios.forEach(function(r) {
-        r.addEventListener('change', function() {
-            if (this.value === 'ONLINE') {
-                // Синхронізуємо суму в PayPal-модалці
-                var totalEl = document.getElementById('cartTotalFinal');
-                var paypalEl = document.getElementById('paypalAmount');
-                if (totalEl && paypalEl) {
-                    paypalEl.textContent = totalEl.textContent;
-                }
-                openPaymentModal();
-            }
-        });
-    });
 });

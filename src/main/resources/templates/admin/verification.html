@@ -10,10 +10,186 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" th:href="@{/css/admin.css}">
     <link rel="stylesheet" th:href="@{/css/header.css}">
+    <style>
+        .verif-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .verif-card {
+            background: #fff;
+            border: 1.5px solid #e8f4f6;
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            box-shadow: 0 2px 12px rgba(39,123,138,0.06);
+        }
+        .verif-card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .verif-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #e0f4f8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #277B8A;
+            flex-shrink: 0;
+        }
+        .verif-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+        .verif-email {
+            font-size: 0.82rem;
+            color: #888;
+            font-family: 'Cormorant Garamond', serif;
+        }
+        .verif-role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #e0f4f8;
+            color: #277B8A;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.88rem;
+            font-weight: 700;
+        }
+        .verif-doc-wrap {
+            border: 1.5px solid #e0f4f8;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #f8fcfd;
+            text-align: center;
+            padding: 8px;
+        }
+        .verif-doc-img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            object-fit: contain;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .verif-doc-img:hover { transform: scale(1.02); }
+        .verif-doc-link {
+            display: inline-block;
+            margin-top: 6px;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.82rem;
+            color: #277B8A;
+            text-decoration: underline;
+        }
+        .verif-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 4px;
+        }
+        .btn-approve {
+            background: #3AA6B9;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 0;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .btn-approve:hover { background: #277B8A; }
+        .btn-reject {
+            background: #f5e8ea;
+            color: #a0304a;
+            border: 1.5px solid #e8c4cb;
+            border-radius: 10px;
+            padding: 10px 0;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .btn-reject:hover { background: #efd0d5; }
+        .verif-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+        }
+        .verif-empty-icon { font-size: 2.5rem; margin-bottom: 10px; }
+        .verif-section-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #888;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-top: 10px;
+        }
+        /* Модалка для перегляду документа */
+        .doc-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        .doc-modal-overlay.open { display: flex; }
+        .doc-modal-img {
+            max-width: 90vw;
+            max-height: 90vh;
+            border-radius: 12px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+        }
+        .doc-modal-close {
+            position: fixed;
+            top: 20px; right: 28px;
+            font-size: 2rem;
+            color: white;
+            cursor: pointer;
+            line-height: 1;
+        }
+        /* Попередження про конфіденційність */
+        .privacy-notice {
+            background: #fff8e8;
+            border: 1px solid #f5c842;
+            border-radius: 10px;
+            padding: 10px 16px;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.88rem;
+            color: #7a5f00;
+            margin-bottom: 8px;
+        }
+    </style>
 </head>
 <body>
 
 <header th:replace="~{header :: header}"></header>
+
+<!-- Модалка перегляду документа -->
+<div class="doc-modal-overlay" id="docModal" onclick="closeDocModal(event)">
+    <span class="doc-modal-close" onclick="document.getElementById('docModal').classList.remove('open')">&times;</span>
+    <img class="doc-modal-img" id="docModalImg" src="" alt="Посвідчення">
+</div>
 
 <div class="admin-layout">
     <aside class="admin-sidebar">
@@ -32,12 +208,16 @@
         <nav class="sidebar-nav">
             <a th:href="@{/admin/orders}"       class="sidebar-link">Замовлення</a>
             <a th:href="@{/admin/users}"        class="sidebar-link">Клієнти</a>
-            <a th:href="@{/admin/verification}" class="sidebar-link active">Верифікація</a>
+            <a th:href="@{/admin/verification}" class="sidebar-link active">Верифікація
+                <span th:if="${pendingCount > 0}"
+                      th:text="${pendingCount}"
+                      style="background:#e8829a;color:white;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:0.75rem;margin-left:6px;"></span>
+            </a>
             <a th:href="@{/admin/assortment}"   class="sidebar-link">Асортимент</a>
             <a th:href="@{/admin/reviews}"      class="sidebar-link">Відгуки</a>
-            <a th:href="@{/admin/chats}"        class="sidebar-link" style="display: flex; align-items: center; justify-content: space-between;">
+            <a th:href="@{/admin/chats}"        class="sidebar-link" style="display:flex;align-items:center;justify-content:space-between;">
                 <span>Чати</span>
-                <span id="admin-global-unread-dot" class="ca-unread-dot" style="display: none; margin: 0;"></span>
+                <span id="admin-global-unread-dot" class="ca-unread-dot" style="display:none;margin:0;"></span>
             </a>
             <a th:href="@{/logout}"             class="sidebar-link sidebar-exit">Вихід</a>
         </nav>
@@ -47,57 +227,102 @@
         <div class="admin-card">
             <h1 class="admin-page-title">Верифікація</h1>
 
-            <div class="admin-table-wrap">
-                <table class="admin-table">
-                    <thead>
-                    <tr>
-                        <th>Клієнт</th>
-                        <th>Статус</th>
-                        <th>Документ</th>
-                        <th>Дія</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:if="${pendingUsers.empty}">
-                        <td colspan="4" class="empty-row">Нових заявок немає ✓</td>
-                    </tr>
-                    <tr th:each="u : ${pendingUsers}">
-                        <td>
-                            <strong th:text="${u.username}"></strong><br>
-                            <span class="text-muted" th:text="${u.phone}"></span>
-                        </td>
-                        <td>
-                            <!-- Читабельна назва ролі -->
-                            <span class="role-label"
-                                  th:text="${u.role.name() == 'ZSU'  ? 'Військовослужбовець' :
-                                                 u.role.name() == 'DPSU' ? 'Співробітник ДПСУ' :
-                                                 u.role.name() == 'DSNS' ? 'Співробітник ДСНС' :
-                                                 u.role.name()}"></span>
-                        </td>
-                        <td>
-                            <a th:if="${u.documentPath != null}"
-                               th:href="${u.documentPath}"
-                               target="_blank"
-                               class="btn-view-doc">Переглянути фото</a>
-                            <span th:if="${u.documentPath == null}" class="text-muted">Немає документа</span>
-                        </td>
-                        <td>
-                            <div style="display:flex; flex-direction:column; gap:6px;">
-                                <form th:action="@{/admin/verification/{id}/approve(id=${u.id})}" method="post">
-                                    <button class="btn-approve">Підтвердити</button>
-                                </form>
-                                <form th:action="@{/admin/verification/{id}/reject(id=${u.id})}" method="post">
-                                    <button class="btn-reject">Відхилити</button>
-                                </form>
+            <!-- Очікують перевірки -->
+            <div th:if="${!pendingUsers.empty}">
+                <div class="privacy-notice">
+                    🔒 Фото посвідчень автоматично видаляються після підтвердження або відхилення заявки.
+                </div>
+                <div class="verif-section-title">Очікують перевірки (<span th:text="${pendingCount}"></span>)</div>
+                <div class="verif-grid">
+                    <div class="verif-card" th:each="u : ${pendingUsers}">
+
+                        <!-- Шапка: аватар + ім'я + email -->
+                        <div class="verif-card-header">
+                            <div class="verif-avatar"
+                                 th:text="${#strings.substring(u.username, 0, 1).toUpperCase()}">А</div>
+                            <div>
+                                <div class="verif-name" th:text="${u.username}">Ім'я</div>
+                                <div class="verif-email" th:text="${u.email}">email@email.com</div>
+                                <div class="verif-email" th:text="${u.phone}"></div>
                             </div>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
+                        </div>
+
+                        <!-- Роль -->
+                        <div>
+                            <span class="verif-role-badge">
+                                <span th:text="${u.role.name() == 'ZSU'  ? '🪖 Військовослужбовець ЗСУ' :
+                                                 u.role.name() == 'DPSU' ? '🛡 Співробітник ДПСУ' :
+                                                 u.role.name() == 'DSNS' ? '🚒 Співробітник ДСНС' :
+                                                 u.role.name()}"></span>
+                            </span>
+                        </div>
+
+                        <!-- Фото посвідчення -->
+                        <div class="verif-doc-wrap" th:if="${u.documentPath != null}">
+                            <img class="verif-doc-img"
+                                 th:src="${u.documentPath}"
+                                 alt="Посвідчення"
+                                 onclick="openDocModal(this.src)">
+                            <br>
+                            <a class="verif-doc-link" th:href="${u.documentPath}" target="_blank">
+                                Відкрити у новій вкладці ↗
+                            </a>
+                        </div>
+                        <div class="verif-doc-wrap" th:unless="${u.documentPath != null}"
+                             style="color:#aaa;padding:16px;font-family:'Cormorant Garamond',serif;">
+                            Документ не завантажено
+                        </div>
+
+                        <!-- Кнопки -->
+                        <div class="verif-actions">
+                            <form th:action="@{/admin/verification/{id}/approve(id=${u.id})}" method="post">
+                                <button class="btn-approve" style="width:100%;"
+                                        onclick="return confirm('Підтвердити верифікацію? Фото посвідчення буде видалено.')">
+                                    ✓ Підтвердити
+                                </button>
+                            </form>
+                            <form th:action="@{/admin/verification/{id}/reject(id=${u.id})}" method="post">
+                                <button class="btn-reject" style="width:100%;"
+                                        onclick="return confirm('Відхилити заявку? Фото буде видалено, статус повернеться до Клієнта.')">
+                                    ✕ Відхилити
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
             </div>
+
+            <!-- Порожньо -->
+            <div th:if="${pendingUsers.empty}" class="verif-empty">
+                <div class="verif-empty-icon">✓</div>
+                Нових заявок немає — всі перевірено!
+            </div>
+
         </div>
     </main>
 </div>
+
+<div id="docModal" class="doc-modal-overlay" onclick="closeDocModal(event)">
+    <span class="doc-modal-close">&times;</span>
+    <img class="doc-modal-img" id="docModalImg" src="" alt="Посвідчення">
+</div>
+
+<script>
+    function openDocModal(src) {
+        document.getElementById('docModalImg').src = src;
+        document.getElementById('docModal').classList.add('open');
+    }
+    function closeDocModal(e) {
+        if (e.target === document.getElementById('docModal') ||
+            e.target.classList.contains('doc-modal-close')) {
+            document.getElementById('docModal').classList.remove('open');
+        }
+    }
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') document.getElementById('docModal').classList.remove('open');
+    });
+</script>
 <script th:src="@{/js/admin.js}"></script>
 </body>
 </html>

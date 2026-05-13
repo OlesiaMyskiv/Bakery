@@ -22,7 +22,7 @@
 </script>
 
 <main class="cart-page">
-    <h1 class="cart-title">🛒 Кошик</h1>
+    <h1 class="cart-title">Кошик</h1>
 
     <div class="cart-layout">
 
@@ -208,14 +208,20 @@
             return;
         }
 
-        // Перевірка: залогінений
-        // Авторизацію перевіряє SecurityConfig — якщо тут, то вже залогінений
-
-        // Заповнюємо поля
+        // Заповнюємо поля кошика і солодощів
         document.getElementById('cartJsonField').value = JSON.stringify(cart);
-
         var milCheck = document.getElementById('militaryCheckbox');
         document.getElementById('militarySweetsField').value = milCheck.checked ? 'true' : 'false';
+
+        // Якщо обрана онлайн-оплата — відкриваємо PayPal і НЕ відправляємо форму
+        var payMethod = document.querySelector('input[name="paymentMethod"]:checked');
+        if (payMethod && payMethod.value === 'ONLINE') {
+            e.preventDefault();
+            var totalEl  = document.getElementById('cartTotalFinal');
+            var paypalEl = document.getElementById('paypalAmount');
+            if (totalEl && paypalEl) paypalEl.textContent = totalEl.textContent;
+            openPaymentModal();
+        }
     });
 
     // Скасування онлайн-оплати → повертаємо на "При отриманні"
@@ -224,14 +230,6 @@
         var onDelivery = document.querySelector('input[name="paymentMethod"][value="ON_DELIVERY"]');
         if (onDelivery) onDelivery.checked = true;
         document.getElementById('paymentStatusField').value = 'ON_DELIVERY';
-    }
-
-    // Слухач оплати вже є в cart.js — тут тільки оновлюємо суму в PayPal при відкритті
-    function beforeOpenPaypal() {
-        var amount = document.getElementById('cartTotalFinal');
-        var paypalAmount = document.getElementById('paypalAmount');
-        if (amount && paypalAmount) paypalAmount.textContent = amount.textContent;
-        openPaymentModal();
     }
 
     // Чекбокс солодощів — показуємо/ховаємо рядок

@@ -176,6 +176,8 @@ public class AdminController {
     public String approveUser(@PathVariable Long id) {
         userRepository.findById(id).ifPresent(u -> {
             u.setVerificationStatus(VerificationStatus.APPROVED);
+            deleteDocumentFile(u);
+            u.setDocumentPath(null);
             userRepository.save(u);
         });
         return "redirect:/admin/verification";
@@ -185,9 +187,22 @@ public class AdminController {
     public String rejectUser(@PathVariable Long id) {
         userRepository.findById(id).ifPresent(u -> {
             u.setVerificationStatus(VerificationStatus.REJECTED);
+            u.setRole(Role.CLIENT);
+            deleteDocumentFile(u);
+            u.setDocumentPath(null);
             userRepository.save(u);
         });
         return "redirect:/admin/verification";
+    }
+
+    private void deleteDocumentFile(User u) {
+        if (u.getDocumentPath() == null) return;
+        try {
+            java.nio.file.Path filePath = java.nio.file.Paths
+                    .get(System.getProperty("user.dir"))
+                    .resolve(u.getDocumentPath().replaceFirst("^/", ""));
+            java.nio.file.Files.deleteIfExists(filePath);
+        } catch (Exception ignored) {}
     }
 
     // ── Асортимент ────────────────────────────────────────────────────────────

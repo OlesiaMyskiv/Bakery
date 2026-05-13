@@ -446,9 +446,15 @@
             var imgSrc = images[idx] || (idx === 0 ? (d.aiImg && d.aiImg !== 'null' ? d.aiImg : (d.firstImg && d.firstImg !== 'null' ? d.firstImg : null)) : null);
             if (name.indexOf('Солодощі для ЗСУ') !== -1 || name.indexOf('🇺🇦') !== -1) imgSrc = '/img/energy_ua.png';
 
-            var imgHtml = (imgSrc && imgSrc !== 'null' && imgSrc !== '')
-                ? '<img src="' + imgSrc + '" class="omi-item-img" alt="">'
-                : '<div class="omi-item-img-placeholder">🎂</div>';
+            var isConstructorItem = g.layers && g.layers.length > 0;
+            var imgHtml;
+            if (imgSrc && imgSrc !== 'null' && imgSrc !== '') {
+                imgHtml = isConstructorItem
+                    ? '<div class="cake-preview"><img src="' + imgSrc + '" alt=""></div>'
+                    : '<img src="' + imgSrc + '" class="omi-item-img" alt="">';
+            } else {
+                imgHtml = '<div class="omi-item-img-placeholder">🎂</div>';
+            }
 
             var layersHtml = '';
             if (g.layers.length > 0) {

@@ -116,8 +116,10 @@
                             <div th:if="${stat.index == 0}">
                                 <img th:if="${r.order.aiImageUrl != null}"
                                      th:src="${r.order.aiImageUrl}" class="rca-item-img" alt="">
-                                <img th:if="${r.order.aiImageUrl == null and r.order.constructorImg != null}"
-                                     th:src="${r.order.constructorImg}" class="rca-item-img" alt="">
+                                <div th:if="${r.order.aiImageUrl == null and r.order.constructorImg != null}"
+                                     class="cake-preview" style="display:inline-block;">
+                                    <img th:src="${r.order.constructorImg}" class="rca-item-img" alt="">
+                                </div>
                                 <img th:if="${r.order.aiImageUrl == null and r.order.constructorImg == null and r.order.firstImagePath != null}"
                                      th:src="${r.order.firstImagePath}" class="rca-item-img" alt="">
                                 <div th:if="${r.order.aiImageUrl == null and r.order.constructorImg == null and r.order.firstImagePath == null}"

@@ -84,7 +84,7 @@
 .cart-item {
     display: flex;
     gap: 1rem;
-    align-items: center;
+    align-items: flex-start;
     padding: 0.8rem 0;
     border-bottom: 1px solid #f5f5f0;
 }
@@ -499,16 +499,6 @@
     .cart-summary-col { width: 100%; position: static; }
 }
 
-/* ── Конструктор: вертикальне фото ──────────────────────────── */
-.cart-item[data-type="CONSTRUCTOR"] .cart-item-img {
-    width: 70px;
-    height: 110px;   /* вище — бо шари вертикальні */
-}
-
-.cart-item[data-type="CONSTRUCTOR"] .cart-item-img img {
-    object-fit: cover;
-    object-position: center;
-}
 /* ── Іконка видалення в кошику ───────────────────────────────── */
 .cart-item-remove {
     background: none;
@@ -534,5 +524,38 @@
 
 .cart-item-remove:hover .cart-remove-icon {
     opacity: 1;
-    filter: invert(40%) sepia(80%) saturate(500%) hue-rotate(320deg);
+}
+
+/* ── Конструктор: склад торта ────────────────────────────────── */
+.constructor-layers-list {
+    margin: 6px 0 2px;
+    padding-left: 18px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.9rem;
+    color: #999;
+    line-height: 1.65;
+}
+
+.constructor-layers-list li {
+    padding: 0;
+}
+
+.constructor-layers-list li::marker {
+    color: #bbb;
+    font-size: 0.8rem;
+}
+
+.constructor-meta {
+    display: block;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.82rem;
+    color: #bbb;
+    margin-bottom: 2px;
+}
+
+.constructor-price {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #3a2a1a;
 }

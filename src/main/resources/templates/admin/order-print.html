@@ -171,9 +171,16 @@
                 imgSrc = '/img/energy_ua.png';
             }
 
-            var imgHtml = imgSrc && imgSrc !== 'null'
-                ? '<img src="' + imgSrc + '" class="print-item-img" alt="">'
-                : '<span class="print-item-img-placeholder">🎂</span>';
+            var isConstructorItem = g.layers && g.layers.length > 0;
+            var imgHtml;
+            if (imgSrc && imgSrc !== 'null') {
+                var imgTag = '<img src="' + imgSrc + '" class="print-item-img" alt="">';
+                imgHtml = isConstructorItem
+                    ? '<div class="constructor-preview-wrap">' + imgTag + '</div>'
+                    : imgTag;
+            } else {
+                imgHtml = '<span class="print-item-img-placeholder">🎂</span>';
+            }
 
             // Шари
             var layersHtml = '';

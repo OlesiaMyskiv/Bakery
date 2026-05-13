@@ -448,3 +448,32 @@ html, body {
     transition: background 0.15s;
 }
 .gc-send:hover { background: #2d8a9e; }
+
+/* ══════════════════════════════════════════════════════════════
+   CAKE PREVIEW — єдиний стиль конструктора СКРІЗЬ
+   ══════════════════════════════════════════════════════════════ */
+.cake-preview {
+    width: 80px;
+    min-height: 70px;
+    height: auto;
+    border: 3px solid #277B8A;
+    border-radius: 12px;
+    background: #fff;
+    padding: 4px;
+    display: block;
+    box-sizing: border-box;
+    overflow: hidden;
+    flex-shrink: 0;
+    align-self: flex-start;
+}
+
+.cake-preview img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    object-fit: contain;
+}

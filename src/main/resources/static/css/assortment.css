@@ -467,7 +467,15 @@
     font-size: 0.9rem;
     color: #4a8a9a;
     border-top: 1px solid #f0e8e0;
+    background: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    width: 100%;
+    cursor: pointer;
 }
+
+.product-card-btn:hover { background: #f0fafb; }
 
 .btn-text {
     font-family: 'Cormorant Garamond', serif;

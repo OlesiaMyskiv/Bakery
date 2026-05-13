@@ -240,6 +240,6 @@ public class CartController {
 
         redirectAttributes.addFlashAttribute("successMsg",
                 "Замовлення #" + order.getId() + " успішно оформлено! 🎂");
-        return "redirect:/profile";
+        return "redirect:/profile?ordered=1";
     }
 }

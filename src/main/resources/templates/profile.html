@@ -481,7 +481,7 @@
                     <!-- Як це працює -->
                     <div class="bonus-info-block">
                         <strong>Як це працює?</strong>
-                        <span th:text="'Ми повертаємо ' + ${d.currentCashback} + '% від суми кожного замовлення бонусами. 1 бонус = 1 гривня знижки (до 30% замовлення).'"></span>
+                        <span th:text="'Ми повертаємо від 3% до 10% бонусами залежно від вашого рівня. 1 бонус = 1 гривня знижки (до 30% замовлення).'"></span>
                     </div>
 
                     <!-- Прогрес + Історія -->
@@ -506,7 +506,7 @@
                             </div>
 
                             <div class="bonus-to-next" th:if="${!d.isMaxLevel}"
-                                 th:text="'До рівня ' + ${d.nextLevel} + ' залишилось замовлень на ' + ${d.toNextLevel} + ' грн'">
+                                 th:text="'До рівня ' + ${d.nextLevel} + ' залишилось ' + ${d.toNextLevel} + ' бонусів'">
                             </div>
                             <div class="bonus-to-next" th:if="${d.isMaxLevel}">
                                 Ви на найвищому рівні — кешбек 10%!
@@ -1018,9 +1018,18 @@
                 if (imgSrc) {
                     var imgEl = document.createElement('img');
                     imgEl.src = imgSrc;
-                    imgEl.className = 'order-item-img';
                     imgEl.alt = '';
-                    placeholder.parentNode.replaceChild(imgEl, placeholder);
+                    var isConstr = notNull(constrImg) && imgSrc === constrImg;
+                    if (isConstr) {
+                        imgEl.className = '';   // без зайвих класів всередині cake-preview
+                        var wrapEl = document.createElement('div');
+                        wrapEl.className = 'cake-preview';
+                        wrapEl.appendChild(imgEl);
+                        placeholder.parentNode.replaceChild(wrapEl, placeholder);
+                    } else {
+                        imgEl.className = 'order-item-img';
+                        placeholder.parentNode.replaceChild(imgEl, placeholder);
+                    }
                 }
             });
         });
