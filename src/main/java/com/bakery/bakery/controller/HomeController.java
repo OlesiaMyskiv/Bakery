@@ -26,7 +26,19 @@ public class HomeController {
     @Autowired private UserService       userService;
 
     @GetMapping("/")
-    public String home() { return "index"; }
+    public String home(Model model) {
+        // Популярні товари — 3 рандомних FLAVOR
+        List<Product> all = new ArrayList<>(
+                productRepository.findByCatalogTypeAndAvailableTrueOrderByNameAsc(Product.CatalogType.FLAVOR)
+        );
+        Collections.shuffle(all, new Random());
+        model.addAttribute("popularProducts", all.stream().limit(3).toList());
+
+        // Відгуки для головної — 3 останніх
+        model.addAttribute("homeReviews", reviewRepository.findTop3ByHiddenFalseOrderByCreatedAtDesc());
+
+        return "index";
+    }
 
     @GetMapping("/constructor")
     public String constructorPage() { return "constructor"; }

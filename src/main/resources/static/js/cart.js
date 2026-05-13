@@ -187,13 +187,15 @@ function calcMinDeliveryDate(cart) {
 }
 
 /**
- * Перевіряє: є DESIGN без FLAVOR → повертає true (помилка)
+ * Перевіряє: є DESIGN/AI_DESIGN без смаку (FLAVOR або CONSTRUCTOR) → повертає true (помилка)
  */
 function hasDesignWithoutFlavor(cart) {
     var hasDesign = cart.some(function(c) {
         return c.type === 'DESIGN' || c.type === 'AI_DESIGN';
     });
-    var hasFlavor = cart.some(function(c) { return c.type === 'FLAVOR'; });
+    var hasFlavor = cart.some(function(c) {
+        return c.type === 'FLAVOR' || c.type === 'CONSTRUCTOR';
+    });
     return hasDesign && !hasFlavor;
 }
 
@@ -249,10 +251,10 @@ function renderCartPage() {
 
     // Групуємо по типу
     var groups = {
-        FLAVOR:      { label: 'Смаки',           icon: '🎂', items: [] },
-        DESIGN:      { label: 'Дизайни',          icon: '👑', items: [] },
-        LINE:        { label: 'Лінійка виробів',  icon: '🕯', items: [] },
-        AI_DESIGN:   { label: 'ШІ-дизайн',        icon: '🤖', items: [] },
+        FLAVOR:      { label: 'Смаки',           icon: '', items: [] },
+        DESIGN:      { label: 'Дизайни',          icon: '', items: [] },
+        LINE:        { label: 'Лінійка виробів',  icon: '', items: [] },
+        AI_DESIGN:   { label: 'ШІ-дизайн',        icon: '', items: [] },
         CONSTRUCTOR: { label: 'Конструктор',       icon: '',   items: [] }
     };
 

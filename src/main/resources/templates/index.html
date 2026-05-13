@@ -3,43 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <title>Cake House - Головна</title>
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Love+Light&display=swap" rel="stylesheet">
-
     <link rel="stylesheet" th:href="@{/css/globals.css}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/assortment.css}">
     <link rel="stylesheet" th:href="@{/css/header.css}">
-
 </head>
 <body>
 
 <header th:replace="~{header :: header}"></header>
 
+
+<!-- ══ БАНЕР АКЦІЇ ═══════════════════════════════════════════════════════ -->
+<div class="promo-banner">
+    <span class="promo-banner-text">
+        🎁 Знижка <strong>-20%</strong> для військовослужбовців ЗСУ, ДПСУ та ДСНС —
+        <a th:href="@{/register}" class="promo-banner-link">зареєструйтесь та підтвердіть статус</a>
+    </span>
+</div>
+
 <main>
+
+    <!-- ══ HERO ══════════════════════════════════════════════════════════ -->
     <section class="hero">
         <img th:src="@{/img/2.png}" alt="Шоколадні бризки" class="splash-left">
-
         <div class="hero-text">
             <div class="subtitle">КОНДИТЕРСЬКА</div>
             <h1 class="title-home">HOME</h1>
             <h1 class="title-bakery">BAKERY</h1>
         </div>
-
         <div class="hero-image">
             <img th:src="@{/img/1.png}" alt="Головний торт" />
         </div>
     </section>
+    <!-- ══ CTA ════════════════════════════════════════════════════════════ -->
+    <div class="hero-cta">
+        <a th:href="@{/assortment}" class="hero-cta-btn">Перейти до асортименту</a>
+        <a th:href="@{/constructor}" class="hero-cta-btn hero-cta-btn--outline">Створити свій торт</a>
+    </div>
 
-    <section class="about-us">
+    <!-- ══ ПРО НАС ════════════════════════════════════════════════════════ -->
+    <section class="about-us fade-up">
         <div class="about-container">
-
             <div class="about-content">
                 <div class="about-image">
                     <img th:src="@{/img/about-image.png}" alt="Процес приготування торта" />
                 </div>
-
                 <div class="about-text-block">
                     <h2 class="about-title">ПРО НАС</h2>
                     <p class="about-description">
@@ -47,21 +58,218 @@
                     </p>
                 </div>
             </div>
-
             <div class="about-features">
-                <span>100% натурально</span>
-                <span>Ручна робота</span>
-                <span>Бережна доставка</span>
+                <div class="about-badge">
+                    <img th:src="@{/img/natural-icon.svg}" alt="" onerror="this.style.display='none'">
+                    <span class="about-badge-title">100% натурально</span>
+                    <span class="about-badge-desc">Тільки свіжі інгредієнти без консервантів</span>
+                </div>
+                <div class="about-badge">
+                    <img th:src="@{/img/handmade-icon.svg}" alt="" onerror="this.style.display='none'">
+                    <span class="about-badge-title">Ручна робота</span>
+                    <span class="about-badge-desc">Кожен торт створюється з любов'ю вручну</span>
+                </div>
+                <div class="about-badge">
+                    <img th:src="@{/img/delivery-icon.svg}" alt="" onerror="this.style.display='none'">
+                    <span class="about-badge-title">Бережна доставка</span>
+                    <span class="about-badge-desc">Холодильні авто та акуратна упаковка</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ══ ЯК ЦЕ ПРАЦЮЄ ══════════════════════════════════════════════════ -->
+    <section class="how-section fade-up">
+        <h2 class="section-title">Як це працює?</h2>
+        <div class="how-steps">
+
+            <div class="how-step fade-up">
+                <div class="how-step-num">1</div>
+                <div class="how-step-icon">
+                    <img th:src="@{/img/icon-cake.svg}" alt="Торт" onerror="this.style.display='none'">
+                </div>
+                <div class="how-step-title">Обираєш</div>
+                <div class="how-step-desc">Переглядаєш асортимент або конструюєш власний торт по шарах</div>
+            </div>
+
+            <div class="how-step-arrow">→</div>
+
+            <div class="how-step fade-up">
+                <div class="how-step-num">2</div>
+                <div class="how-step-icon">
+                    <img th:src="@{/img/icon-pencil.svg}" alt="Замовлення" onerror="this.style.display='none'">
+                </div>
+                <div class="how-step-title">Замовляєш</div>
+                <div class="how-step-desc">Вказуєш дату, кількість гостей та спосіб отримання</div>
+            </div>
+
+            <div class="how-step-arrow">→</div>
+
+            <div class="how-step fade-up">
+                <div class="how-step-num">3</div>
+                <div class="how-step-icon">
+                    <img th:src="@{/img/icon-chef.svg}" alt="Приготування" onerror="this.style.display='none'">
+                </div>
+                <div class="how-step-title">Ми готуємо</div>
+                <div class="how-step-desc">Наші майстри з любов'ю створюють твій десерт</div>
+            </div>
+
+            <div class="how-step-arrow">→</div>
+
+            <div class="how-step fade-up">
+                <div class="how-step-num">4</div>
+                <div class="how-step-icon">
+                    <img th:src="@{/img/icon-giftbox.svg}" alt="Отримання" onerror="this.style.display='none'">
+                </div>
+                <div class="how-step-title">Отримуєш</div>
+                <div class="how-step-desc">Забираєш самовивозом або отримуєш кур'єром у холодильнику</div>
             </div>
 
         </div>
     </section>
 
+    <!-- ══ ПОПУЛЯРНІ ЗАМОВЛЕННЯ ═══════════════════════════════════════════ -->
+    <section class="popular-section fade-up" th:if="${popularProducts != null and !popularProducts.empty}">
+        <h2 class="section-title">Популярні замовлення</h2>
+        <div class="popular-grid">
+            <a th:each="p : ${popularProducts}"
+               th:href="@{/product/{id}(id=${p.id})}"
+               class="popular-card fade-up">
+                <div class="popular-card-img">
+                    <img th:src="${p.imagePath}" th:alt="${p.name}" onerror="this.src='/img/2.png'">
+                </div>
+                <div class="popular-card-info">
+                    <div class="popular-card-name" th:text="${p.name}"></div>
+                    <div class="popular-card-weight" th:if="${p.minWeightKg != null}"
+                         th:text="${p.minWeightKg} + ' кг'"></div>
+                    <div class="popular-card-price" th:text="${p.price} + ' грн'"></div>
+                </div>
+                <button class="popular-card-btn"
+                        th:attr="data-id=${p.id},
+                                     data-name=${p.name},
+                                     data-type=${p.catalogType},
+                                     data-image=${p.imagePath},
+                                     data-price-unit=${p.priceUnit},
+                                     data-price=${p.price}"
+                        onclick="event.preventDefault(); popularAddToCart(this)">
+                    <span class="btn-text">додати в кошик</span>
+                    <div class="btn-line-circle">
+                        <div class="btn-line"></div>
+                        <div class="btn-circle"></div>
+                    </div>
+                </button>
+            </a>
+        </div>
+    </section>
+
+    <!-- ══ МАЄТЕ ВЛАСНУ ІДЕЮ ═══════════════════════════════════════════════ -->
+    <section class="idea-section fade-up">
+        <div class="idea-container">
+            <div class="idea-image">
+                <img th:src="@{/img/idea-hand.png}" alt="Ваша ідея" onerror="this.style.display='none'">
+            </div>
+            <div class="idea-text">
+                <h2 class="idea-title">Маєте власну ідею?</h2>
+                <p class="idea-desc">
+                    Створіть свій ідеальний торт від А до Я.<br>
+                    Зберіть унікальний смак по шарах у нашому
+                    Конструкторі та згенеруйте неповторний декор за допомогою
+                    ШІ-генератора дизайну
+                </p>
+                <a th:href="@{/constructor}" class="idea-btn">Спробувати</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ ВІДГУКИ ════════════════════════════════════════════════════════ -->
+    <section class="home-reviews-section fade-up" th:if="${homeReviews != null and !homeReviews.empty}">
+        <h2 class="section-title">Відгуки наших клієнтів</h2>
+        <div class="home-reviews-grid">
+            <div class="home-review-card fade-up" th:each="rev : ${homeReviews}">
+                <div class="home-review-header">
+                    <div class="home-review-avatar"
+                         th:if="${rev.user != null and rev.user.profilePicturePath != null}">
+                        <img th:src="${rev.user.profilePicturePath}" alt="Фото">
+                    </div>
+                    <div class="home-review-avatar home-review-avatar-letter"
+                         th:unless="${rev.user != null and rev.user.profilePicturePath != null}"
+                         th:text="${rev.user != null ? #strings.substring(rev.user.username,0,1).toUpperCase() : '?'}">К</div>
+                    <div class="home-review-name" th:text="${rev.user != null ? rev.user.username : 'Клієнт'}">Клієнт</div>
+                </div>
+                <div class="home-review-stars">
+                    <span th:each="i : ${#numbers.sequence(1,5)}"
+                          th:classappend="${i <= rev.rating} ? ' star-filled' : ' star-empty'"
+                          class="rev-star">★</span>
+                </div>
+                <div class="home-review-text" th:text="${rev.text}"></div>
+                <div class="home-review-photo" th:if="${rev.photoPath != null}">
+                    <img th:src="${rev.photoPath}" alt="Фото до відгуку">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ FAQ ════════════════════════════════════════════════════════════ -->
+    <section class="faq-section fade-up">
+        <h2 class="section-title">FAQ (Поширені запитання)</h2>
+        <div class="faq-list">
+            <details class="faq-item fade-up">
+                <summary>За скільки днів потрібно робити замовлення?</summary>
+                <p>Для ідеального результату ми рекомендуємо оформлювати замовлення за 3-5 днів до вашого свята. Якщо плануєте складний багаторусний торт або весільний колд-бар (великий стіл) — бажано забронювати дату за 1-2 тижні. Важливо для тих, хто хоча до свята в останню мить, у нас є категорія «Готові дизайни», які ми можемо замовити на добу 24 год наперед.</p>
+            </details>
+            <details class="faq-item fade-up">
+                <summary>Як працює доставка? Чи безпечно замовляти торт кур'єром?</summary>
+                <p>Так, абсолютно! Торти — це дуже крихкий продукт, тому ми не перевозимо посилками звичайних кур'єр. У нас працює власна безпечна доставка в автомобілях з холодильним обладнанням. Ваш десерт приїде ідеально свіжим. Також ви можете забрати замовлення самостійно (самовивіз) з нашої студії.</p>
+            </details>
+            <details class="faq-item fade-up">
+                <summary>Які терміни придатності ваших десертів?</summary>
+                <p>Оскільки ми принципово не використовуємо штучні консерванти, маргарину чи штучні наповнювачі смаку, наші торти 100% натуральні. Рекомендований термін зберігання тортів — 72 години (3 доби) в холодильнику за температури від +2°С до +6°С. До вашого ювілею ми замовимо смачний і свіжий, дотримуючись правил зберігання та перевезення.</p>
+            </details>
+            <details class="faq-item fade-up">
+                <summary>Як працює ШІ-генератор дизайну?</summary>
+                <p>Все дуже просто! Ви вписуєте свою ідею словами (наприклад: «торт з шоколадними пластинами та ягодами»). Наш ШІ-асистент генерує зображення з тисячами варіантів. Після цього ви обираєте найкращий, а наші майстри-кондитери з точністю відтворять його у реальності.</p>
+            </details>
+        </div>
+    </section>
+
 </main>
 
-<footer class="footer">
-    <p>&copy; 2026 Cake House. Всі права захищені.</p>
-</footer>
+<footer th:replace="~{footer :: footer}"></footer>
+
+
+<script>
+    // Intersection Observer — показуємо елементи при скролі
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+</script>
+
+<script src="/js/cart.js"></script>
+
+<script>
+    function popularAddToCart(btn) {
+        requireAuth(function() {
+            var d = btn.dataset;
+            addProductToCart(
+                parseInt(d.id),
+                d.name,
+                d.type,
+                d.image || null,
+                d.priceUnit || 'грн/шт',
+                parseInt(d.price),
+                null, 1, 'шт', null
+            );
+        });
+    }
+</script>
 
 </body>
 </html>

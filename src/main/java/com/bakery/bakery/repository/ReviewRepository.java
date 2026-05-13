@@ -25,4 +25,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<Review> findByUserIdOrderByCreatedAtDesc(Long userId);
 
     boolean existsByUserIdAndOrderId(Long userId, Long orderId);
+
+    @EntityGraph(attributePaths = {"user", "order"})
+    List<Review> findTop3ByHiddenFalseOrderByCreatedAtDesc();
 }

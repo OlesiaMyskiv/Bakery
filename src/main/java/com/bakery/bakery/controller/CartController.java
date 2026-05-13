@@ -92,13 +92,16 @@ public class CartController {
             return "redirect:/cart";
         }
 
-        // Перевірка: є DESIGN/AI_DESIGN без FLAVOR
+        // Перевірка: є DESIGN/AI_DESIGN без FLAVOR або CONSTRUCTOR
         boolean hasDesign = cartItems.stream().anyMatch(i -> {
             var t = String.valueOf(i.get("type"));
             return "DESIGN".equals(t) || "AI_DESIGN".equals(t);
         });
         boolean hasFlavor = cartItems.stream()
-                .anyMatch(i -> "FLAVOR".equals(String.valueOf(i.get("type"))));
+                .anyMatch(i -> {
+                    var t = String.valueOf(i.get("type"));
+                    return "FLAVOR".equals(t) || "CONSTRUCTOR".equals(t);
+                });
 
         if (hasDesign && !hasFlavor) {
             redirectAttributes.addFlashAttribute("errorMsg",

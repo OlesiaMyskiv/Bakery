@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<th:block th:fragment="footer">
+    <link rel="stylesheet" th:href="@{/css/footer.css}">
+
+    <footer class="site-footer">
+        <div class="footer-container">
+
+            <!-- Контакти -->
+            <div class="footer-col">
+                <div class="footer-logo">Cake house</div>
+                <div class="footer-contacts">
+                    <div class="footer-contact-row">
+                        <img th:src="@{/img/call.svg}" alt="" class="footer-icon">
+                        +380 (66) 88 88 888
+                    </div>
+                    <div class="footer-contact-row">
+                        <img th:src="@{/img/sms-edit.svg}" alt="" class="footer-icon">
+                        cake.house@mail.com
+                    </div>
+                    <div>Пн–Пт: 09:00 – 18:00</div>
+                    <div>Сб–Нд: 10:00 – 15:00</div>
+                </div>
+            </div>
+
+            <!-- Меню -->
+            <div class="footer-col">
+                <div class="footer-col-title">Меню</div>
+                <a th:href="@{/assortment}">Асортимент</a>
+                <a th:href="@{/constructor}">Конструктор</a>
+                <a th:href="@{/ai-design}">ШІ-дизайн</a>
+                <a th:href="@{/profile}" sec:authorize="isAuthenticated()">Профіль</a>
+                <a th:href="@{/cart}">Кошик</a>
+            </div>
+
+            <!-- Інформація -->
+            <div class="footer-col">
+                <div class="footer-col-title">Інформація</div>
+                <a href="#">Про нас</a>
+                <a href="#">Умови доставки</a>
+                <a href="#">Публічна оферта</a>
+            </div>
+
+            <!-- Соціальні мережі -->
+            <div class="footer-col">
+                <div class="footer-col-title">Соціальні мережі</div>
+                <a href="#" class="footer-social-link">
+                    <img th:src="@{/img/Instagram.svg}" alt="Instagram" class="footer-icon">
+                    @cakehouse.ua
+                </a>
+                <a href="#" class="footer-social-link">
+                    <img th:src="@{/img/Tik-Tok.svg}" alt="TikTok" class="footer-icon">
+                    @cakehouse.ua
+                </a>
+                <a href="#" class="footer-social-link">
+                    <img th:src="@{/img/Facebook.svg}" alt="Facebook" class="footer-icon">
+                    Cake House UA
+                </a>
+            </div>
+
+        </div>
+        <div class="footer-bottom">© 2026 Cake House. Всі права захищені.</div>
+    </footer>
+
+</th:block>
+</body>
+</html>

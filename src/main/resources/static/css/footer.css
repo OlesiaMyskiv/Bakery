@@ -1,0 +1,115 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Love+Light&display=swap');
+
+/* ══════════════════════════════════════════════════════════════
+   FOOTER — окремий файл, підключається на всіх сторінках
+   ══════════════════════════════════════════════════════════════ */
+
+.site-footer {
+    background: #1a1a1a;
+    color: #ccc;
+    font-family: 'Cormorant Garamond', serif;
+    padding: 48px 40px 20px;
+    margin-top: auto;
+}
+
+.footer-container {
+    max-width: 1100px;
+    margin: 0 auto 32px;
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr;
+    gap: 32px;
+}
+
+.footer-logo {
+    font-family: 'Love Light', cursive;
+    font-size: 1.8rem;
+    color: white;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.footer-contacts {
+    font-size: 0.88rem;
+    line-height: 1.9;
+    color: #aaa;
+}
+
+.footer-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.footer-col-title {
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.footer-col a {
+    display: block;
+    color: #bbb;
+    text-decoration: none;
+    font-size: 0.92rem;
+    line-height: 1.9;
+    transition: color 0.15s;
+}
+
+.footer-col a:hover { color: #3AA6B9; }
+
+.footer-contact-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    line-height: 1.9;
+}
+
+.footer-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    filter: brightness(0) invert(0.7);
+}
+
+.footer-social-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.footer-social-link .footer-icon {
+    filter: brightness(0) invert(0.7);
+    transition: filter 0.15s;
+}
+
+.footer-social-link:hover .footer-icon {
+    filter: brightness(0) invert(1);
+}
+
+.footer-bottom {
+    max-width: 1100px;
+    margin: 0 auto;
+    border-top: 1px solid #333;
+    padding-top: 16px;
+    font-size: 0.8rem;
+    color: #666;
+    text-align: center;
+}
+
+@media (max-width: 900px) {
+    .footer-container {
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+    }
+}
+
+@media (max-width: 500px) {
+    .footer-container {
+        grid-template-columns: 1fr;
+    }
+    .site-footer {
+        padding: 32px 20px 16px;
+    }
+}
