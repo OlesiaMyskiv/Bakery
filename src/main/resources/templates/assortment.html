@@ -121,7 +121,7 @@
                             <label>Від</label>
                             <input type="number" name="minPrice" th:value="${minPrice}" placeholder="0" min="0">
                         </div>
-                        <span class="price-separator">—</span>
+                        <span class="price-separator"></span>
                         <div class="price-field">
                             <label>До</label>
                             <input type="number" name="maxPrice" th:value="${maxPrice}" placeholder="∞" min="0">
@@ -129,7 +129,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="filter-apply-btn">Застосувати</button>
+                <button type="submit" class="filter-apply-btn" style="display:none;">Застосувати</button>
             </form>
         </aside>
 
@@ -186,7 +186,7 @@
 
                         <!-- Бейдж знижки ЗСУ -->
                         <div class="defenders-badge" th:if="${p.hasDiscount()}">
-                            <div class="defenders-text-top">ЗСУ</div>
+                            <div class="defenders-text-top">Захисникам</div>
                             <div class="defenders-text-bottom"
                                  th:text="'-' + ${p.discountPercent} + '%'"></div>
                         </div>
@@ -315,6 +315,13 @@
             urgency  === '' ? null : urgency
         );
     }
+
+    // Автосабміт при кліку на чекбокс фільтра
+    document.querySelectorAll('#filterForm input[type="checkbox"]').forEach(function(cb) {
+        cb.addEventListener('change', function() {
+            document.getElementById('filterForm').submit();
+        });
+    });
 </script>
 
 </body>

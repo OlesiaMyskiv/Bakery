@@ -17,7 +17,7 @@ import java.util.List;
 @RequestMapping("/assortment")
 public class AssortmentController {
 
-    private static final int PAGE_SIZE = 6;
+    private static final int PAGE_SIZE = 12;
 
     private final ProductService productService;
     private final UserService userService;

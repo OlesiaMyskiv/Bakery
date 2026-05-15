@@ -361,6 +361,8 @@
 
 .btn-cancel { background: #f2c4c9; color: #8a2030; min-width: 100px; }
 .btn-cancel:hover { background: #e8aab1; }
+.btn-save { background: #3AA6B9 !important; color: white !important; }
+.btn-save:hover { background: #277B8A !important; }
 
 .btn-details {
     background: #f0ece8;

@@ -377,7 +377,10 @@
                         </tr>
                         <tr th:each="p : ${products}"
                             th:classappend="${!p.available} ? ' row-dim'"
-                            th:attr="data-name=${p.name}">
+                            th:attr="data-name=${p.name},
+                                     data-category=${(p.flavorBase != null ? p.flavorBase.label : '')
+                                                   + ' ' + (p.designEvent != null ? p.designEvent.label : '')
+                                                   + ' ' + (p.productLine != null ? p.productLine.label : '')}">
                             <td>
                                 <img th:if="${p.imagePath != null}"
                                      th:src="${p.imagePath}" class="product-thumb" alt="фото">
@@ -472,9 +475,13 @@
 
         if (clearBtn) clearBtn.style.display = q ? 'block' : 'none';
         rows.forEach(function(row) {
-            var name = (row.getAttribute('data-name') || '').toLowerCase();
-            if (name.includes(q)) { row.style.display = ''; visible++; }
-            else row.style.display = 'none';
+            var name     = (row.getAttribute('data-name')     || '').toLowerCase();
+            var category = (row.getAttribute('data-category') || '').toLowerCase();
+            if (name.includes(q) || category.includes(q)) {
+                row.style.display = ''; visible++;
+            } else {
+                row.style.display = 'none';
+            }
         });
         if (countEl)   countEl.textContent = q ? 'Знайдено: ' + visible : '';
         if (noResults) noResults.style.display = (q && visible === 0) ? 'block' : 'none';

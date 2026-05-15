@@ -67,9 +67,11 @@
                 </div>
 
                 <div class="ai-result-actions">
-                    <!-- Додати в корзину -->
-                    <button class="ai-btn-cart" th:attr="data-image-url=${generatedImageUrl}" onclick="addAiDesignToCart(this.dataset.imageUrl, 'ШІ-дизайн торта')">
-                        <span class="btn-text">додати в корзину</span>
+                    <!-- Додати в кошик -->
+                    <button class="ai-btn-cart"
+                            th:attr="data-imgurl=${generatedImageUrl}"
+                            onclick="addAiDesignToCartFromPage(this.getAttribute('data-imgurl'))">
+                        <span class="btn-text">додати в кошик</span>
                         <div class="btn-line-circle">
                             <div class="btn-line"></div>
                             <div class="btn-circle"></div>
@@ -78,7 +80,8 @@
 
                     <!-- Додати в список бажань -->
                     <button class="ai-btn-wishlist" id="aiWishlistBtn"
-                            th:attr="data-image-url=${generatedImageUrl}" onclick="toggleAiWishlist(this.dataset.imageUrl)">
+                            th:attr="data-imgurl=${generatedImageUrl}"
+                            onclick="toggleAiWishlist(this.getAttribute('data-imgurl'))">
                         <span class="ai-wishlist-label">Додати в список бажань</span>
                         <svg class="heart-icon" width="22" height="22" viewBox="0 0 24 24"
                              fill="none" stroke="#DF7481" stroke-width="2"
@@ -129,7 +132,7 @@
 
         // Робимо кнопку неактивною та міняємо текст
         generateBtn.classList.add('disabled');
-        generateBtn.innerHTML = "🔮 Чаклуємо...";
+        generateBtn.innerHTML = "Чаклуємо...";
     };
 
     // --- ВАШ ІСНУЮЧИЙ КОД ДЛЯ ПІДКАЗОК ---
@@ -157,41 +160,92 @@
     }
 </script>
 
+<script th:inline="javascript">
+    window.IS_LOGGED_IN = /*[[${#authorization.expression('isAuthenticated()')}]]*/ false;
+    window.IS_VERIFIED  = false;
+</script>
 <script src="/js/cart.js"></script>
 <script src="/js/wishlist.js"></script>
-<script th:inline="javascript">
-    function toggleAiWishlist(imageUrl) {
-        var item = {
-            id:            'ai_design_' + Date.now(),
-            type:          'AI_DESIGN',
-            productId:     null,
-            name:          'ШІ-дизайн торта',
-            imagePath:     imageUrl,
-            priceUnit:     'грн/шт',
-            unitPrice:     1000,
-            discountPrice: null,
-            quantity:      1,
-            unit:          'шт',
-            urgency:       null,
-            aiImageUrl:    imageUrl,
-            description:   'Ваш унікальний ШІ-дизайн торта'
-        };
-
-        // Використовуємо фіксований id для AI дизайну (щоб можна було видалити)
-        item.id = 'ai_' + imageUrl.split('/').pop().split('.')[0];
-
-        var added = toggleWishlist(item);
-        var btn   = document.getElementById('aiWishlistBtn');
-        if (btn) {
-            var heart = btn.querySelector('.heart-icon');
-            if (heart) {
-                heart.classList.toggle('heart-active', added);
-                heart.classList.add('heart-pulse');
-                setTimeout(function() { heart.classList.remove('heart-pulse'); }, 400);
-            }
-            var label = btn.querySelector('.ai-wishlist-label');
-            if (label) label.textContent = added ? 'В списку бажань' : 'Додати в список бажань';
+<script>
+    /**
+     * Якщо imageUrl — це base64, спочатку зберігаємо на сервер,
+     * потім повертаємо реальний /uploads/... URL.
+     * Якщо вже URL — повертаємо одразу.
+     */
+    function resolveImageUrl(imageUrl, callback) {
+        if (!imageUrl || !imageUrl.startsWith('data:image')) {
+            callback(imageUrl);
+            return;
         }
+        // Зберігаємо base64 на сервер
+        fetch('/api/ai-design/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ base64: imageUrl })
+        })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.url) {
+                    // Оновлюємо data-imgurl на кнопках, щоб повторне натискання не re-upload
+                    document.querySelectorAll('[data-imgurl]').forEach(function(el) {
+                        if (el.getAttribute('data-imgurl') === imageUrl) {
+                            el.setAttribute('data-imgurl', data.url);
+                        }
+                    });
+                    // Оновлюємо src картинки
+                    var img = document.getElementById('ai-generated-img');
+                    if (img) img.src = data.url;
+                    callback(data.url);
+                } else {
+                    callback(imageUrl); // fallback
+                }
+            })
+            .catch(function() { callback(imageUrl); });
+    }
+
+    // ── Додати AI-дизайн в КОШИК ─────────────────────────────
+    function addAiDesignToCartFromPage(imageUrl) {
+        requireAuth(function() {
+            resolveImageUrl(imageUrl, function(url) {
+                addAiDesignToCart(url, 'ШІ-дизайн торта');
+            });
+        });
+    }
+
+    // ── Додати AI-дизайн у СПИСОК БАЖАНЬ ─────────────────────
+    function toggleAiWishlist(imageUrl) {
+        requireAuth(function() {
+            resolveImageUrl(imageUrl, function(url) {
+                var item = {
+                    id:            'ai_' + Date.now(),
+                    type:          'AI_DESIGN',
+                    productId:     null,
+                    name:          'ШІ-дизайн торта',
+                    imagePath:     url,
+                    priceUnit:     'грн/шт',
+                    unitPrice:     1000,
+                    discountPrice: null,
+                    quantity:      1,
+                    unit:          'шт',
+                    urgency:       null,
+                    aiImageUrl:    url,
+                    description:   'Ваш унікальний ШІ-дизайн торта'
+                };
+
+                var added = toggleWishlist(item);
+                var btn = document.getElementById('aiWishlistBtn');
+                if (btn) {
+                    var heart = btn.querySelector('.heart-icon');
+                    if (heart) {
+                        heart.classList.toggle('heart-active', added);
+                        heart.classList.add('heart-pulse');
+                        setTimeout(function() { heart.classList.remove('heart-pulse'); }, 400);
+                    }
+                    var label = btn.querySelector('.ai-wishlist-label');
+                    if (label) label.textContent = added ? 'В списку бажань' : 'Додати в список бажань';
+                }
+            });
+        });
     }
 </script>
 </body>

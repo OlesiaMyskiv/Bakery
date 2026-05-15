@@ -36,7 +36,8 @@
             <img th:if="${product.imagePath != null}"
                  th:src="${product.imagePath}"
                  th:alt="${product.name}"
-                 class="product-main-img">
+                 class="product-main-img"
+            >
             <div th:unless="${product.imagePath != null}" class="product-no-photo">
                 Фото скоро з'явиться
             </div>
@@ -122,20 +123,20 @@
                     </div>
                 </th:block>
 
-                <!-- ══ LINE: вага тільки якщо задана ══════════════════════ -->
+                <!-- ══ LINE: кількість з правильною одиницею ══════════════ -->
                 <th:block th:if="${product.catalogType.name() == 'LINE'
                                    and product.minWeightKg != null
                                    and product.minWeightKg > 0}">
                     <div class="char-row">
-                        <span class="char-label">Вага:</span>
+                        <span class="char-label">Кількість:</span>
                         <div class="weight-counter">
                             <button type="button" class="weight-btn"
-                                    onclick="changeWeight(-0.5)">−</button>
+                                    onclick="changeWeight(-1)">−</button>
                             <span class="weight-val" id="weightVal"
                                   th:text="${product.minWeightKg}">1</span>
                             <button type="button" class="weight-btn"
-                                    onclick="changeWeight(0.5)">+</button>
-                            <span class="weight-unit">кг</span>
+                                    onclick="changeWeight(1)">+</button>
+                            <span class="weight-unit" th:text="${product.priceUnit != null ? product.priceUnit.replace('грн/', '') : 'шт'}">шт</span>
                         </div>
                     </div>
                     <div class="char-row">
@@ -156,6 +157,11 @@
             </button>
 
         </div>
+    </div>
+
+    <!-- ── Широкий опис (для всіх типів якщо є) ─────────────────────────── -->
+    <div class="product-wide-desc" th:if="${product.description != null and !#strings.isEmpty(product.description) and product.catalogType.name() != 'DESIGN'}">
+        <p class="product-wide-desc-text" th:text="${product.description}"></p>
     </div>
 
     <!-- ── Про смак / Склад (FLAVOR і LINE) ──────────────────────────────── -->
@@ -307,7 +313,12 @@
 
     function changeWeight(delta) {
         if (catalogType === 'DESIGN') return;
-        currentWeight = Math.max(minWeight, Math.round((currentWeight + delta) * 10) / 10);
+        if (catalogType === 'LINE' && minWeight >= 1) {
+            // LINE без кг — цілі одиниці (порції, шт)
+            currentWeight = Math.max(1, Math.round(currentWeight + delta));
+        } else {
+            currentWeight = Math.max(minWeight, Math.round((currentWeight + delta) * 10) / 10);
+        }
         var wEl = document.getElementById('weightVal');
         var pEl = document.getElementById('totalPrice');
         if (wEl) wEl.textContent = currentWeight;
@@ -336,5 +347,36 @@
     }
 </script>
 
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const img = document.getElementById('product-main-photo');
+        const lb = document.getElementById('lb');
+        const lbImg = document.getElementById('lb-img');
+
+        if (!img) return;
+
+        img.addEventListener('click', () => {
+            lbImg.src = img.src;
+            lb.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        });
+
+        lb.addEventListener('click', () => {
+            lb.style.display = 'none';
+            document.body.style.overflow = '';
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                lb.style.display = 'none';
+                document.body.style.overflow = '';
+            }
+        });
+
+    });
+</script>
 </body>
 </html>

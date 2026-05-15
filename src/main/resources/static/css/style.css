@@ -298,6 +298,23 @@ body {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
+.idea-btn--outline {
+    background: transparent;
+    border: 2.5px solid #3AA6B9;
+    color: #3AA6B9;
+}
+
+.idea-btn--outline:hover {
+    background: #3AA6B9;
+    color: white;
+}
+
+.idea-buttons {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
 .idea-btn::after {
     content: '';
     position: absolute;

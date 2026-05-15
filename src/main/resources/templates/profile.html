@@ -1039,6 +1039,11 @@
 
 </script>
 
+<script>
+    /* Профіль доступний тільки авторизованим — виставляємо прапори */
+    window.IS_LOGGED_IN = true;
+    window.IS_VERIFIED  = /*[[${user.verificationStatus != null && user.verificationStatus.name() == 'APPROVED'}]]*/ false;
+</script>
 <script src="/js/cart.js"></script>
 <script src="/js/wishlist.js"></script>
 </body>

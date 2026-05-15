@@ -25,7 +25,7 @@ public class AiImageService {
 
             String requestBody = """
             {
-              "model": "dall-e-3",
+              "model": "gpt-image-1",
               "prompt": "%s",
               "n": 1,
               "size": "1024x1024"
@@ -53,9 +53,18 @@ public class AiImageService {
             }
 
             // URL зображення приходить прямо у відповіді
-            String imageUrl = rootNode.path("data").get(0).path("url").asText();
-            System.out.println("Зображення отримано: " + imageUrl);
-            return imageUrl;
+            // gpt-image-1 повертає base64, dall-e-3 повертає url
+            JsonNode dataNode = rootNode.path("data").get(0);
+            if (dataNode.has("url")) {
+                String imageUrl = dataNode.path("url").asText();
+                System.out.println("Зображення отримано (url): " + imageUrl);
+                return imageUrl;
+            } else if (dataNode.has("b64_json")) {
+                String b64 = dataNode.path("b64_json").asText();
+                System.out.println("Зображення отримано (base64)");
+                return "data:image/png;base64," + b64;
+            }
+            return null;
 
         } catch (Exception e) {
             System.err.println("Помилка: " + e.getMessage());

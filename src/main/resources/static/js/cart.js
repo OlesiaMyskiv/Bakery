@@ -101,7 +101,7 @@ function addAiDesignToCart(imageUrl, description) {
         name:          'ШІ-дизайн торта',
         imagePath:     imageUrl,
         priceUnit:     'грн/шт',
-        unitPrice:     0,
+        unitPrice:     1000,
         discountPrice: null,
         quantity:      1,
         unit:          'шт',
@@ -176,14 +176,39 @@ function calcCartTotal(cart, isVerified) {
  * TODAY → сьогодні, HOURS_24 → завтра, HOURS_48 → через 2 дні
  */
 function calcMinDeliveryDate(cart) {
-    var daysToAdd = 0;
+    // Визначаємо максимальний час виготовлення серед усіх товарів у кошику
+    // TODAY = 0 год, HOURS_24 = 24 год, HOURS_48 = 48 год
+    var maxProductionHours = 0;
     cart.forEach(function(item) {
-        if (item.urgency === 'HOURS_24' && daysToAdd < 1) daysToAdd = 1;
-        if (item.urgency === 'HOURS_48' && daysToAdd < 2) daysToAdd = 2;
+        if (item.urgency === 'HOURS_24' && maxProductionHours < 24) maxProductionHours = 24;
+        if (item.urgency === 'HOURS_48' && maxProductionHours < 48) maxProductionHours = 48;
     });
-    var date = new Date();
-    date.setDate(date.getDate() + daysToAdd);
-    return date;
+
+    var now = new Date();
+
+    if (maxProductionHours === 0) {
+        // TODAY — можна забрати сьогодні
+        var today = new Date(now);
+        today.setHours(0, 0, 0, 0);
+        return today;
+    }
+
+    // Додаємо час виготовлення до поточного моменту
+    // Наприклад: зараз 22:00 + 24год = завтра 22:00
+    var readyTime = new Date(now.getTime() + maxProductionHours * 60 * 60 * 1000);
+
+    // Якщо торт готовий після 12:00 — забрати можна тільки наступного дня
+    // Наприклад: готовий 15 травня о 22:00 → забрати не раніше 16 травня
+    var readyHour = readyTime.getHours();
+    var pickupDate = new Date(readyTime);
+
+    if (readyHour >= 12) {
+        pickupDate.setDate(pickupDate.getDate() + 1);
+    }
+
+    // Повертаємо тільки дату (без часу)
+    pickupDate.setHours(0, 0, 0, 0);
+    return pickupDate;
 }
 
 /**
@@ -400,6 +425,46 @@ function updateMinDate(cart) {
         dateInput.min   = y + '-' + m + '-' + d;
         dateInput.value = y + '-' + m + '-' + d;
     }
+    updateDeliveryHint(cart);
+}
+
+function updateDeliveryHint(cart) {
+    var hint = document.getElementById('deliveryDateHint');
+    if (!hint) return;
+
+    var maxProductionHours = 0;
+    var urgencyLabel = '';
+    cart.forEach(function(item) {
+        if (item.urgency === 'HOURS_48' && maxProductionHours < 48) {
+            maxProductionHours = 48;
+            urgencyLabel = '48+ год';
+        }
+        if (item.urgency === 'HOURS_24' && maxProductionHours < 24) {
+            maxProductionHours = 24;
+            urgencyLabel = '24+ год';
+        }
+    });
+
+    if (maxProductionHours === 0) {
+        hint.style.display = 'none';
+        return;
+    }
+
+    var now = new Date();
+    var readyTime = new Date(now.getTime() + maxProductionHours * 60 * 60 * 1000);
+    var minPickup = calcMinDeliveryDate(cart);
+
+    var monthNames = ['січня','лютого','березня','квітня','травня','червня',
+        'липня','серпня','вересня','жовтня','листопада','грудня'];
+
+    var readyStr = readyTime.getDate() + ' ' + monthNames[readyTime.getMonth()]
+        + ' о ' + String(readyTime.getHours()).padStart(2,'0')
+        + ':' + String(readyTime.getMinutes()).padStart(2,'0');
+
+    var pickupStr = minPickup.getDate() + ' ' + monthNames[minPickup.getMonth()];
+
+    hint.innerHTML = '⏱ Виготовлення ' + urgencyLabel + '. Найраніше отримання: <strong>' + pickupStr + '</strong>';
+    hint.style.display = 'block';
 }
 
 // ── Оплата PayPal-заглушка ────────────────────────────────────────────────────

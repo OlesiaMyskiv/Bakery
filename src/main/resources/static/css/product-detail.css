@@ -59,6 +59,7 @@
 .product-tab-title { font-family:'Cormorant Garamond',serif; font-size:1.2rem;
     font-weight:700; color:#3a2a1a; margin-bottom:0.8rem; text-align:center; }
 .product-tab-text { font-family:'Cormorant Garamond',serif; color:#5a3a2a;
+    white-space: pre-line;
     font-size:1rem; line-height:1.6; }
 
 /* Відгуки */
@@ -80,21 +81,48 @@
 .recommended-section { margin-top:2rem; }
 .recommended-title { font-family:'Cormorant Garamond',serif; font-size:1.5rem;
     font-weight:700; color:#3a2a1a; text-align:center; margin-bottom:1.2rem; }
-.recommended-grid { display:flex; gap:0.8rem; overflow-x:auto; padding-bottom:0.5rem; }
-.recommended-card { display:flex; flex-direction:column; align-items:center; gap:0.4rem;
-    min-width:170px; background:#f0fafc; border-radius:10px; padding:0.6rem; }
-.recommended-img { width:150px; height:130px; object-fit:cover; border-radius:8px; }
+.recommended-grid { display:flex; gap:16px; overflow-x:auto; padding-bottom:0.5rem; }
+.recommended-card { display:flex; flex-direction:column; align-items:center; gap:0.5rem;
+    width:190px; flex-shrink:0; background:#f0fafc; border-radius:12px; padding:12px;
+    justify-content: space-between; }
+.recommended-img { width:166px; height:166px; object-fit:cover; border-radius:8px; flex-shrink:0; }
 .recommended-img-placeholder { width:150px; height:130px; background:#ddd; border-radius:8px;
     display:flex; align-items:center; justify-content:center; font-size:2.5rem; }
 .recommended-name { font-family:'Cormorant Garamond',serif; font-size:0.9rem; color:#3a2a1a;
-    text-align:center; font-weight:600; margin:0; }
+    text-align:center; font-weight:600; margin:0; flex:1; }
 .recommended-btn { display:block; width:100%; padding:0.4rem; background:#5a9aaa; color:white;
     border-radius:6px; text-align:center; text-decoration:none;
-    font-family:'Cormorant Garamond',serif; font-size:0.9rem; transition:background 0.2s; }
+    font-family:'Cormorant Garamond',serif; font-size:0.9rem; transition:background 0.2s;
+    margin-top: auto; flex-shrink:0; }
 .recommended-btn:hover { background:#3a7a8a; }
-
 @media (max-width:680px) {
     .product-main-block { flex-direction:column; }
     .product-photo-wrap { flex:none; }
     .product-tabs-section { flex-direction:column; }
 }
+/* ── Широкий опис перед табами ──────────────────────────────── */
+.product-wide-desc {
+    background: #fdf6f0;
+    border-radius: 16px;
+    padding: 28px 36px;
+    margin-bottom: 1.5rem;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.product-wide-desc-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    color: #5a3a2a;
+    line-height: 1.7;
+    white-space: pre-line;
+    margin: 0;
+}
+
+/* ── Зображення товару — підказка що можна збільшити ── */
+.product-main-img--zoomable {
+    cursor: zoom-in;
+    transition: opacity 0.2s;
+}
+.product-main-img--zoomable:hover { opacity: 0.92; }

@@ -64,6 +64,12 @@
             <optional>true</optional>
         </dependency>
 
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20240303</version>
+        </dependency>
+
         <!-- ── DEV TOOLS (hot-reload) ────────────────────────── -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

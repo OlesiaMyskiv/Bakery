@@ -41,7 +41,7 @@ function removeFromWishlist(id) {
     renderWishlistPage();
 }
 
-// ── Лічильник на іконці (якщо потрібен) ─────────────────────
+// ── Лічильник на іконці ───────────────────────────────────────
 function updateWishlistBadge() {
     var badge = document.getElementById('wishlistBadge');
     if (badge) {
@@ -69,16 +69,13 @@ function toggleWishlistFromCard(btn, productId, name, type, image, priceUnit, pr
 
     var added = toggleWishlist(item);
 
-    // Анімація серця
     var heart = btn.querySelector('.heart-icon');
     if (heart) {
         heart.classList.toggle('heart-active', added);
-        // Пульс-анімація
         heart.classList.add('heart-pulse');
         setTimeout(function() { heart.classList.remove('heart-pulse'); }, 400);
     }
 
-    // Текст кнопки
     var label = btn.querySelector('.wishlist-label');
     if (label) {
         label.textContent = added ? 'В списку бажань' : 'Додати в список бажань';
@@ -148,16 +145,117 @@ function renderWishlistPage() {
         + '</div>';
 }
 
+// ── Додати зі списку бажань в кошик ──────────────────────────
 function wishlistAddToCart(id) {
     var item = getWishlist().find(function(w) { return w.id === id; });
     if (!item) return;
-    if (typeof addProductToCart === 'function') {
-        addProductToCart(
-            item.productId, item.name, item.type, item.imagePath,
-            item.priceUnit, item.unitPrice, item.discountPrice,
-            item.quantity, item.unit, item.urgency
-        );
+
+    // Напряму в localStorage — обходимо перевірку IS_LOGGED_IN в addToCart
+    // (користувач вже авторизований, бо він на сторінці профілю)
+    var cart;
+    try { cart = JSON.parse(localStorage.getItem('cakeCart')) || []; }
+    catch(e) { cart = []; }
+
+    var newItem;
+
+    if (item.type === 'AI_DESIGN') {
+        // AI-дизайн торта
+        var existIdx = cart.findIndex(function(c) { return c.id === item.id; });
+        if (existIdx !== -1) {
+            // вже є в кошику — просто показуємо сповіщення
+            showWishlistCartNotification(item.name);
+            return;
+        }
+        newItem = {
+            id:             'ai_' + Date.now(),
+            type:           'AI_DESIGN',
+            productId:      null,
+            name:           item.name || 'ШІ-дизайн торта',
+            imagePath:      item.imagePath,
+            priceUnit:      item.priceUnit || 'грн/шт',
+            unitPrice:      item.unitPrice || 0,
+            discountPrice:  null,
+            quantity:       1,
+            unit:           'шт',
+            urgency:        null,
+            aiImageUrl:     item.imagePath,
+            constructorImg: null,
+            description:    item.description || null
+        };
+
+    } else if (item.type === 'CONSTRUCTOR') {
+        // Конструктор торта
+        newItem = {
+            id:             'constructor_' + Date.now(),
+            type:           'CONSTRUCTOR',
+            productId:      null,
+            name:           item.name || 'Авторський торт',
+            imagePath:      item.imagePath,
+            priceUnit:      item.priceUnit || 'грн',
+            unitPrice:      item.unitPrice || 0,
+            discountPrice:  null,
+            quantity:       1,
+            unit:           'шт',
+            urgency:        null,
+            aiImageUrl:     null,
+            constructorImg: item.imagePath,
+            description:    item.description || null
+        };
+
+    } else {
+        // Звичайний товар з каталогу
+        var cartId = 'product_' + item.productId;
+        var existIdx = cart.findIndex(function(c) { return c.id === cartId; });
+        if (existIdx !== -1) {
+            cart[existIdx].quantity = Math.round((cart[existIdx].quantity + item.quantity) * 10) / 10;
+            localStorage.setItem('cakeCart', JSON.stringify(cart));
+            if (typeof updateCartBadge === 'function') updateCartBadge();
+            showWishlistCartNotification(item.name);
+            return;
+        }
+        newItem = {
+            id:             cartId,
+            type:           item.type,
+            productId:      item.productId,
+            name:           item.name,
+            imagePath:      item.imagePath,
+            priceUnit:      item.priceUnit,
+            unitPrice:      item.unitPrice,
+            discountPrice:  item.discountPrice || null,
+            quantity:       item.quantity,
+            unit:           item.unit,
+            urgency:        item.urgency || null,
+            aiImageUrl:     null,
+            constructorImg: null,
+            description:    null
+        };
     }
+
+    cart.push(newItem);
+    localStorage.setItem('cakeCart', JSON.stringify(cart));
+    if (typeof updateCartBadge === 'function') updateCartBadge();
+    showWishlistCartNotification(item.name);
+}
+
+// ── Сповіщення про додавання в кошик ─────────────────────────
+function showWishlistCartNotification(name) {
+    var existing = document.getElementById('cartToast');
+    if (existing) existing.remove();
+
+    var toast = document.createElement('div');
+    toast.id = 'cartToast';
+    toast.innerHTML = '🛒 «' + esc(name) + '» додано в кошик';
+    toast.style.cssText = [
+        'position:fixed', 'bottom:30px', 'right:30px', 'z-index:9999',
+        'background:#3AA6B9', 'color:white', 'padding:14px 24px',
+        'border-radius:12px', 'font-family:Cormorant Garamond,serif',
+        'font-size:18px', 'box-shadow:0 4px 20px rgba(0,0,0,0.15)',
+        'transition:opacity 0.4s ease', 'opacity:1'
+    ].join(';');
+
+    document.body.appendChild(toast);
+    setTimeout(function() { toast.style.opacity = '0'; }, 2500);
+    setTimeout(function() { if (toast.parentNode) toast.remove(); }, 3000);
 }
 
 // ── SVG серця ─────────────────────────────────────────────────
