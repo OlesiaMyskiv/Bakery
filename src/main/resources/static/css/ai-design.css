@@ -269,24 +269,86 @@
     overflow: hidden;
 }
 
-/* Кнопка "додати в корзину" — рисочка + кружечок */
+/* Кнопка "додати в кошик" після генерації — точна копія з асортименту */
 .ai-btn-cart {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.5rem 0.6rem 0.5rem 0.8rem;
+    padding: 10px 14px;
     background: none;
     border: none;
-    border-bottom: 1px solid #f5f0ec;
+    border-bottom: 1px solid #f0e8e0;
     cursor: pointer;
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 0.9rem;
-    color: #4a8a9a;
     width: 100%;
 }
 
-.ai-btn-cart:hover { background: #f0f8f9; }
-.ai-btn-cart:hover .btn-circle { background: #4a8a9a; }
+.ai-btn-cart:hover { background: #f0fafb; }
+
+.ai-btn-cart .btn-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.9rem;
+    color: #4a8a9a;
+}
+
+.ai-btn-cart .btn-line-circle {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.ai-btn-cart .btn-line {
+    width: 40px;
+    height: 1.5px;
+    background: linear-gradient(to right, rgba(74,138,154,0), #4a8a9a);
+    transition: width 0.25s ease;
+    position: relative;
+    z-index: 2;
+    margin-right: -13px;
+}
+
+.ai-btn-cart .btn-line::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 5px;
+    height: 5px;
+    background: #4a8a9a;
+    border-radius: 50%;
+    transition: background 0.25s ease;
+}
+
+.ai-btn-cart .btn-circle {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 1.5px solid transparent;
+    background-image: linear-gradient(white, white), linear-gradient(to right, rgba(74,138,154,0) 10%, #4a8a9a);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    flex-shrink: 0;
+    transition: all 0.25s ease;
+    z-index: 1;
+}
+
+.ai-btn-cart:hover .btn-line {
+    width: 26px;
+}
+
+.ai-btn-cart:hover .btn-circle {
+    background-image: linear-gradient(#4a8a9a, #4a8a9a), linear-gradient(to right, rgba(74,138,154,0) 10%, #4a8a9a);
+}
+
+.ai-btn-cart:hover .btn-line::after {
+    background: white;
+}
+
+.ai-btn-cart:hover .btn-text {
+    color: #3a7a8a;
+}
 
 /* Кнопка "Додати в список бажань" */
 .ai-btn-wishlist {
@@ -309,9 +371,230 @@
     font-family: 'Cormorant Garamond', serif;
 }
 
-/* Серце і btn-line-circle — спільні стилі (з assortment.css) */
-.ai-btn-cart .btn-text  { font-size: 0.9rem; color: #4a8a9a; }
-.ai-btn-cart .btn-line  { width: 32px; height: 1px; background: #4a8a9a; transition: width .25s; }
-.ai-btn-cart .btn-circle { width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid #4a8a9a; transition: background .25s; }
-.ai-btn-cart .btn-line-circle { display: flex; align-items: center; }
-.ai-btn-cart:hover .btn-line { width: 20px; }
+/* Прибираємо кнопку "Поділитись" */
+.ai-btn-share { display: none !important; }
+/* ══ ГАЛЕРЕЯ ШІ-ДИЗАЙНІВ ═══════════════════════════════════════════════════ */
+
+.ai-gallery-section {
+    max-width: 1200px;
+    margin: 60px auto 80px;
+    padding: 0 24px;
+}
+
+.ai-gallery-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.2rem;
+    font-weight: 600;
+    color: #2c2c2c;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.ai-gallery-subtitle {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    color: #888;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.ai-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 28px;
+}
+
+/* ── Картка ─────────────────────────────────────────────────────────────── */
+.ai-gallery-card {
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 16px rgba(0,0,0,.08);
+    transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.ai-gallery-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 28px rgba(0,0,0,.13);
+}
+
+.ai-gallery-img-wrap {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: #f5f0eb;
+}
+
+.ai-gallery-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform .4s ease;
+}
+
+.ai-gallery-card:hover .ai-gallery-img {
+    transform: scale(1.04);
+}
+
+.ai-gallery-body {
+    padding: 16px 18px 18px;
+}
+
+.ai-gallery-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #2c2c2c;
+    margin-bottom: 4px;
+}
+
+.ai-gallery-price {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: #888;
+    margin-bottom: 14px;
+}
+
+.ai-gallery-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+/* Кнопка серця в галереї */
+.ai-gallery-heart {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    transition: transform .2s;
+    flex-shrink: 0;
+}
+
+.ai-gallery-heart:hover {
+    transform: scale(1.2);
+}
+
+.ai-gallery-heart.heart-active svg {
+    fill: #DF7481;
+}
+
+/* ── Кнопка "Поділитись" після генерації ─────────────────────────────────── */
+.ai-btn-share {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: 1.5px solid #3AA6B9;
+    color: #3AA6B9;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background .2s, color .2s;
+    margin-top: 8px;
+}
+
+.ai-btn-share:hover:not(:disabled) {
+    background: #3AA6B9;
+    color: #fff;
+}
+
+.ai-btn-share:disabled {
+    cursor: default;
+}
+
+/* ── Кнопка "додати в кошик" в галереї — точна копія з асортименту ─────── */
+.ai-gallery-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0;
+    border-top: 1px solid #f0e8e0;
+    padding: 0;
+}
+
+.ai-gallery-card .wishlist-add-cart-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: none;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+    flex: 1;
+}
+
+.ai-gallery-card .wishlist-add-cart-btn:hover { background: #f0fafb; }
+
+.ai-gallery-card .btn-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.9rem;
+    color: #4a8a9a;
+}
+
+.ai-gallery-card .btn-line-circle {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.ai-gallery-card .btn-line {
+    width: 40px;
+    height: 1.5px;
+    background: linear-gradient(to right, rgba(74,138,154,0), #4a8a9a);
+    transition: width 0.25s ease;
+    position: relative;
+    z-index: 2;
+    margin-right: -13px;
+}
+
+.ai-gallery-card .btn-line::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 5px;
+    height: 5px;
+    background: #4a8a9a;
+    border-radius: 50%;
+    transition: background 0.25s ease;
+}
+
+.ai-gallery-card .btn-circle {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 1.5px solid transparent;
+    background-image: linear-gradient(white, white), linear-gradient(to right, rgba(74,138,154,0) 10%, #4a8a9a);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    flex-shrink: 0;
+    transition: all 0.25s ease;
+    z-index: 1;
+}
+
+.ai-gallery-card:hover .btn-line {
+    width: 26px;
+}
+
+.ai-gallery-card:hover .btn-circle {
+    background-image: linear-gradient(#4a8a9a, #4a8a9a), linear-gradient(to right, rgba(74,138,154,0) 10%, #4a8a9a);
+}
+
+.ai-gallery-card:hover .btn-line::after {
+    background: white;
+}
+
+.ai-gallery-card:hover .btn-text {
+    color: #3a7a8a;
+}

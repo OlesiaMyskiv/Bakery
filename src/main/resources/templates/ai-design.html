@@ -70,7 +70,7 @@
                     <!-- Додати в кошик -->
                     <button class="ai-btn-cart"
                             th:attr="data-imgurl=${generatedImageUrl}"
-                            onclick="addAiDesignToCartFromPage(this.getAttribute('data-imgurl'))">
+                            onclick="var url=this.getAttribute('data-imgurl'); requireAuth(function(){ addAiDesignToCart(url, 'ШІ-дизайн торта'); })">
                         <span class="btn-text">додати в кошик</span>
                         <div class="btn-line-circle">
                             <div class="btn-line"></div>
@@ -78,10 +78,18 @@
                         </div>
                     </button>
 
+                    <!-- Поділитись у галереї -->
+                    <button class="ai-btn-share" id="aiShareBtn"
+                            th:attr="data-imgurl=${generatedImageUrl},data-prompt=${userPrompt}"
+                            onclick="shareAiDesign(this.getAttribute('data-imgurl'), this.getAttribute('data-prompt'))">
+                        <span class="ai-share-label">Поділитись з усіма</span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                    </button>
+
                     <!-- Додати в список бажань -->
                     <button class="ai-btn-wishlist" id="aiWishlistBtn"
                             th:attr="data-imgurl=${generatedImageUrl}"
-                            onclick="toggleAiWishlist(this.getAttribute('data-imgurl'))">
+                            onclick="var url=this.getAttribute('data-imgurl'); requireAuth(function(){ toggleAiWishlist(url); })">
                         <span class="ai-wishlist-label">Додати в список бажань</span>
                         <svg class="heart-icon" width="22" height="22" viewBox="0 0 24 24"
                              fill="none" stroke="#DF7481" stroke-width="2"
@@ -109,6 +117,40 @@
             <p>Ви можете зберегти фото та обговорити його з нашим кондитером для реалізації.</p>
         </div>
     </section>
+
+    <!-- ══ ГАЛЕРЕЯ ПУБЛІЧНИХ ШІ-ДИЗАЙНІВ ══════════════════════════════════ -->
+    <section class="ai-gallery-section" th:if="${not #lists.isEmpty(galleryUrls)}">
+        <h2 class="ai-gallery-title">Дизайни нашої спільноти</h2>
+        <p class="ai-gallery-subtitle">Натхнення від інших замовників — додайте в кошик або збережіть ідею</p>
+
+        <div class="ai-gallery-grid">
+            <div class="ai-gallery-card" th:each="imgUrl : ${galleryUrls}">
+                <div class="ai-gallery-img-wrap">
+                    <img th:src="${imgUrl}" alt="ШІ-дизайн торта" class="ai-gallery-img">
+                </div>
+                <div class="ai-gallery-body">
+                    <div class="ai-gallery-name">Торт згенерований ШІ</div>
+                    <div class="ai-gallery-price">1000 грн/шт</div>
+                    <div class="ai-gallery-actions">
+                        <button class="wishlist-add-cart-btn"
+                                th:attr="data-imgurl=${imgUrl}"
+                                onclick="addPublicAiToCart(this.getAttribute('data-imgurl'))">
+                            <span class="btn-text">додати в кошик</span>
+                            <div class="btn-line-circle"><div class="btn-line"></div><div class="btn-circle"></div></div>
+                        </button>
+                        <button class="ai-gallery-heart"
+                                th:attr="data-imgurl=${imgUrl}"
+                                onclick="addPublicAiToWishlist(this)">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                                 stroke="#DF7481" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 </main>
 
 <footer th:replace="~{footer :: footer}"></footer>
@@ -132,7 +174,7 @@
 
         // Робимо кнопку неактивною та міняємо текст
         generateBtn.classList.add('disabled');
-        generateBtn.innerHTML = "Чаклуємо...";
+        generateBtn.innerHTML = "🔮 Чаклуємо...";
     };
 
     // --- ВАШ ІСНУЮЧИЙ КОД ДЛЯ ПІДКАЗОК ---
@@ -160,92 +202,183 @@
     }
 </script>
 
-<script th:inline="javascript">
-    window.IS_LOGGED_IN = /*[[${#authorization.expression('isAuthenticated()')}]]*/ false;
-    window.IS_VERIFIED  = false;
-</script>
 <script src="/js/cart.js"></script>
 <script src="/js/wishlist.js"></script>
-<script>
-    /**
-     * Якщо imageUrl — це base64, спочатку зберігаємо на сервер,
-     * потім повертаємо реальний /uploads/... URL.
-     * Якщо вже URL — повертаємо одразу.
-     */
-    function resolveImageUrl(imageUrl, callback) {
-        if (!imageUrl || !imageUrl.startsWith('data:image')) {
-            callback(imageUrl);
-            return;
+<script th:inline="javascript">
+    function toggleAiWishlist(imageUrl) {
+        var item = {
+            id:            'ai_design_' + Date.now(),
+            type:          'AI_DESIGN',
+            productId:     null,
+            name:          'ШІ-дизайн торта',
+            imagePath:     imageUrl,
+            priceUnit:     'грн/шт',
+            unitPrice:     1000,
+            discountPrice: null,
+            quantity:      1,
+            unit:          'шт',
+            urgency:       null,
+            aiImageUrl:    imageUrl,
+            description:   'Ваш унікальний ШІ-дизайн торта'
+        };
+
+        // Використовуємо фіксований id для AI дизайну (щоб можна було видалити)
+        item.id = 'ai_' + imageUrl.split('/').pop().split('.')[0];
+
+        var added = toggleWishlist(item);
+        var btn   = document.getElementById('aiWishlistBtn');
+        if (btn) {
+            var heart = btn.querySelector('.heart-icon');
+            if (heart) {
+                heart.classList.toggle('heart-active', added);
+                heart.classList.add('heart-pulse');
+                setTimeout(function() { heart.classList.remove('heart-pulse'); }, 400);
+            }
+            var label = btn.querySelector('.ai-wishlist-label');
+            if (label) label.textContent = added ? 'В списку бажань' : 'Додати в список бажань';
         }
-        // Зберігаємо base64 на сервер
-        fetch('/api/ai-design/save', {
+    }
+</script>
+
+<script>
+    // ── Поділитись дизайном у галереї ────────────────────────────────────────────
+    function shareAiDesign(imageUrl, prompt) {
+        if (!imageUrl) return;
+        var btn = document.getElementById('aiShareBtn');
+
+        fetch('/api/ai-design/publish', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ base64: imageUrl })
+            body: JSON.stringify({ imageUrl: imageUrl, prompt: prompt || '' })
         })
             .then(function(r) { return r.json(); })
             .then(function(data) {
-                if (data.url) {
-                    // Оновлюємо data-imgurl на кнопках, щоб повторне натискання не re-upload
-                    document.querySelectorAll('[data-imgurl]').forEach(function(el) {
-                        if (el.getAttribute('data-imgurl') === imageUrl) {
-                            el.setAttribute('data-imgurl', data.url);
-                        }
-                    });
-                    // Оновлюємо src картинки
-                    var img = document.getElementById('ai-generated-img');
-                    if (img) img.src = data.url;
-                    callback(data.url);
-                } else {
-                    callback(imageUrl); // fallback
+                if (data.success) {
+                    if (btn) {
+                        btn.innerHTML = '<span class="ai-share-label">✓ Опубліковано!</span>';
+                        btn.disabled = true;
+                        btn.style.opacity = '0.7';
+                    }
+                    // Оновлюємо галерею без перезавантаження
+                    refreshAiGallery();
                 }
             })
-            .catch(function() { callback(imageUrl); });
+            .catch(function(e) { console.error('share error', e); });
     }
 
-    // ── Додати AI-дизайн в КОШИК ─────────────────────────────
-    function addAiDesignToCartFromPage(imageUrl) {
+    // ── Додати публічний AI-дизайн у кошик ───────────────────────────────────────
+    function addPublicAiToCart(imageUrl) {
         requireAuth(function() {
-            resolveImageUrl(imageUrl, function(url) {
-                addAiDesignToCart(url, 'ШІ-дизайн торта');
-            });
+            var cart;
+            try { cart = JSON.parse(localStorage.getItem('cakeCart')) || []; } catch(e) { cart = []; }
+
+            var newItem = {
+                id:             'ai_' + Date.now(),
+                type:           'AI_DESIGN',
+                productId:      null,
+                name:           'Торт згенерований ШІ',
+                imagePath:      imageUrl,
+                priceUnit:      'грн/шт',
+                unitPrice:      1000,
+                discountPrice:  null,
+                quantity:       1,
+                unit:           'шт',
+                urgency:        null,
+                aiImageUrl:     imageUrl,
+                constructorImg: null,
+                description:    null
+            };
+            cart.push(newItem);
+            localStorage.setItem('cakeCart', JSON.stringify(cart));
+            if (typeof updateCartBadge === 'function') updateCartBadge();
+
+            // Тост-повідомлення
+            showAiGalleryToast('🛒 Додано в кошик!');
         });
     }
 
-    // ── Додати AI-дизайн у СПИСОК БАЖАНЬ ─────────────────────
-    function toggleAiWishlist(imageUrl) {
+    // ── Додати публічний AI-дизайн у список бажань ────────────────────────────────
+    function addPublicAiToWishlist(btn) {
         requireAuth(function() {
-            resolveImageUrl(imageUrl, function(url) {
-                var item = {
-                    id:            'ai_' + Date.now(),
-                    type:          'AI_DESIGN',
-                    productId:     null,
-                    name:          'ШІ-дизайн торта',
-                    imagePath:     url,
-                    priceUnit:     'грн/шт',
-                    unitPrice:     1000,
-                    discountPrice: null,
-                    quantity:      1,
-                    unit:          'шт',
-                    urgency:       null,
-                    aiImageUrl:    url,
-                    description:   'Ваш унікальний ШІ-дизайн торта'
-                };
+            var imageUrl = btn.getAttribute('data-imgurl');
+            var item = {
+                id:            'ai_pub_' + imageUrl.split('/').pop().replace('.png',''),
+                type:          'AI_DESIGN',
+                productId:     null,
+                name:          'Торт згенерований ШІ',
+                imagePath:     imageUrl,
+                priceUnit:     'грн/шт',
+                unitPrice:     1000,
+                discountPrice: null,
+                quantity:      1,
+                unit:          'шт',
+                urgency:       null,
+                aiImageUrl:    imageUrl
+            };
+            var added = toggleWishlist(item);
+            var svg = btn.querySelector('svg');
+            if (svg) {
+                svg.setAttribute('fill', added ? '#DF7481' : 'none');
+                btn.classList.toggle('heart-active', added);
+            }
+            showAiGalleryToast(added ? '♡ Додано в список бажань!' : 'Видалено зі списку бажань');
+        });
+    }
 
-                var added = toggleWishlist(item);
-                var btn = document.getElementById('aiWishlistBtn');
-                if (btn) {
-                    var heart = btn.querySelector('.heart-icon');
-                    if (heart) {
-                        heart.classList.toggle('heart-active', added);
-                        heart.classList.add('heart-pulse');
-                        setTimeout(function() { heart.classList.remove('heart-pulse'); }, 400);
-                    }
-                    var label = btn.querySelector('.ai-wishlist-label');
-                    if (label) label.textContent = added ? 'В списку бажань' : 'Додати в список бажань';
+    // ── Оновити галерею без перезавантаження ──────────────────────────────────────
+    function refreshAiGallery() {
+        fetch('/api/ai-design/public')
+            .then(function(r) { return r.json(); })
+            .then(function(designs) {
+                var section = document.querySelector('.ai-gallery-section');
+                if (!section) {
+                    // Якщо секції ще немає — перезавантажуємо сторінку
+                    if (designs.length > 0) window.location.reload();
+                    return;
                 }
+                var grid = section.querySelector('.ai-gallery-grid');
+                if (!grid) return;
+
+                grid.innerHTML = designs.map(function(d) {
+                    return '<div class="ai-gallery-card">'
+                        + '<div class="ai-gallery-img-wrap">'
+                        + '<img src="' + d.imageUrl + '" alt="ШІ-дизайн торта" class="ai-gallery-img">'
+                        + '</div>'
+                        + '<div class="ai-gallery-body">'
+                        + '<div class="ai-gallery-name">Торт згенерований ШІ</div>'
+                        + '<div class="ai-gallery-price">1000 грн/шт</div>'
+                        + '<div class="ai-gallery-actions">'
+                        + '<button class="wishlist-add-cart-btn" data-imgurl="' + d.imageUrl + '" '
+                        + 'onclick="addPublicAiToCart(this.getAttribute('data-imgurl'))">'
+                    + '<span class="btn-text">додати в кошик</span>'
+                    + '<div class="btn-line-circle"><div class="btn-line"></div><div class="btn-circle"></div></div>'
+                    + '</button>'
+                    + '<button class="ai-gallery-heart" data-imgurl="' + d.imageUrl + '" '
+                    + 'onclick="addPublicAiToWishlist(this)">'
+                    + '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#DF7481" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+                    + '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>'
+                    + '</svg>'
+                    + '</button>'
+                    + '</div>'
+                    + '</div>'
+                    + '</div>';
+                }).join('');
             });
-        });
+    }
+
+    // ── Тост ──────────────────────────────────────────────────────────────────────
+    function showAiGalleryToast(msg) {
+        var t = document.getElementById('aiGalleryToast');
+        if (t) t.remove();
+        t = document.createElement('div');
+        t.id = 'aiGalleryToast';
+        t.textContent = msg;
+        t.style.cssText = 'position:fixed;bottom:30px;right:30px;z-index:9999;background:#3AA6B9;color:#fff;'
+            + 'padding:12px 22px;border-radius:12px;font-family:Cormorant Garamond,serif;'
+            + 'font-size:17px;box-shadow:0 4px 20px rgba(0,0,0,.15);transition:opacity .4s;opacity:1;';
+        document.body.appendChild(t);
+        setTimeout(function() { t.style.opacity = '0'; }, 2200);
+        setTimeout(function() { if (t.parentNode) t.remove(); }, 2700);
     }
 </script>
 </body>

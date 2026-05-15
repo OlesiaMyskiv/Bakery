@@ -52,7 +52,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/chat/**").hasAuthority("SUPER_ADMIN")
                         .requestMatchers("/admin/**").hasAuthority("SUPER_ADMIN")
                         // ── ШІ генерація — тільки залогінені ────────────────
-                        .requestMatchers("/ai-design/generate", "/api/ai-design/save").authenticated()
+                        .requestMatchers("/ai-design/generate", "/api/ai-design/save", "/api/ai-design/publish").authenticated()
                         // ── КОШИК і ЗАМОВЛЕННЯ — тільки залогінені ──────────
                         .requestMatchers("/cart", "/cart/**").authenticated()
                         .requestMatchers("/api/my-orders", "/orders/**", "/profile/**").authenticated()
