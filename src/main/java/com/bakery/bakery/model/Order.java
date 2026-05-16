@@ -45,6 +45,9 @@ public class Order {
     @Column(name = "images_json", columnDefinition = "TEXT")
     private String imagesJson;
 
+    @Column(name = "military_sweets", columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean militarySweets = false;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status")
     private PaymentStatus paymentStatus = PaymentStatus.ON_DELIVERY;
@@ -128,4 +131,7 @@ public class Order {
 
     public String getAdminNote() { return adminNote; }
     public void setAdminNote(String adminNote) { this.adminNote = adminNote; }
+
+    public Boolean isMilitarySweets() { return militarySweets != null && militarySweets; }
+    public void setMilitarySweets(Boolean militarySweets) { this.militarySweets = militarySweets != null ? militarySweets : false; }
 }

@@ -38,14 +38,131 @@
             <img th:src="@{/img/1.png}" alt="Головний торт" />
         </div>
     </section>
+
+    <!-- ══ НАША ПІДТРИМКА ════════════════════════════════════════════════ -->
+    <section class="support-banner fade-up">
+        <div class="support-left">
+            <div class="support-heart-icon">
+                <img src="/img/heart.png" alt="heart">
+            </div>
+            <div>
+                <div class="support-title">Наша підтримка</div>
+                <div class="support-desc">Разом ми передаємо смаколики<br>нашим захисникам 🩷</div>
+            </div>
+        </div>
+        <div class="support-center">
+            <div class="support-count-label">Цього місяця зібрано</div>
+            <div class="support-count-value"><span id="supportCount" th:text="${militaryCount}">0</span> з <span id="supportGoal" th:text="${militaryGoal}">50</span> наборів</div>
+            <div class="support-bar-wrap">
+                <div class="support-bar-track">
+                    <div class="support-bar-fill" id="supportBarFill">
+                        <span class="support-bar-heart">🤍</span>
+                    </div>
+                </div>
+                <div class="support-bar-labels">
+                    <span>0</span>
+                    <span id="supportGoalLabel" th:text="${militaryGoal}">50</span>
+                </div>
+            </div>
+        </div>
+        <div class="support-right">
+            <div class="support-circle" id="supportCircle">
+                <svg viewBox="0 0 100 100" class="support-svg">
+                    <circle cx="50" cy="50" r="42" class="support-svg-bg"/>
+                    <circle cx="50" cy="50" r="42" class="support-svg-fill" id="supportSvgFill"/>
+                </svg>
+                <div class="support-percent-text">
+                    <span id="supportPercent" th:text="${militaryPct}">0</span>%<br>
+                    <small>від цілі</small>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- ══ CTA ════════════════════════════════════════════════════════════ -->
-    <div class="hero-cta">
-        <a th:href="@{/assortment}" class="hero-cta-btn">Перейти до асортименту</a>
-        <a th:href="@{/ai-design}" class="hero-cta-btn hero-cta-btn--outline">Створити ШІ-дизайн</a>
-    </div>
+    <section class="hero-bottom-section fade-up">
+        <div class="hero-bottom-container">
+
+            <div class="hero-cta-column">
+                <a th:href="@{/assortment}" class="hero-cta-btn">Перейти до асортименту</a>
+                <a th:href="@{/ai-design}" class="hero-cta-btn hero-cta-btn--outline">Створити ШІ-дизайн</a>
+            </div>
+
+            <div class="top-donators-wrapper" th:if="${topDonators != null and not #lists.isEmpty(topDonators)}">
+                <div class="top-donators-card">
+                    <div class="top-donators-header">
+                        <div class="top-donators-trophy-img-wrap">
+                            <img th:src="@{/img/trophy.png}" class="top-donators-trophy-img" alt="Трофей">
+                        </div>
+                        <div>
+                            <div class="top-donators-title">ТОП донаторів місяця</div>
+                            <div class="top-donators-subtitle">Дякуємо кожному, хто наближає нашу перемогу! 🩷</div>
+                        </div>
+                    </div>
+
+                    <div class="top-podium" th:if="${#lists.size(topDonators) >= 1}">
+
+                        <div class="podium-item podium-2" th:if="${#lists.size(topDonators) >= 2}" th:with="d=${topDonators[1]}">
+                            <div class="podium-crown-img-wrap">
+                                <img th:src="@{/img/2nd-place.png}" class="podium-crown-img" alt="2 місце">
+                            </div>
+                            <div class="podium-avatar-wrap">
+                                <img th:if="${d.photo != null}" th:src="${d.photo}" class="podium-avatar" alt="">
+                                <div th:unless="${d.photo != null}" class="podium-avatar podium-avatar-letter" th:text="${#strings.substring(d.name, 0, 1)}"></div>
+                            </div>
+                            <div class="podium-name" th:text="${d.name}"></div>
+                            <div class="podium-amount" th:text="${d.total} + ' грн'"></div>
+                        </div>
+
+                        <div class="podium-item podium-1" th:with="d=${topDonators[0]}">
+                            <div class="podium-crown-img-wrap">
+                                <img th:src="@{/img/1st-prize.png}" class="podium-crown-img" alt="1 місце">
+                            </div>
+                            <div class="podium-avatar-wrap podium-avatar-wrap-gold">
+                                <img th:if="${d.photo != null}" th:src="${d.photo}" class="podium-avatar" alt="">
+                                <div th:unless="${d.photo != null}" class="podium-avatar podium-avatar-letter" th:text="${#strings.substring(d.name, 0, 1)}"></div>
+                            </div>
+                            <div class="podium-name" th:text="${d.name}"></div>
+                            <div class="podium-amount podium-amount-gold" th:text="${d.total} + ' грн'"></div>
+                        </div>
+
+                        <div class="podium-item podium-3" th:if="${#lists.size(topDonators) >= 3}" th:with="d=${topDonators[2]}">
+                            <div class="podium-crown-img-wrap">
+                                <img th:src="@{/img/3nd-place.png}" class="podium-crown-img" alt="3 місце">
+                            </div>
+                            <div class="podium-avatar-wrap">
+                                <img th:if="${d.photo != null}" th:src="${d.photo}" class="podium-avatar" alt="">
+                                <div th:unless="${d.photo != null}" class="podium-avatar podium-avatar-letter" th:text="${#strings.substring(d.name, 0, 1)}"></div>
+                            </div>
+                            <div class="podium-name" th:text="${d.name}"></div>
+                            <div class="podium-amount" th:text="${d.total} + ' грн'"></div>
+                        </div>
+                    </div>
+
+                    <div class="top-donators-list" th:if="${#lists.size(topDonators) > 3}">
+                        <div class="top-donators-list-row" th:each="d, stat : ${topDonators}" th:if="${stat.index >= 3}">
+                            <span class="top-list-rank" th:text="${stat.index + 1}"></span>
+                            <div class="top-list-avatar">
+                                <img th:if="${d.photo != null}" th:src="${d.photo}" alt="">
+                                <div th:unless="${d.photo != null}" class="top-list-letter" th:text="${#strings.substring(d.name, 0, 1)}"></div>
+                            </div>
+                            <span class="top-list-name" th:text="${d.name}"></span>
+                            <span class="top-list-amount" th:text="${d.total} + ' грн'"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
 
     <!-- ══ ПРО НАС ════════════════════════════════════════════════════════ -->
     <section class="about-us fade-up">
+        <div class="wave-divider wave-top">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="#ffffff"></path>
+            </svg>
+        </div>
         <div class="about-container">
             <div class="about-content">
                 <div class="about-image">
@@ -81,6 +198,11 @@
 
     <!-- ══ ЯК ЦЕ ПРАЦЮЄ ══════════════════════════════════════════════════ -->
     <section class="how-section fade-up">
+        <div class="wave-divider wave-top">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,42.4V0Z" fill="#C1ECE4"></path>
+            </svg>
+        </div>
         <h2 class="section-title">Як це працює?</h2>
         <div class="how-steps">
 
@@ -131,6 +253,11 @@
 
     <!-- ══ ПОПУЛЯРНІ ЗАМОВЛЕННЯ ═══════════════════════════════════════════ -->
     <section class="popular-section fade-up" th:if="${popularProducts != null and !popularProducts.empty}">
+        <div class="wave-divider wave-top">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M0,0V116.41c171.18-59.7,358.74-84.34,537.49-59.5,159.25,22.13,313,83.13,472.54,85c67.09.77,130.22-14.77,190-34V0Z" fill="#f9f5f0"></path>
+            </svg>
+        </div>
         <h2 class="section-title">Популярні замовлення</h2>
         <div class="popular-grid">
             <a th:each="p : ${popularProducts}"
@@ -165,6 +292,11 @@
 
     <!-- ══ МАЄТЕ ВЛАСНУ ІДЕЮ ═══════════════════════════════════════════════ -->
     <section class="idea-section fade-up">
+        <div class="wave-divider wave-top">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M1200,0H0V11.23c104.59,41.9,216.51,68.41,329,74.5,178,9.63,348.66-48.4,524.36-47.53,124.62.61,244.38,34.58,346.64,68.64Z" fill="#ffffff"></path>
+            </svg>
+        </div>
         <div class="idea-container">
             <div class="idea-image">
                 <img th:src="@{/img/idea-hand.png}" alt="Ваша ідея" onerror="this.style.display='none'">
@@ -184,6 +316,11 @@
 
     <!-- ══ ВІДГУКИ ════════════════════════════════════════════════════════ -->
     <section class="home-reviews-section fade-up" th:if="${homeReviews != null and !homeReviews.empty}">
+        <div class="wave-divider wave-top">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c166-29.51,324.22-9.52,481,28.62,81.19,19.75,162.24,30.34,243.17,21.14V0Z" fill="#f9f5f0"></path>
+            </svg>
+        </div>
         <h2 class="section-title">Відгуки наших клієнтів</h2>
         <div class="home-reviews-grid">
             <div class="home-review-card fade-up" th:each="rev : ${homeReviews}">
@@ -210,6 +347,51 @@
         </div>
     </section>
 
+
+    <section class="partners-section fade-up">
+        <h2 class="section-title">Ми співпрацюємо з такими фондами</h2>
+
+        <div class="partners-list">
+
+            <div class="partner-item">
+                <div class="partner-logo">
+                    <img th:src="@{/img/povernys-zyvym.svg}" alt="Повернись живим">
+                </div>
+                <span class="partner-name">Повернись живим</span>
+            </div>
+
+            <div class="partner-item">
+                <div class="partner-logo">
+                    <img th:src="@{/img/tviykrok.jpg}" alt="ТВІЙ КРОК">
+                </div>
+                <span class="partner-name">ТВІЙ КРОК</span>
+            </div>
+
+            <div class="partner-item">
+                <div class="partner-logo">
+                    <img th:src="@{/img/fond-prytyly.svg}" alt="Благодійний фонд Сергія Притули">
+                </div>
+                <span class="partner-name">Благодійний фонд Сергія Притули</span>
+            </div>
+
+            <div class="partner-item">
+                <div class="partner-logo">
+                    <img th:src="@{/img/ato.jpeg}" alt="Благодійний фонд А.Т.О.">
+                </div>
+                <span class="partner-name">Благодійний фонд А.Т.О.</span>
+            </div>
+
+            <div class="partner-item">
+                <div class="partner-logo">
+                    <img th:src="@{/img/arni-ukraine.jpg}" alt="Підтримай армію України">
+                </div>
+                <span class="partner-name">Підтримай армію України</span>
+            </div>
+
+        </div>
+    </section>
+
+
     <!-- ══ FAQ ════════════════════════════════════════════════════════════ -->
     <section class="faq-section fade-up">
         <h2 class="section-title">FAQ (Поширені запитання)</h2>
@@ -224,7 +406,7 @@
             </details>
             <details class="faq-item fade-up">
                 <summary>Які терміни придатності ваших десертів?</summary>
-                <p>Оскільки ми принципово не використовуємо штучні консерванти, маргарину чи штучні наповнювачі смаку, наші торти 100% натуральні. Рекомендований термін зберігання тортів — 72 години (3 доби) в холодильнику за температури від +2°С до +6°С. До вашого ювілею ми замовимо смачний і свіжий, дотримуючись правил зберігання та перевезення.</p>
+                <p>Оскільки ми принципово не використовуємо штучні консерванти, маргарину чи штучні наповнювачі смаку, наши торти 100% натуральні. Рекомендований термін зберігання тортів — 72 години (3 доби) в холодильнику за температури від +2°С до +6°С. До вашого ювілею ми замовимо смачний і свіжий, дотримуючись правил зберігання та перевезення.</p>
             </details>
             <details class="faq-item fade-up">
                 <summary>Як працює ШІ-генератор дизайну?</summary>
@@ -232,6 +414,7 @@
             </details>
         </div>
     </section>
+
 
 </main>
 
@@ -250,6 +433,31 @@
     }, { threshold: 0.12 });
 
     document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+</script>
+
+
+<script th:inline="javascript">
+    (function() {
+        var circ = 2 * Math.PI * 42;
+        // Значення вже вставлені Thymeleaf в DOM — просто анімуємо
+        document.addEventListener('DOMContentLoaded', function() {
+            var pct     = parseInt(document.getElementById('supportPercent').textContent) || 0;
+            var elFill  = document.getElementById('supportBarFill');
+            var elSvg   = document.getElementById('supportSvgFill');
+
+            if (elFill) {
+                elFill.style.width = '0%';
+                setTimeout(function() { elFill.style.width = pct + '%'; }, 200);
+            }
+            if (elSvg) {
+                elSvg.style.strokeDasharray  = circ + 'px';
+                elSvg.style.strokeDashoffset = circ + 'px';
+                setTimeout(function() {
+                    elSvg.style.strokeDashoffset = (circ - circ * pct / 100) + 'px';
+                }, 200);
+            }
+        });
+    })();
 </script>
 
 <script src="/js/cart.js"></script>

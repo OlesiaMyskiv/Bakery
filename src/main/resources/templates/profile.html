@@ -11,6 +11,7 @@
     <link rel="stylesheet" th:href="@{/css/profile.css}">
     <link rel="stylesheet" th:href="@{/css/bonus.css}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+
 </head>
 <body>
 
@@ -570,6 +571,144 @@
                             </div>
                         </div>
 
+
+                        <!-- ══ ДОНАТ БОНУСІВ ═════════════════════════════ -->
+                        <div class="bonus-donate-card">
+                            <div class="bonus-donate-header">
+                                <div class="bonus-donate-icon-img-wrap">
+                                    <img th:src="@{/img/urkaine.png}" class="bonus-donate-icon-img" alt="Україна">
+                                </div>
+                                <div>
+                                    <div class="bonus-donate-title">Обмін бонусів на донат для захисників</div>
+                                    <div class="bonus-donate-subtitle">1 бонус = 1 гривня. Ваша підтримка — наша сила!</div>
+                                </div>
+                            </div>
+
+                            <div class="bonus-donate-body">
+                                <div class="bonus-donate-left">
+                                    <div class="bonus-donate-step">1. Виберіть суму для обміну</div>
+                                    <div class="bonus-donate-input-wrap">
+                                        <input type="number" id="donateAmount" class="bonus-donate-input" th:attr="max=${d.balance}" min="1" placeholder="0">
+                                        <span class="bonus-donate-input-label">бонусів</span>
+                                    </div>
+                                    <div class="bonus-donate-eq">
+                                        = <strong id="donateGrn">0</strong> грн на донат для захисників
+                                    </div>
+
+                                    <div class="bonus-donate-slider-wrap">
+                                        <input type="range" id="donateSlider" class="bonus-donate-slider" min="0" th:attr="max=${d.balance}" value="0">
+                                        <div class="bonus-donate-slider-labels">
+                                            <span>0</span>
+                                            <span th:text="${d.balance}">0</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="bonus-donate-pct-btns">
+                                        <button class="bonus-pct-btn" onclick="setDonatePct(25)">25%</button>
+                                        <button class="bonus-pct-btn" onclick="setDonatePct(50)">50%</button>
+                                        <button class="bonus-pct-btn" onclick="setDonatePct(75)">75%</button>
+                                        <button class="bonus-pct-btn" onclick="setDonatePct(100)">100%</button>
+                                    </div>
+
+                                    <div class="bonus-donate-step" style="margin-top:24px;">3. Підтвердження обміну</div>
+                                    <div class="bonus-donate-confirm-box">
+                                        <div class="bonus-donate-confirm-row">
+
+                                            <div class="bonus-donate-confirm-item">
+                                                <div class="confirm-icon-img-wrap">
+                                                    <img th:src="@{/img/bonus-coin.svg}" class="confirm-icon-img" alt="Копійка">
+                                                </div>
+                                                <div>
+                                                    <div class="confirm-label">Обмінюєте:</div>
+                                                    <div class="confirm-value" id="confirmBonuses">0 бонусів</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="confirm-arrow">→</div>
+
+                                            <div class="bonus-donate-confirm-item">
+                                                <div class="confirm-icon-img-wrap">
+                                                    <img th:src="@{/img/donate.png}" class="confirm-icon-img" alt="Донат">
+                                                </div>
+                                                <div>
+                                                    <div class="confirm-label">Донат на:</div>
+                                                    <div class="confirm-value" id="confirmGrn">0 грн</div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <button class="bonus-donate-btn" id="donateFundBtn" onclick="submitDonate()">
+                                            🤍 Обміняти бонуси на донат
+                                        </button>
+                                        <div class="bonus-donate-note">
+                                            Обмін є безповоротним та підтверджує вашу підтримку захисників
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="bonus-donate-right">
+                                    <div class="bonus-donate-step">2. Виберіть куди відправити донат</div>
+                                    <div class="bonus-fund-list" id="fundList">
+
+                                        <label class="bonus-fund-item">
+                                            <input type="radio" name="donateFund" value="Повернись живим" checked>
+                                            <div class="bonus-fund-logo">
+                                                <img th:src="@{/img/povernys-zyvym.svg}" class="fund-img" alt="Повернись живим">
+                                            </div>
+                                            <div class="bonus-fund-info">
+                                                <div class="bonus-fund-name">Повернись живим</div>
+                                                <div class="bonus-fund-desc">Допомога українській армії</div>
+                                            </div>
+                                        </label>
+
+                                        <label class="bonus-fund-item">
+                                            <input type="radio" name="donateFund" value="ТВІЙ КРОК">
+                                            <div class="bonus-fund-logo">
+                                                <img th:src="@{/img/tviykrok.jpg}" class="fund-img" alt="ТВІЙ КРОК">
+                                            </div>
+                                            <div class="bonus-fund-info">
+                                                <div class="bonus-fund-name">ТВІЙ КРОК</div>
+                                                <div class="bonus-fund-desc">Волонтерська допомога бійцям</div>
+                                            </div>
+                                        </label>
+
+                                        <label class="bonus-fund-item">
+                                            <input type="radio" name="donateFund" value="Благодійний фонд Сергія Притули">
+                                            <div class="bonus-fund-logo">
+                                                <img th:src="@{/img/fond-prytyly.svg}" class="fund-img" alt="Фонд Сергія Притули">
+                                            </div>
+                                            <div class="bonus-fund-info">
+                                                <div class="bonus-fund-name">Фонд Сергія Притули</div>
+                                                <div class="bonus-fund-desc">Підтримка ЗСУ та гуманітарні проєкти</div>
+                                            </div>
+                                        </label>
+
+                                        <label class="bonus-fund-item">
+                                            <input type="radio" name="donateFund" value="Благодійний фонд А.Т.О.">
+                                            <div class="bonus-fund-logo">
+                                                <img th:src="@{/img/ato.jpeg}" class="fund-img" alt="БФ А.Т.О.">
+                                            </div>
+                                            <div class="bonus-fund-info">
+                                                <div class="bonus-fund-name">Благодійний фонд А.Т.О.</div>
+                                                <div class="bonus-fund-desc">Допомога ветеранам та діючим бійцям</div>
+                                            </div>
+                                        </label>
+
+                                        <label class="bonus-fund-item">
+                                            <input type="radio" name="donateFund" value="Благодійний фонд Підтримай армію України">
+                                            <div class="bonus-fund-logo">
+                                                <img th:src="@{/img/arni-ukraine.jpg}" class="fund-img" alt="Підтримай армію України">
+                                            </div>
+                                            <div class="bonus-fund-info">
+                                                <div class="bonus-fund-name">Підтримай армію України</div>
+                                                <div class="bonus-fund-desc">Забезпечення потреб армії</div>
+                                            </div>
+                                        </label>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </th:block>
 
@@ -1011,9 +1150,9 @@
                             : notNull(firstImg) ? firstImg : null;
                 }
 
-                // Солодощі ЗСУ
+
                 var row = placeholder.closest('.order-item-row-full');
-                if (row && row.textContent.indexOf('Солодощі для ЗСУ') !== -1) {
+                if (row && row.textContent.indexOf('Солодощі для захисників') !== -1) {
                     imgSrc = '/img/energy_ua.png';
                 }
 
@@ -1046,5 +1185,121 @@
 </script>
 <script src="/js/cart.js"></script>
 <script src="/js/wishlist.js"></script>
+
+<script>
+    // ── Донат бонусів ─────────────────────────────────────────────────────────────
+    (function() {
+        var maxBonus = 0;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var input  = document.getElementById('donateAmount');
+            var slider = document.getElementById('donateSlider');
+            if (!input || !slider) return;
+
+            maxBonus = parseInt(slider.max) || 0;
+
+            // Синхронізація input ↔ slider
+            input.addEventListener('input', function() {
+                var v = Math.min(Math.max(parseInt(this.value) || 0, 0), maxBonus);
+                slider.value = v;
+                updateDonateUI(v);
+            });
+
+            slider.addEventListener('input', function() {
+                var v = parseInt(this.value) || 0;
+                input.value = v;
+                updateDonateUI(v);
+                // Підсвічуємо активну % кнопку
+                var pct = maxBonus > 0 ? Math.round(v / maxBonus * 100) : 0;
+                document.querySelectorAll('.bonus-pct-btn').forEach(function(b) {
+                    b.classList.toggle('active', parseInt(b.textContent) === pct);
+                });
+            });
+        });
+
+        function updateDonateUI(val) {
+            var el = document.getElementById('donateGrn');
+            var c1 = document.getElementById('confirmBonuses');
+            var c2 = document.getElementById('confirmGrn');
+            if (el) el.textContent = val;
+            if (c1) c1.textContent = val + ' бонусів';
+            if (c2) c2.textContent = val + ' грн';
+
+            // Підсвічення слайдера
+            var slider = document.getElementById('donateSlider');
+            if (slider && maxBonus > 0) {
+                var pct = (val / maxBonus * 100);
+                slider.style.background = 'linear-gradient(to right, #3AA6B9 ' + pct + '%, #e0e0e0 ' + pct + '%)';
+            }
+        }
+
+        window.setDonatePct = function(pct) {
+            var v = Math.round(maxBonus * pct / 100);
+            var input  = document.getElementById('donateAmount');
+            var slider = document.getElementById('donateSlider');
+            if (input)  input.value  = v;
+            if (slider) slider.value = v;
+            updateDonateUI(v);
+            document.querySelectorAll('.bonus-pct-btn').forEach(function(b) {
+                b.classList.toggle('active', parseInt(b.textContent) === pct);
+            });
+        };
+
+        window.submitDonate = function() {
+            var amount = parseInt(document.getElementById('donateAmount').value) || 0;
+            if (amount <= 0) { alert('Введіть суму для обміну'); return; }
+            if (amount > maxBonus) { alert('Недостатньо бонусів'); return; }
+
+            var fund = document.querySelector('input[name="donateFund"]:checked');
+            if (!fund) { alert('Оберіть фонд'); return; }
+
+            var btn = document.getElementById('donateFundBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Обробляємо...';
+
+            fetch('/api/bonus/donate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount: amount, fund: fund.value })
+            })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.error) {
+                        alert(data.error);
+                        btn.disabled = false;
+                        btn.innerHTML = '🤍 Обміняти бонуси на донат';
+                        return;
+                    }
+                    // Успіх
+                    btn.innerHTML = '✅ Донат ' + data.donated + ' грн → ' + data.fund + '!';
+                    btn.style.background = '#4CAF50';
+                    maxBonus = data.newBalance;
+
+                    // Оновлюємо баланс на сторінці
+                    var balEl = document.querySelector('.bonus-amount-num');
+                    if (balEl) balEl.textContent = data.newBalance;
+
+                    var slider = document.getElementById('donateSlider');
+                    if (slider) slider.max = data.newBalance;
+                    var input  = document.getElementById('donateAmount');
+                    if (input)  { input.max = data.newBalance; input.value = 0; }
+                    document.querySelectorAll('.bonus-donate-slider-labels span:last-child')
+                        .forEach(function(el) { el.textContent = data.newBalance; });
+                    updateDonateUI(0);
+
+                    setTimeout(function() {
+                        btn.innerHTML = '🤍 Обміняти бонуси на донат';
+                        btn.style.background = '';
+                        btn.disabled = false;
+                    }, 4000);
+                })
+                .catch(function() {
+                    alert('Помилка. Спробуйте ще раз.');
+                    btn.disabled = false;
+                    btn.innerHTML = '🤍 Обміняти бонуси на донат';
+                });
+        };
+    })();
+</script>
 </body>
-</html>
+</html><!-- Стилі донату — вставляємо в head при бажанні, або лишаємо тут -->

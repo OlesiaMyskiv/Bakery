@@ -230,6 +230,7 @@ public class CartController {
         try {
             order.setImagesJson(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(itemImages));
         } catch (Exception e) { order.setImagesJson("[]"); }
+        order.setMilitarySweets("true".equals(militarySweets));
         order.setPaymentStatus(payment);
         order.setOrderStatus(Order.OrderStatus.NEW);
         order.setCreatedAt(LocalDateTime.now());

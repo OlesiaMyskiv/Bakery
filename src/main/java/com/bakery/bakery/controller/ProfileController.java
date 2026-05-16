@@ -184,4 +184,43 @@ public class ProfileController {
         reviewService.deleteById(id);
         return ResponseEntity.ok(Map.of("success", true));
     }
+
+    // ── Сторінка донату бонусів ───────────────────────────────────────────────
+    @GetMapping("/bonus-donate")
+    public ResponseEntity<?> bonusDonatePage() {
+        User user = userService.getCurrentUser();
+        if (user == null) return ResponseEntity.status(302).header("Location", "/login").build();
+        // Redirect до profile з якоюсь вкладкою — повертаємо JSON для AJAX
+        return ResponseEntity.ok(java.util.Map.of("ok", true));
+    }
+
+    @PostMapping("/api/bonus/donate")
+    @ResponseBody
+    public ResponseEntity<?> donateBonuses(
+            @RequestBody java.util.Map<String, Object> body) {
+        User user = userService.getCurrentUser();
+        if (user == null) return ResponseEntity.status(401).body(java.util.Map.of("error", "Unauthorized"));
+
+        int amount;
+        String fund;
+        try {
+            amount = Integer.parseInt(String.valueOf(body.get("amount")));
+            fund   = String.valueOf(body.getOrDefault("fund", "Невідомий фонд"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", "Invalid params"));
+        }
+
+        if (amount <= 0) return ResponseEntity.badRequest().body(java.util.Map.of("error", "Amount must be > 0"));
+
+        int donated = bonusService.donateToFund(user, amount, fund);
+        if (donated == 0) return ResponseEntity.badRequest().body(java.util.Map.of("error", "Недостатньо бонусів"));
+
+        int newBalance = bonusService.getBalance(user.getId());
+        return ResponseEntity.ok(java.util.Map.of(
+                "donated",    donated,
+                "fund",       fund,
+                "newBalance", newBalance
+        ));
+    }
+
 }

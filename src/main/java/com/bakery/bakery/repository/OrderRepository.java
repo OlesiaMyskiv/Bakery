@@ -30,4 +30,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Optional<Order> findByIdWithUser(@Param("id") Long id);
 
     List<Order> findTop100ByOrderByCreatedAtDesc();
+
+    // Підрахунок наборів для ЗСУ за поточний місяць
+    @Query("SELECT COUNT(o) FROM Order o WHERE o.militarySweets = true " +
+            "AND MONTH(o.createdAt) = MONTH(CURRENT_DATE) " +
+            "AND YEAR(o.createdAt) = YEAR(CURRENT_DATE)")
+    long countMilitarySweetsThisMonth();
 }

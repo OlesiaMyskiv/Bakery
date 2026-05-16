@@ -5,6 +5,8 @@ import com.bakery.bakery.model.Role;
 import com.bakery.bakery.model.User;
 import com.bakery.bakery.model.VerificationStatus;
 import com.bakery.bakery.repository.ProductRepository;
+import com.bakery.bakery.repository.OrderRepository;
+import com.bakery.bakery.repository.BonusTransactionRepository;
 import com.bakery.bakery.repository.ReviewRepository;
 import com.bakery.bakery.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,9 @@ import java.util.Random;
 public class HomeController {
 
     @Autowired private ProductRepository productRepository;
+    @Autowired private OrderRepository              orderRepository;
+    @Autowired private BonusTransactionRepository    bonusTransactionRepository;
+    private static final int MILITARY_GOAL = 50;
     @Autowired private ReviewRepository  reviewRepository;
     @Autowired private UserService       userService;
 
@@ -36,6 +41,26 @@ public class HomeController {
 
         // Відгуки для головної — 3 останніх
         model.addAttribute("homeReviews", reviewRepository.findTop3ByHiddenFalseOrderByCreatedAtDesc());
+
+        // Лічильник солодощів для ЗСУ — з БД
+        long militaryCount = orderRepository.countMilitarySweetsThisMonth();
+        model.addAttribute("militaryCount", militaryCount);
+        model.addAttribute("militaryGoal",  MILITARY_GOAL);
+        model.addAttribute("militaryPct",   Math.min(Math.round(militaryCount * 100.0 / MILITARY_GOAL), 100));
+
+        // ТОП донаторів місяця
+        List<Object[]> rawTop = bonusTransactionRepository.findTopDonatorsByMonth();
+        java.util.List<java.util.Map<String, Object>> topDonators = new java.util.ArrayList<>();
+        for (int i = 0; i < rawTop.size(); i++) {
+            Object[] row = rawTop.get(i);
+            java.util.Map<String, Object> d = new java.util.HashMap<>();
+            d.put("rank",    i + 1);
+            d.put("name",    row[1] != null ? row[1].toString() : "Анонім");
+            d.put("photo",   row[2] != null ? row[2].toString() : null);
+            d.put("total",   row[3] != null ? ((Number) row[3]).intValue() : 0);
+            topDonators.add(d);
+        }
+        model.addAttribute("topDonators", topDonators);
 
         return "index";
     }

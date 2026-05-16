@@ -580,6 +580,25 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // При оформленні замовлення — рахуємо солодощі для ЗСУ
+    var checkoutForm = document.getElementById('checkoutForm');
+    if (checkoutForm) {
+        checkoutForm.addEventListener('submit', function() {
+            var mc = document.getElementById('militaryCheckbox');
+            if (mc && mc.checked) {
+                try {
+                    var cur = parseInt(localStorage.getItem('militarySweetsTotal') || '0');
+                    localStorage.setItem('militarySweetsTotal', cur + 1);
+                    // Диспатчимо storage event вручну (для тієї ж вкладки)
+                    window.dispatchEvent(new StorageEvent('storage', {
+                        key: 'militarySweetsTotal',
+                        newValue: String(cur + 1)
+                    }));
+                } catch(e) {}
+            }
+        }, true); // capture — спрацює до preventDefault
+    }
+
     // Радіо доставки
     var deliveryRadios = document.querySelectorAll('input[name="deliveryType"]');
     var addressBlock   = document.getElementById('addressBlock');

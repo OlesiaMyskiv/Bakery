@@ -352,3 +352,337 @@
     color: #27ae60;
     white-space: nowrap;
 }
+
+/* ══ ДОНАТ БОНУСІВ ═════════════════════════════════════════════════════════ */
+.bonus-donate-card {
+    grid-column: 1 / -1;          /* Змушує картку зайняти обидві колонки грида */
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 2px 20px rgba(0,0,0,.07);
+    padding: 32px 40px;
+    margin: 24px 0 0 0;           /* Замість мінусових маржинів ставимо 0, щоб краї чітко збігалися з картками вище */
+    box-sizing: border-box;
+}
+.bonus-donate-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #f0e8e0;
+}
+
+.bonus-donate-icon { font-size: 2rem; }
+
+.bonus-donate-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: #2c2c2c;
+}
+
+.bonus-donate-subtitle {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    color: #888;
+    margin-top: 2px;
+}
+
+.bonus-donate-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Ліва колонка (кроки 1 і 3) та Права колонка (крок 2) */
+    gap: 40px;                      /* Комфортний великий відступ між лівою та правою частинами */
+    align-items: start;
+}
+
+/* ── Кроки ─────────────────────────────────────────────────────────────── */
+.bonus-donate-step {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #2c2c2c;
+    margin-bottom: 12px;
+}
+
+/* ── Поле вводу суми ────────────────────────────────────────────────────── */
+.bonus-donate-input-wrap {
+    display: flex;
+    align-items: center;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 10px 16px;
+    margin-bottom: 8px;
+    background: #fafafa;
+}
+
+.bonus-donate-input {
+    flex: 1;
+    border: none;
+    background: none;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    color: #2c2c2c;
+    outline: none;
+    width: 0;
+}
+
+.bonus-donate-input-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: #3AA6B9;
+    font-weight: 600;
+}
+
+.bonus-donate-eq {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: #888;
+    margin-bottom: 14px;
+}
+
+.bonus-donate-eq strong { color: #2c2c2c; }
+
+/* ── Слайдер ────────────────────────────────────────────────────────────── */
+.bonus-donate-slider-wrap { margin-bottom: 14px; }
+
+.bonus-donate-slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 100px;
+    background: linear-gradient(to right, #3AA6B9 0%, #e0e0e0 0%);
+    outline: none;
+    transition: background 0.2s;
+}
+
+.bonus-donate-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #DF7481;
+    cursor: pointer;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,.15);
+}
+
+.bonus-donate-slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.85rem;
+    color: #aaa;
+    margin-top: 4px;
+}
+
+/* ── % кнопки ───────────────────────────────────────────────────────────── */
+.bonus-donate-pct-btns {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.bonus-pct-btn {
+    flex: 1;
+    padding: 8px 0;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 8px;
+    background: #fff;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    color: #666;
+    cursor: pointer;
+    transition: all .2s;
+}
+
+.bonus-pct-btn:hover, .bonus-pct-btn.active {
+    background: #3AA6B9;
+    border-color: #3AA6B9;
+    color: #fff;
+}
+
+/* ── Підтвердження ──────────────────────────────────────────────────────── */
+.bonus-donate-confirm-box {
+    background: #f9f9f9;
+    border-radius: 14px;
+    padding: 20px;
+}
+
+.bonus-donate-confirm-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.bonus-donate-confirm-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.confirm-icon { font-size: 1.8rem; }
+
+.confirm-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.85rem;
+    color: #888;
+}
+
+.confirm-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #3AA6B9;
+}
+
+.confirm-arrow {
+    font-size: 1.2rem;
+    color: #ccc;
+}
+
+.bonus-donate-btn {
+    width: 100%;
+    padding: 14px;
+    background: #DF7481;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .2s, transform .15s;
+    margin-bottom: 10px;
+}
+
+.bonus-donate-btn:hover:not(:disabled) {
+    background: #c85e6a;
+    transform: translateY(-1px);
+}
+
+.bonus-donate-btn:disabled { opacity: .7; cursor: default; }
+
+.bonus-donate-note {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.82rem;
+    color: #aaa;
+    text-align: center;
+}
+
+/* ── Список фондів ──────────────────────────────────────────────────────── */
+.bonus-fund-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.bonus-fund-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 20px;
+    border: 1.5px solid #f0e8e0;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+}
+
+.bonus-fund-item:has(input:checked) {
+    border-color: #3AA6B9;
+    background: #f0fafb;
+}
+
+.bonus-fund-item input[type="radio"] {
+    accent-color: #3AA6B9;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+.bonus-fund-logo {
+    width: 64px;
+    height: 60px;
+    border-radius: 12px;
+    flex-shrink: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    border: 1px solid #e8e0d8;
+    padding: 4px;
+    box-sizing: border-box;
+}
+
+.fund-img {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.bonus-fund-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #2c2c2c;
+}
+
+.bonus-fund-desc {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    color: #888;
+    margin-top: 3px;
+}
+
+
+.bonus-fund-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #2c2c2c;
+}
+
+.bonus-fund-desc {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    color: #888;
+    margin-top: 3px;
+}
+
+/* ── Стилі для нових графічних іконок донату ── */
+
+/* Обгортка для художнього прапора в шапці */
+.bonus-donate-icon-img-wrap {
+    width: 60px;
+    height: auto;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+
+.bonus-donate-icon-img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+/* Обгортки для маленьких іконок у блоці підтвердження (Крок 3) */
+.confirm-icon-img-wrap {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.confirm-icon-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Захищає пропорції картинок монети та долоні */
+}

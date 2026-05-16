@@ -83,10 +83,54 @@ body {
    СЕКЦІЯ "ПРО НАС" (ABOUT US)
    =============================== */
 .about-us {
+    position: relative;        /* Обов'язково додаємо, щоб хвилі позиціонувалися відносно цієї карти */
     background-color: #C1ECE4;
     color: #277B8A;
     font-family: 'Cormorant Garamond', serif;
-    padding: 80px 20px;
+    padding: 140px 20px;       /* Збільшуємо відступи зверху та знизу, щоб хвилі не налазили на текст і картинку */
+    overflow: visible;
+}
+
+/* ── Стилі для верхньої хвилі ── */
+.wave-divider-top {
+    position: absolute;
+    top: -1px;                 /* Захист від мікропіксельних білих зазорів */
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    line-height: 0;
+}
+
+.wave-divider-top svg {
+    position: relative;
+    display: block;
+    width: calc(100% + 1.3px);
+    height: 70px;              /* Висота хвилі. Можна збільшити до 90px, якщо хочеться більшого вигину */
+}
+
+.wave-divider-top svg path {
+    fill: #FFFFFF;             /* Колір верхньої секції */
+}
+
+/* ── Стилі для нижньої хвилі ── */
+.wave-divider-bottom {
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    line-height: 0;
+}
+
+.wave-divider-bottom svg {
+    position: relative;
+    display: block;
+    width: calc(100% + 1.3px);
+    height: 70px;              /* Висота нижнього вигину */
+}
+
+.wave-divider-bottom svg path {
+    fill: #f9f5f0;             /* Точний колір фону секції "Як це працює" (#f9f5f0) */
 }
 
 /* Обмежуємо ширину, щоб було як у шапці */
@@ -864,3 +908,657 @@ body {
     linear-gradient(to right, rgba(74,138,154,0) 10%, #4a8a9a);
 }
 .popular-card:hover .btn-line::after { background: white; }
+/* ══ БАНЕР ПІДТРИМКИ — як на макеті ═════════════════════════════════════ */
+.support-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 38px;
+    max-width: 1200px;
+    margin: -25px auto 0;
+    padding: 28px 46px;
+    background: #fff;
+    border: 1px solid #fde3ea;
+    border-radius: 28px;
+    box-shadow: 0 12px 35px rgba(0,0,0,.06);
+}
+
+.support-left {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    width: 330px;
+    flex-shrink: 0;
+}
+
+.support-heart-icon {
+    font-size: 42px;
+    line-height: 1;
+}
+
+.support-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 30px;
+    line-height: 1.1;
+    margin-bottom: 10px;
+    color: #222;
+}
+
+.support-desc {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 19px;
+    line-height: 1.4;
+    color: #777;
+}
+
+.support-center {
+    flex: 1;
+}
+
+.support-count-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 19px;
+    color: #555;
+    margin-bottom: 6px;
+}
+
+.support-count-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 29px;
+    color: #e8758a;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.support-bar-track {
+    height: 30px;
+    background: #f9dce5;
+    border-radius: 999px;
+    overflow: visible;
+}
+
+.support-bar-fill {
+    height: 100%;
+    min-width: 48px;
+    background: linear-gradient(90deg, #ea6b8c, #f48cab);
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    box-sizing: border-box;
+}
+
+.support-bar-heart {
+    width: 36px;
+    height: 36px;
+    margin-right: -16px;
+    border-radius: 50%;
+    background: white;
+    color: #e8758a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 4px 12px rgba(232,117,138,.25);
+}
+
+.support-bar-labels {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 10px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    color: #999;
+}
+
+.support-right {
+    width: 130px;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.support-circle {
+    position: relative;
+    width: 120px;
+    height: 120px;
+}
+
+.support-percent-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: #222;
+}
+
+.support-percent-text small {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 12px;
+    color: #999;
+    margin-top: 6px;
+}
+
+.support-svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.support-svg-bg {
+    fill: #fff;
+    stroke: #f9dce5;
+    stroke-width: 9;
+}
+
+.support-svg-fill {
+    fill: none;
+    stroke: #e8758a;
+    stroke-width: 9;
+    stroke-linecap: round;
+}
+
+.support-heart-icon img {
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
+    display: block;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ОНОВЛЕНИЙ МАКЕТ: КНОПКИ (ЛІВОРУЧ) + ТОП ДОНАТОРІВ (ПРАВОРУЧ)
+   ══════════════════════════════════════════════════════════════ */
+
+.hero-bottom-section {
+    background: #ffffff;
+    padding: 30px 0 60px 0;
+}
+
+.hero-bottom-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 50px;
+    padding: 0 46px;
+    align-items: center; /* МАГІЯ: Змінюємо з 'start' на 'center', тепер ліві кнопки будуть строго по центру правої картки */
+}
+
+/* Ліва колонка: кнопки */
+.hero-cta-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    justify-content: center;
+    padding-top: 0;      /* Обов'язково прибираємо фіксований верхній паддінг, щоб він не зсував кнопки вниз */
+}
+
+/* Обгортка для головного кубка в заголовку */
+.top-donators-trophy-img-wrap {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.top-donators-trophy-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Обгортки для нових медалей/значків на подіумі */
+.podium-crown-img-wrap {
+    width: 38px;
+    height: 38px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.podium-crown-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.hero-cta-column .hero-cta-btn {
+    width: 100%;
+    max-width: 340px; /* Обмежуємо ширину, щоб вони виглядали акуратно акуратно */
+    text-align: center;
+    box-sizing: border-box;
+}
+
+/* ── Права колонка: Картка лідерів ── */
+.top-donators-card {
+    background: #fff;
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.04);
+    border: 1px solid #fdf0f3;
+}
+
+.top-donators-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 30px;
+}
+
+.top-donators-trophy {
+    font-size: 2.6rem;
+    line-height: 1;
+}
+
+.top-donators-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.top-donators-subtitle {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    color: #888;
+    margin-top: 2px;
+}
+
+/* Подіум (Топ 3) */
+.top-podium {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 12px;
+    margin-bottom: 30px;
+}
+
+.podium-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    text-align: center;
+    position: relative;
+}
+
+/* Візуальне виділення 1 місця (по центру) */
+.podium-1 {
+    order: 2;
+    background: #fffcfd;
+    border: 1.5px solid #fdebee;
+    border-radius: 20px;
+    padding: 24px 10px;
+    box-shadow: 0 4px 24px rgba(232, 117, 138, 0.04);
+    transform: translateY(-12px);
+}
+.podium-2 { order: 1; padding-bottom: 10px; }
+.podium-3 { order: 3; padding-bottom: 10px; }
+
+.podium-crown {
+    font-size: 24px;
+    margin-bottom: 2px;
+    line-height: 1;
+}
+.podium-crown-gold { transform: scale(1.15); }
+
+.podium-rank {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #b0b0b0;
+    background: #f5f5f5;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+.podium-1 .podium-rank { background: #fef5e7; color: #f39c12; }
+
+/* Аватари */
+.podium-avatar-wrap {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin-bottom: 12px;
+}
+.podium-1 .podium-avatar-wrap {
+    width: 95px;
+    height: 95px;
+}
+
+.podium-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e0e0e0;
+    background: #fafafa;
+}
+.podium-1 .podium-avatar {
+    border: 3px solid #f1c40f;
+}
+
+.podium-avatar-letter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    font-weight: 700;
+    color: #777;
+    background: #eaeaea;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+/* Лаврові гілки для 1 місця */
+.podium-laurel {
+    position: absolute;
+    left: -24px;
+    top: 50%;
+    transform: translateY(-50%) rotate(-15deg);
+    font-size: 22px;
+    opacity: 0.4;
+}
+.podium-laurel-right {
+    left: auto;
+    right: -24px;
+    transform: translateY(-50%) rotate(15deg);
+}
+
+.podium-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 21px;
+    font-weight: 700;
+    color: #2c2c2c;
+    margin-bottom: 3px;
+}
+
+.podium-amount {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 19px;
+    font-weight: 700;
+    color: #df7481;
+}
+.podium-amount-gold {
+    font-size: 21px;
+    color: #ea6b8c;
+}
+
+/* Список 4+ місць */
+.top-donators-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.top-donators-list-row {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border: 1px solid #fcf6f8;
+    border-radius: 14px;
+    padding: 10px 18px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.01);
+}
+
+.top-list-rank {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #888;
+    width: 32px;
+}
+
+.top-list-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #fafafa;
+    margin-right: 14px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #eee;
+}
+
+.top-list-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.top-list-letter {
+    font-size: 16px;
+    font-weight: 700;
+    color: #888;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+.top-list-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 19px;
+    color: #333;
+    flex: 1;
+}
+
+.top-list-amount {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 19px;
+    font-weight: 700;
+    color: #444;
+}
+
+
+/* ==============================================================
+   УНІВЕРСАЛЬНІ СТИЛІ ДЛЯ ВСІХ ХВИЛЬ СТОРАНКИ (ЗАХИСТ ВІД НАКЛАДОК)
+   ============================================================== */
+.wave-divider {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 85px;          /* Оптимальна висота для красивого об'ємного вигину */
+    overflow: hidden;
+    line-height: 0;
+    z-index: 2;            /* Хвиля лежить строго на стику фонів */
+    pointer-events: none;  /* Дозволяє клікати крізь хвилю на кнопки */
+}
+
+.wave-divider svg {
+    position: relative;
+    display: block;
+    width: calc(100% + 1.3px);
+    height: 100%;
+}
+
+.wave-top { top: -1px; }
+.wave-bottom { bottom: -1px; }
+
+/* ── ЗМУШУЄМО ВЕСЬ КОНТЕНТ БУТИ ПОВЕРХ ХВИЛЬ (Z-INDEX) ── */
+.about-container,
+.how-steps,
+.popular-grid,
+.idea-container,
+.home-reviews-grid,
+.faq-list,
+.section-title {
+    position: relative;
+    z-index: 3 !important; /* Піднімає текст, кнопки та картки вище за хвилі */
+}
+
+/* ==============================================================
+   ГЛОБАЛЬНЕ ВИРІВНЮВАННЯ СЕКЦІЙ ТА ВІДСТУПІВ (БЕЗ ОБРІЗАНЬ)
+   ============================================================== */
+
+/* 1. Секція Про Нас (Тіфані) */
+.about-us {
+    position: relative;
+    width: 100%;
+    background-color: #C1ECE4 !important;
+    color: #277B8A;
+    font-family: 'Cormorant Garamond', serif;
+    padding: 160px 20px !important;
+    box-sizing: border-box;
+}
+
+/* 2. Секція Як це працює (Кремова) */
+.how-section {
+    position: relative;
+    width: 100%;
+    background: #f9f5f0 !important;
+    padding: 140px 40px !important;
+    box-sizing: border-box;
+}
+
+/* 3. Секція Популярні замовлення (Розгортаємо на всю ширину екрана) */
+.popular-section {
+    position: relative;
+    width: 100%;
+    max-width: 100% !important; /* Прибираємо стискання з самої секції */
+    background: #ffffff !important;
+    padding: 160px 0 100px 0 !important;
+    box-sizing: border-box;
+    margin: 0 !important;
+}
+/* Центруємо контент всередині Популярних замовлень */
+.popular-section .section-title,
+.popular-grid {
+    max-width: 1100px;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* 4. Секція Маєте власну ідею (Кремова) */
+.idea-section {
+    position: relative;
+    width: 100%;
+    background: #f9f5f0 !important;
+    padding: 160px 40px !important;
+    box-sizing: border-box;
+}
+
+/* 5. Секція Відгуків (Розгортаємо на всю ширину екрана) */
+.home-reviews-section {
+    position: relative;
+    width: 100%;
+    max-width: 100% !important; /* Прибираємо стискання з самої секції */
+    background: #ffffff !important;
+    padding: 160px 0 100px 0 !important;
+    box-sizing: border-box;
+    margin: 0 !important;
+}
+/* Центруємо контент всередині Відгуків */
+.home-reviews-section .section-title,
+.home-reviews-grid {
+    max-width: 1100px;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* 6. Секція FAQ (Поширені запитання) */
+.faq-section {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 100px 40px 180px 40px !important; /* Величезний відступ знизу, щоб чорна хвиля не перекривала текст */
+}
+
+/* 7. Футер */
+.footer {
+    position: relative;
+    margin-top: 0 !important;
+    z-index: 4;
+}
+
+/* ==============================================================
+   СЕКЦІЯ ПАРТНЕРСЬКИХ ФОНДІВ (ПЕРЕД FAQ)
+   ============================================================== */
+/* ==============================================================
+   СЕКЦІЯ ПАРТНЕРСЬКИХ ФОНДІВ (ОНОВЛЕНО: В ОДИН РЯДОЧОК)
+   ============================================================== */
+.partners-section {
+    padding: 60px 40px 30px 40px;
+    max-width: 1100px;             /* Розширюємо секцію до загальної ширини сайту (як відгуки та товари) */
+    margin: 0 auto;
+}
+
+.partners-list {
+    display: flex;
+    flex-direction: row;           /* МАГІЯ: вибудовуємо всі 5 фондів в один горизонтальний рядок */
+    justify-content: center;       /* Рівномірно центруємо картки на екрані */
+    align-items: stretch;          /* Змушує всі картки бути строго однієї висоти */
+    gap: 16px;                     /* Охайний відступ між картками */
+    flex-wrap: wrap;               /* Якщо екран смартфона замалий, вони акуратно перенесуться */
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+.partner-item {
+    display: flex;
+    flex-direction: column;        /* Перебудовуємо внутрішню структуру: логотип зверху, текст знизу */
+    align-items: center;           /* Центруємо елементи по середній лінії */
+    text-align: center;            /* Робимо текст назви по центру */
+    gap: 12px;                     /* Відступ між картинкою та назвою */
+    background: #ffffff;
+    border: 1.5px solid #f0e8e0;
+    border-radius: 20px;           /* Красиві закруглені куточки */
+    padding: 24px 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.01);
+    flex: 1;                       /* Розподіляє ширину порівну між усіма 5 картками */
+    min-width: 160px;              /* Безпечна мінімальна ширина для адаптиву */
+    max-width: 200px;              /* Ідеальний розмір, щоб картки виглядали як акуратні квадрати-плашки */
+    transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Ефект преміального підсвічування при наведенні курсору */
+.partner-item:hover {
+    transform: translateY(-4px);
+    border-color: #3AA6B9;
+    background-color: #f0fafb;
+    box-shadow: 0 8px 24px rgba(58, 166, 185, 0.08);
+}
+
+/* Оновлена квадратна підкладка під логотип у сітці */
+.partner-logo {
+    width: 76px;                   /* Збільшили розмір, тепер логотипи читаються набагато краще */
+    height: 72px;
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    border: 1px solid #e8e0d8;
+    padding: 6px;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.partner-logo img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;           /* Рятує пропорції: широкі та круглі логотипи сядуть ідеально */
+    display: block;
+}
+
+/* Оновлений стиль тексту назви фонду */
+.partner-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 19px;               /* Оптимальний розмір, щоб довгі назви (напр. Притули) красиво розбивалися на 2-3 рядки */
+    font-weight: 700;
+    color: #2c2c2c;
+    line-height: 1.2;
+}

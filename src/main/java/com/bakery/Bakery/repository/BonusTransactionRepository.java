@@ -34,4 +34,16 @@ public interface BonusTransactionRepository extends JpaRepository<BonusTransacti
             "AND YEAR(t.createdAt) = :year")
     boolean hasBirthdayBonusThisYear(@Param("userId") Long userId,
                                      @Param("year") int year);
+
+    // ТОП донаторів місяця — сума DONATED за поточний місяць по юзеру
+    @Query("SELECT t.user.id, t.user.username, t.user.profilePicturePath, " +
+            "SUM(ABS(t.amount)) as totalDonated " +
+            "FROM BonusTransaction t " +
+            "WHERE t.type = 'DONATED' " +
+            "AND MONTH(t.createdAt) = MONTH(CURRENT_DATE) " +
+            "AND YEAR(t.createdAt) = YEAR(CURRENT_DATE) " +
+            "GROUP BY t.user.id, t.user.username, t.user.profilePicturePath " +
+            "ORDER BY totalDonated DESC")
+    List<Object[]> findTopDonatorsByMonth();
+
 }

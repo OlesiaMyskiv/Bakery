@@ -11,7 +11,8 @@ public class BonusTransaction {
         EARNED,    // нараховано
         SPENT,     // списано
         WELCOME,   // вітальний бонус
-        BIRTHDAY   // бонус на день народження
+        BIRTHDAY,  // бонус на день народження
+        DONATED    // обмін на донат ЗСУ
     }
 
     @Id
@@ -27,7 +28,7 @@ public class BonusTransaction {
     private Order order;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private TransactionType type;
 
     @Column(nullable = false)

@@ -163,6 +163,24 @@ public class BonusService {
         return toSpend;
     }
 
+
+    // ── Обмін бонусів на донат ЗСУ ───────────────────────────────────────────
+    @Transactional
+    public int donateToFund(User user, int requestedAmount, String fundName) {
+        int balance = getBalance(user.getId());
+        int toSpend = Math.min(requestedAmount, balance);
+        if (toSpend <= 0) return 0;
+
+        BonusTransaction t = new BonusTransaction();
+        t.setUser(user);
+        t.setType(BonusTransaction.TransactionType.DONATED);
+        t.setAmount(-toSpend);
+        t.setDescription("Донат " + toSpend + " грн → " + fundName);
+        t.setCreatedAt(java.time.LocalDateTime.now());
+        bonusRepo.save(t);
+        return toSpend;
+    }
+
     // ── Дашборд ───────────────────────────────────────────────────────────────
     @Transactional(readOnly = true)
     public Map<String, Object> getDashboard(Long userId) {
