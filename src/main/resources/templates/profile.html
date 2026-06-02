@@ -491,7 +491,7 @@
                         <!-- Прогрес до наступного рівня -->
                         <div class="bonus-progress-card">
                             <div class="bonus-progress-title"
-                                 th:text="${d.isMaxLevel} ? 'Максимальний рівень!' : ('Прогрес до рівня ' + d.nextLevel)">
+                                 th:text="${d.isMaxLevel} ? 'Максимальний рівень!' : 'Прогрес до наступного рівня'">
                             </div>
 
                             <div class="bonus-levels-row">
@@ -518,25 +518,25 @@
                                 <div class="bonus-level-row" th:classappend="${d.currentLevel == 'Ласун'} ? ' bll-active'">
                                     <span class="bll-icon"><img src="/img/donut-icon.svg" alt="" class="bll-svg"></span>
                                     <span class="bll-name">Ласун</span>
-                                    <span class="bll-range">0 – 300 грн</span>
+                                    <span class="bll-range">0 – 300 балів</span>
                                     <span class="bll-cashback">3%</span>
                                 </div>
                                 <div class="bonus-level-row" th:classappend="${d.currentLevel == 'Гурман'} ? ' bll-active'">
                                     <span class="bll-icon"><img src="/img/croissant-icon.svg" alt="" class="bll-svg"></span>
                                     <span class="bll-name">Гурман</span>
-                                    <span class="bll-range">300 – 800 грн</span>
+                                    <span class="bll-range">300 – 800 балів</span>
                                     <span class="bll-cashback">5%</span>
                                 </div>
                                 <div class="bonus-level-row" th:classappend="${d.currentLevel == 'Майстер тіста'} ? ' bll-active'">
                                     <span class="bll-icon"><img src="/img/baking-tray-icon.svg" alt="" class="bll-svg"></span>
                                     <span class="bll-name">Майстер тіста</span>
-                                    <span class="bll-range">800 – 1500 грн</span>
+                                    <span class="bll-range">800 – 1500 балів</span>
                                     <span class="bll-cashback">7%</span>
                                 </div>
                                 <div class="bonus-level-row" th:classappend="${d.currentLevel == 'Шеф-пекар'} ? ' bll-active'">
                                     <span class="bll-icon"><img src="/img/crown-icon.svg" alt="" class="bll-svg"></span>
                                     <span class="bll-name">Шеф-пекар</span>
-                                    <span class="bll-range">1500+ грн</span>
+                                    <span class="bll-range">1500+ балів</span>
                                     <span class="bll-cashback">10%</span>
                                 </div>
                             </div>

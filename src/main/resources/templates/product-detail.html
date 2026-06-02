@@ -152,7 +152,7 @@
             </div>
 
             <!-- Кнопка додати в корзину -->
-            <button class="btn-add-cart" onclick="addToCart()">
+            <button class="btn-add-cart" onclick="addToCartFromPage()">
                 Додати в корзину
             </button>
 
@@ -297,6 +297,10 @@
 
 <footer th:replace="~{footer :: footer}"></footer>
 
+<script th:inline="javascript">
+    window.IS_LOGGED_IN = /*[[${isLoggedIn}]]*/ false;
+    window.IS_VERIFIED  = /*[[${isVerified}]]*/ false;
+</script>
 <script src="/js/cart.js"></script>
 <script th:inline="javascript">
     const basePrice     = /*[[${product.price}]]*/ 700;
@@ -325,7 +329,7 @@
         if (pEl) pEl.textContent = Math.round(basePrice * currentWeight) + ' грн';
     }
 
-    function addToCart() {
+    function addToCartFromPage() {
         if (!window.IS_LOGGED_IN) {
             var modal = document.getElementById('auth-required-modal');
             if (modal) modal.style.display = 'flex';

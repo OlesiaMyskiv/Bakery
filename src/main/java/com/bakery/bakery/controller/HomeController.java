@@ -82,7 +82,9 @@ public class HomeController {
         boolean isVerified = currentUser != null
                 && currentUser.getVerificationStatus() == VerificationStatus.APPROVED
                 && currentUser.getRole() != Role.SUPER_ADMIN;
-        model.addAttribute("isVerified", isVerified);
+        boolean isLoggedIn = currentUser != null;
+        model.addAttribute("isVerified",  isVerified);
+        model.addAttribute("isLoggedIn",  isLoggedIn);
 
         // ── Breadcrumb ────────────────────────────────────────────────────────
         String catalogLabel = product.getCatalogType() != null
