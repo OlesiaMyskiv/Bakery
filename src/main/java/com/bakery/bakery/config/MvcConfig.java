@@ -12,11 +12,7 @@ public class MvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Абсолютний шлях до папки uploads (поряд з src і pom.xml)
-        Path uploadRoot = Paths.get(System.getProperty("user.dir"), "uploads");
-        String absolutePath = uploadRoot.toAbsolutePath().toString();
-
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:" + absolutePath + "/");
+                .addResourceLocations("classpath:/uploads/");
     }
 }
